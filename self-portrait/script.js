@@ -199,7 +199,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 500);
     });
 
-    function handleRelease() {
+    function handleRelease(e) {
+        e.preventDefault();
+
         if (!document.body.classList.contains("pressed")) {
             if (video.paused) {
                 video.play();
@@ -222,13 +224,10 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("mouseup", (e) => {
         if (e.button > 1) return;
         updateXY(e);
-        handleRelease()
+        handleRelease(e)
     });
 
-    document.addEventListener("touchend", (e) => {
-        if (e.button > 1) return;
-        handleRelease()
-    });
+    document.addEventListener("touchend", handleRelease);
 
     document.addEventListener("mouseleave", (e) => {
         if (e.button > 1) return;
