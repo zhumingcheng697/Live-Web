@@ -38,9 +38,9 @@ video {
     transform: translate(-50%, -50%) scale(var(--my-scale));
     left: var(--mouse-x);
     top: var(--mouse-y);
-    background: -webkit-radial-gradient(circle, #e4e4e4 20%, #e4e4e4 30%, #dcdcdc 53%, #d9d9d9 62%, #d9d9d9 70%);
-    /*background-position-x: -2vw;*/
-    transition: background 0.1s;
+    /*background: -webkit-radial-gradient(circle, #e4e4e4 20%, #e4e4e4 30%, #dcdcdc 53%, #d9d9d9 62%, #d9d9d9 70%);*/
+    background-image: url("radial-gradient.png");
+    background-size: contain;
 }
 
 #mask {
