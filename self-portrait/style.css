@@ -1,0 +1,97 @@
+:root {
+    --mouse-x: 50%;
+    --mouse-y: 50%;
+    --my-scale: 1.5;
+    --my-opacity: 1;
+    --my-duration: 0
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    background: #d9d9d9;
+    overflow: hidden;
+}
+
+body.pressed video {
+    cursor: ew-resize;
+}
+
+video {
+    max-width: 60vw;
+    max-height: calc(calc(60vh / 16) * 9);
+    object-fit: contain;
+    display: block;
+    position: absolute;
+    left: var(--mouse-x);
+    top: var(--mouse-y);
+    transform: translate(-50%, -50%) scale(var(--my-scale));
+}
+
+#video-padding {
+    width: min(80vw, 80vh);
+    height: min(80vw, 80vh);
+    position: absolute;
+    transform: translate(-50%, -50%) scale(var(--my-scale));
+    left: var(--mouse-x);
+    top: var(--mouse-y);
+    background: -webkit-radial-gradient(circle, #e4e4e4 20%, #e4e4e4 30%, #dcdcdc 53%, #d9d9d9 62%, #d9d9d9 70%);
+    background-position-x: -2vw;
+    transition: background 0.1s;
+}
+
+#mask {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: #fff;
+    opacity: var(--my-opacity);
+}
+
+#prompt {
+    border-radius: 15px;
+    background-color: #222b;
+    margin: 10vh auto auto auto;
+    text-align: center;
+    position: relative;
+    height: max-content;
+    width: max-content;
+    padding: 15px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+body.show-prompt #prompt {
+    opacity: 1;
+}
+
+#time {
+    color: #ddd;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    margin: 0 12px;
+    padding-bottom: 5px;
+    font-size: 1.25em;
+}
+
+#progress {
+    height: 4px;
+    width: 100%;
+    background-color: #dddb;
+    border-radius: 8px;
+    margin-top: 5px;
+    position: relative;
+}
+
+#fill {
+    height: 4px;
+    position: absolute;
+    border-radius: 8px;
+    left: 0;
+    background-color: #0a84ff;
+    width: var(--my-duration);
+}
