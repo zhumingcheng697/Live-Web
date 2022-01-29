@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let shouldPlay = false;
     let dragTimeoutId;
     let promptTimeoutId;
+    let downInVideo = false;
 
     function numToTwoDigit(n) {
         const floored = Math.floor(n);
@@ -168,6 +169,10 @@ document.addEventListener("DOMContentLoaded", () => {
         updateXY(e.touches[0]);
     });
 
+    video.addEventListener("mousedown", (e) => {
+        downInVideo = e.button <= 1;
+    });
+
     document.addEventListener("mousedown", (e) => {
         if (e.button > 1) return;
 
@@ -184,7 +189,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("mouseup", (e) => {
         if (e.button > 1) return;
 
-        if (!document.body.classList.contains("pressed")) {
+        if (!document.body.classList.contains("pressed") && downInVideo) {
             if (video.paused) {
                 video.play();
             } else {
@@ -199,6 +204,7 @@ document.addEventListener("DOMContentLoaded", () => {
         shouldPlay = false;
         clearTimeout(dragTimeoutId);
         isMouseDown = false;
+        downInVideo = false;
         document.body.classList.remove("pressed");
     });
 
