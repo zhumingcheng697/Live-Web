@@ -174,6 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         e.preventDefault();
 
+        console.log(e.target);
+
         downInVideo = e.target === video;
         isMouseDown = true;
         shouldPlay = !video.paused;
