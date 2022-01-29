@@ -156,11 +156,19 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("touchmove", (e) => {
         e.preventDefault();
 
-        if (e.touches.length !== 1) return;
-
-        updateXY(e.touches[0]);
-
-        handleMove(e.touches[0]);
+        switch (e.touches.length) {
+            case 1:
+                updateXY(e.touches[0]);
+                break;
+            case 2:
+                const newE = {};
+                for (let key in e.touches[0]) {
+                    if (typeof e.touches[0][key] !== "number") continue;
+                    newE[key] = (e.touches[0][key] + e.touches[0][key]) / 2;
+                }
+                updateXY(newE);
+                handleMove(newE);
+        }
     });
 
     document.addEventListener("mousedown", (e) => {
