@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     if (navigator.maxTouchPoints) {
-        document.body.classList.add("mobile")
+        document.body.classList.add("mobile");
     }
 
     const video = document.querySelector("video");
@@ -77,7 +77,7 @@ document.addEventListener("DOMContentLoaded", () => {
         document.body.classList.add("show-prompt");
         promptTimeoutId = setTimeout(() => {
             document.body.classList.remove("show-prompt");
-        }, 1500)
+        }, 1500);
     }
 
     function updateXY(e) {
@@ -87,7 +87,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (newVolume > 1) {
             newVolume = 1;
         } else if (newVolume < 0) {
-            newVolume = 0
+            newVolume = 0;
         }
         video.volume = newVolume;
         document.documentElement.style.setProperty("--mouse-x", `${ e.clientX }px`);
@@ -185,24 +185,36 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    function handleDown() {
+        isMouseDown = true;
+        shouldPlay = !video.paused;
+        dragTimeoutId = setTimeout(() => {
+            document.body.classList.add("pressed");
+        }, 500);
+    }
+
     document.addEventListener("mousedown", (e) => {
         if (e.button > 1) return;
 
         e.preventDefault();
 
         updateXY(e);
-
-        isMouseDown = true;
-        shouldPlay = !video.paused;
-        dragTimeoutId = setTimeout(() => {
-            document.body.classList.add("pressed");
-        }, 500);
+        handleDown();
     });
 
-    function handleRelease(e) {
+    document.addEventListener("touchstart", (e) => {
         e.preventDefault();
 
-        if (!document.body.classList.contains("pressed")) {
+        if (e.touches.length === 1) {
+            updateXY(e.touches[0]);
+            handleDown();
+        }
+    });
+
+    function handleRelease(e, handlePlay = true) {
+        e.preventDefault();
+
+        if (handlePlay && !document.body.classList.contains("pressed")) {
             if (video.paused) {
                 video.play();
             } else {
@@ -215,7 +227,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         pCord = {};
-
         clearTimeout(dragTimeoutId);
         isMouseDown = false;
         document.body.classList.remove("pressed");
@@ -224,10 +235,12 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("mouseup", (e) => {
         if (e.button > 1) return;
         updateXY(e);
-        handleRelease(e)
+        handleRelease(e);
     });
 
-    document.addEventListener("touchend", handleRelease);
+    document.addEventListener("touchend", (e) => {
+        handleRelease(e, e.touches.length === 1);
+    });
 
     document.addEventListener("mouseleave", (e) => {
         if (e.button > 1) return;
