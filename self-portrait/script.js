@@ -199,11 +199,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 500);
     });
 
-    document.addEventListener("mouseup", (e) => {
-        if (e.button > 1) return;
-
-        updateXY(e);
-
+    function handleRelease() {
         if (!document.body.classList.contains("pressed")) {
             if (video.paused) {
                 video.play();
@@ -221,6 +217,17 @@ document.addEventListener("DOMContentLoaded", () => {
         clearTimeout(dragTimeoutId);
         isMouseDown = false;
         document.body.classList.remove("pressed");
+    }
+
+    document.addEventListener("mouseup", (e) => {
+        if (e.button > 1) return;
+        updateXY(e);
+        handleRelease()
+    });
+
+    document.addEventListener("touchend", (e) => {
+        if (e.button > 1) return;
+        handleRelease()
     });
 
     document.addEventListener("mouseleave", (e) => {
