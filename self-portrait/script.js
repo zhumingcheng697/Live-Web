@@ -169,17 +169,12 @@ document.addEventListener("DOMContentLoaded", () => {
         updateXY(e.touches[0]);
     });
 
-    video.addEventListener("mousedown", (e) => {
-        console.log(e);
-        if (e.button > 1) return;
-        downInVideo = true;
-    });
-
     document.addEventListener("mousedown", (e) => {
         if (e.button > 1) return;
 
         e.preventDefault();
 
+        downInVideo = e.target === video;
         isMouseDown = true;
         shouldPlay = !video.paused;
         clearTimeout(dragTimeoutId);
