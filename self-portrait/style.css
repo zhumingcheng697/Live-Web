@@ -20,6 +20,10 @@ body.pressed video {
     cursor: ew-resize;
 }
 
+body.mobile video {
+    -webkit-filter: brightness(102%);
+}
+
 video {
     max-width: 60vw;
     max-height: calc(calc(60vh / 16) * 9);

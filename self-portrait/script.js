@@ -1,4 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
+    if (navigator.maxTouchPoints) {
+        document.body.classList.add("mobile")
+    }
+
     const video = document.querySelector("video");
     const time = document.getElementById("time");
     let isMouseDown = false;
