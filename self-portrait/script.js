@@ -170,7 +170,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     video.addEventListener("mousedown", (e) => {
-        downInVideo = e.button <= 1;
+        console.log(e);
+        if (e.button > 1) return;
+        downInVideo = true;
     });
 
     document.addEventListener("mousedown", (e) => {
