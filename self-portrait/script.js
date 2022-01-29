@@ -164,6 +164,8 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("touchmove", (e) => {
         e.preventDefault();
 
+        console.log(e.target);
+
         if (e.touches.length !== 1) return;
 
         updateXY(e.touches[0]);
