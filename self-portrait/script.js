@@ -154,13 +154,13 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("touchmove", (e) => {
-        if (e.changedTouches.length !== 1) return;
-
         e.preventDefault();
 
-        updateXY(e.changedTouches[0]);
+        if (e.touches.length !== 1) return;
 
-        handleMove(e.changedTouches[0]);
+        updateXY(e.touches[0]);
+
+        handleMove(e.touches[0]);
     });
 
     document.addEventListener("mousedown", (e) => {
@@ -172,7 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         isMouseDown = true;
         shouldPlay = !video.paused;
-        clearTimeout(dragTimeoutId);
         dragTimeoutId = setTimeout(() => {
             document.body.classList.add("pressed");
         }, 500);
@@ -194,6 +193,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 video.play();
             }
         }
+
+        pCord = {};
 
         clearTimeout(dragTimeoutId);
         isMouseDown = false;
