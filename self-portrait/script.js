@@ -9,7 +9,6 @@ document.addEventListener("DOMContentLoaded", () => {
     let shouldPlay = false;
     let dragTimeoutId;
     let promptTimeoutId;
-    let pCord = {};
 
     function numToTwoDigit(n) {
         const floored = Math.floor(n);
@@ -80,6 +79,47 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1500);
     }
 
+    video.volume = 0.5;
+
+    document.addEventListener("keydown", (e) => {
+        let newTime = video.currentTime;
+
+        switch (e.key) {
+            case " ":
+            case "Enter":
+                if (video.paused) {
+                    video.play();
+                } else {
+                    video.pause();
+                }
+                update();
+                return;
+            case "ArrowLeft":
+                e.preventDefault();
+                newTime -= 2;
+                showPrompt();
+                break;
+            case "ArrowRight":
+                e.preventDefault();
+                newTime += 2;
+                showPrompt();
+                break;
+            default:
+                update();
+                return;
+        }
+
+        if (newTime < 0) {
+            newTime = 0;
+        } else if (newTime > video.duration) {
+            newTime = video.duration;
+        }
+
+        video.currentTime = newTime;
+
+        update();
+    });
+
     function updateXY(e) {
         const y = e.clientY / window.innerHeight;
         let newVolume = 1 - y;
@@ -95,126 +135,56 @@ document.addEventListener("DOMContentLoaded", () => {
         document.documentElement.style.setProperty("--my-scale", `${ 1.5 - (y - 0.5) }`);
     }
 
-    video.volume = 0.5;
-
-    document.addEventListener("keydown", (e) => {
-        let newTime = video.currentTime;
-
-        switch (e.key) {
-            case " ":
-            case "Enter":
-                if (video.paused) {
-                    video.play();
-                } else {
-                    video.pause();
-                }
-                break;
-            case "ArrowLeft":
-                e.preventDefault();
-                newTime -= 2;
-                showPrompt();
-                break;
-            case "ArrowRight":
-                e.preventDefault();
-                newTime += 2;
-                showPrompt();
-                break;
-        }
-
-        if (newTime < 0) {
-            newTime = 0;
-        } else if (newTime > video.duration) {
-            newTime = video.duration;
-        }
-
-        video.currentTime = newTime;
-
-        update();
-    });
-
-    function handleMove(e) {
-        if (!video.paused) {
-            video.pause();
-        }
-
-        let newTime = video.currentTime;
-
-        const diff = (pCord.clientX === undefined ? 0 : e.clientX - pCord.clientX) / window.innerWidth;
-        const coefficient = Math.abs(diff) * diff * 500 + 1.5 * diff;
-        newTime += video.duration * coefficient;
-
-        if (newTime < 0) {
-            newTime = 0;
-        } else if (newTime > video.duration) {
-            newTime = video.duration;
-        }
-
-        video.currentTime = newTime;
-
-        showPrompt();
-
-        update();
-
-        pCord = e;
-    }
-
     document.addEventListener("mousemove", (e) => {
         e.preventDefault();
 
-        updateXY(e);
-
         if (isMouseDown) {
-            handleMove(e);
+            if (!video.paused) {
+                video.pause();
+            }
+
+            const diff = e.movementX / window.innerWidth;
+            const coefficient = Math.abs(diff) * diff * 500 + 1.5 * diff;
+            video.currentTime += video.duration * coefficient;
+
+            if (video.currentTime < 0) {
+                video.currentTime = 0;
+            } else if (video.currentTime > video.duration) {
+                video.currentTime = video.duration;
+            }
+
+            showPrompt();
+            update();
         }
+
+        updateXY(e);
     });
 
     document.addEventListener("touchmove", (e) => {
         e.preventDefault();
 
-        switch (e.touches.length) {
-            case 1:
-                updateXY(e.touches[0]);
-                break;
-            case 2:
-                const newE = {};
-                for (let key in e.touches[0]) {
-                    if (typeof e.touches[0][key] !== "number") continue;
-                    newE[key] = (e.touches[0][key] + e.touches[1][key]) / 2;
-                }
-                handleMove(newE);
-        }
-    });
+        if (e.touches.length !== 1) return;
 
-    function handleDown() {
-        isMouseDown = true;
-        shouldPlay = !video.paused;
-        dragTimeoutId = setTimeout(() => {
-            document.body.classList.add("pressed");
-        }, 500);
-    }
+        updateXY(e.touches[0]);
+    });
 
     document.addEventListener("mousedown", (e) => {
         if (e.button > 1) return;
 
         e.preventDefault();
 
-        updateXY(e);
-        handleDown();
+        isMouseDown = true;
+        shouldPlay = !video.paused;
+        clearTimeout(dragTimeoutId);
+        dragTimeoutId = setTimeout(() => {
+            document.body.classList.add("pressed");
+        }, 500);
     });
 
-    document.addEventListener("touchstart", (e) => {
-        e.preventDefault();
+    document.addEventListener("mouseup", (e) => {
+        if (e.button > 1) return;
 
-        if (e.touches.length === 1) {
-            updateXY(e.touches[0]);
-            handleDown();
-        }
-    });
-
-    function handleRelease(e, handlePlay = true) {
-        e.preventDefault();
-
-        if (handlePlay && !document.body.classList.contains("pressed")) {
+        if (!document.body.classList.contains("pressed")) {
             if (video.paused) {
                 video.play();
             } else {
@@ -226,20 +196,10 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
 
-        pCord = {};
+        shouldPlay = false;
         clearTimeout(dragTimeoutId);
         isMouseDown = false;
         document.body.classList.remove("pressed");
-    }
-
-    document.addEventListener("mouseup", (e) => {
-        if (e.button > 1) return;
-        updateXY(e);
-        handleRelease(e);
-    });
-
-    document.addEventListener("touchend", (e) => {
-        handleRelease(e, e.touches.length === 1);
     });
 
     document.addEventListener("mouseleave", (e) => {
