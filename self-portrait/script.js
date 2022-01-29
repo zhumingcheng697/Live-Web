@@ -9,6 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let shouldPlay = false;
     let dragTimeoutId;
     let promptTimeoutId;
+    let pCord = {};
 
     function numToTwoDigit(n) {
         const floored = Math.floor(n);
@@ -125,7 +126,7 @@ document.addEventListener("DOMContentLoaded", () => {
             video.pause();
         }
 
-        const diff = e.movementX / window.innerWidth;
+        const diff = (pCord.clientX === undefined ? 0 : e.clientX - pCord.clientX) / window.innerWidth;
         const coefficient = Math.abs(diff) * diff * 500 + 1.5 * diff;
         video.currentTime += video.duration * coefficient;
 
@@ -138,6 +139,8 @@ document.addEventListener("DOMContentLoaded", () => {
         showPrompt();
 
         update();
+
+        pCord = e;
     }
 
     document.addEventListener("mousemove", (e) => {
@@ -151,17 +154,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("touchmove", (e) => {
+        if (e.changedTouches.length !== 1) return;
+
         e.preventDefault();
 
-        updateXY(e);
+        updateXY(e.changedTouches[0]);
 
-        handleMove(e);
+        handleMove(e.changedTouches[0]);
     });
 
     document.addEventListener("mousedown", (e) => {
         if (e.button > 1) return;
 
         e.preventDefault();
+
         updateXY(e);
 
         isMouseDown = true;
