@@ -79,6 +79,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1500)
     }
 
+    function updateXY(e) {
+        const y = e.clientY / window.innerHeight;
+        video.volume = 1 - y;
+        document.documentElement.style.setProperty("--mouse-x", `${ e.clientX }px`);
+        document.documentElement.style.setProperty("--mouse-y", `${ e.clientY }px`);
+        document.documentElement.style.setProperty("--my-scale", `${ 1.5 - 0.8 * (y - 0.5) }`);
+    }
+
     video.volume = 0.5;
 
     document.addEventListener("keydown", (e) => {
@@ -112,42 +120,49 @@ document.addEventListener("DOMContentLoaded", () => {
         update();
     });
 
+    function handleMove(e) {
+        if (!video.paused) {
+            video.pause();
+        }
+
+        const diff = e.movementX / window.innerWidth;
+        const coefficient = Math.abs(diff) * diff * 500 + 1.5 * diff;
+        video.currentTime += video.duration * coefficient;
+
+        if (video.currentTime < 0) {
+            video.currentTime = 0;
+        } else if (video.currentTime > video.duration) {
+            video.currentTime = video.duration;
+        }
+
+        showPrompt();
+
+        update();
+    }
+
     document.addEventListener("mousemove", (e) => {
         e.preventDefault();
 
-        const y = e.clientY / window.innerHeight;
-
-        video.volume = 1 - y;
+        updateXY(e);
 
         if (isMouseDown) {
-            if (!video.paused) {
-                video.pause();
-            }
-
-            const diff = e.movementX / window.innerWidth;
-            const coefficient = Math.abs(diff) * diff * 500 + 1.5 * diff;
-            video.currentTime += video.duration * coefficient;
-
-            if (video.currentTime < 0) {
-                video.currentTime = 0;
-            } else if (video.currentTime > video.duration) {
-                video.currentTime = video.duration;
-            }
-
-            showPrompt();
-
-            update();
+            handleMove(e);
         }
+    });
 
-        document.documentElement.style.setProperty("--mouse-x", `${ e.clientX }px`);
-        document.documentElement.style.setProperty("--mouse-y", `${ e.clientY }px`);
-        document.documentElement.style.setProperty("--my-scale", `${ 1.5 - 0.8 * (y - 0.5) }`);
+    document.addEventListener("touchmove", (e) => {
+        e.preventDefault();
+
+        updateXY(e);
+
+        handleMove(e);
     });
 
     document.addEventListener("mousedown", (e) => {
         if (e.button > 1) return;
 
         e.preventDefault();
+        updateXY(e);
 
         isMouseDown = true;
         shouldPlay = !video.paused;
@@ -159,6 +174,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     document.addEventListener("mouseup", (e) => {
         if (e.button > 1) return;
+
+        updateXY(e);
 
         if (!document.body.classList.contains("pressed")) {
             if (video.paused) {
