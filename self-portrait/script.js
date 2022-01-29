@@ -82,15 +82,24 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function updateXY(e) {
         const y = e.clientY / window.innerHeight;
-        video.volume = 1 - y;
+        let newVolume = 1 - y;
+
+        if (newVolume > 1) {
+            newVolume = 1;
+        } else if (newVolume < 0) {
+            newVolume = 0
+        }
+        video.volume = newVolume;
         document.documentElement.style.setProperty("--mouse-x", `${ e.clientX }px`);
         document.documentElement.style.setProperty("--mouse-y", `${ e.clientY }px`);
-        document.documentElement.style.setProperty("--my-scale", `${ 1.5 - 0.8 * (y - 0.5) }`);
+        document.documentElement.style.setProperty("--my-scale", `${ 1.5 - (y - 0.5) }`);
     }
 
     video.volume = 0.5;
 
     document.addEventListener("keydown", (e) => {
+        let newTime = video.currentTime;
+
         switch (e.key) {
             case " ":
             case "Enter":
@@ -102,21 +111,23 @@ document.addEventListener("DOMContentLoaded", () => {
                 break;
             case "ArrowLeft":
                 e.preventDefault();
-                video.currentTime -= 2;
+                newTime -= 2;
                 showPrompt();
                 break;
             case "ArrowRight":
                 e.preventDefault();
-                video.currentTime += 2;
+                newTime += 2;
                 showPrompt();
                 break;
         }
 
-        if (video.currentTime < 0) {
-            video.currentTime = 0;
-        } else if (video.currentTime > video.duration) {
-            video.currentTime = video.duration;
+        if (newTime < 0) {
+            newTime = 0;
+        } else if (newTime > video.duration) {
+            newTime = video.duration;
         }
+
+        video.currentTime = newTime;
 
         update();
     });
@@ -126,15 +137,19 @@ document.addEventListener("DOMContentLoaded", () => {
             video.pause();
         }
 
+        let newTime = video.currentTime;
+
         const diff = (pCord.clientX === undefined ? 0 : e.clientX - pCord.clientX) / window.innerWidth;
         const coefficient = Math.abs(diff) * diff * 500 + 1.5 * diff;
-        video.currentTime += video.duration * coefficient;
+        newTime += video.duration * coefficient;
 
-        if (video.currentTime < 0) {
-            video.currentTime = 0;
-        } else if (video.currentTime > video.duration) {
-            video.currentTime = video.duration;
+        if (newTime < 0) {
+            newTime = 0;
+        } else if (newTime > video.duration) {
+            newTime = video.duration;
         }
+
+        video.currentTime = newTime;
 
         showPrompt();
 
@@ -164,9 +179,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const newE = {};
                 for (let key in e.touches[0]) {
                     if (typeof e.touches[0][key] !== "number") continue;
-                    newE[key] = (e.touches[0][key] + e.touches[0][key]) / 2;
+                    newE[key] = (e.touches[0][key] + e.touches[1][key]) / 2;
                 }
-                updateXY(newE);
                 handleMove(newE);
         }
     });
