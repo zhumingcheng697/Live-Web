@@ -89,7 +89,7 @@ body.show-prompt #prompt {
 #progress {
     height: 5px;
     width: 100%;
-    background-color: #dddb;
+    background-color: #dddc;
     border-radius: 10px;
     margin-top: 5px;
     position: relative;

@@ -108,6 +108,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 showPrompt();
                 break;
             default:
+                if (e.key.length === 1){
+                    const numKey = parseInt(e.key);
+
+                    if (!isNaN(numKey)) {
+                        newTime = video.duration / 10 * numKey;
+                        showPrompt();
+                        break;
+                    }
+                }
+
                 update();
                 return;
         }
