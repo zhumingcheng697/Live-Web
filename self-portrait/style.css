@@ -60,6 +60,7 @@ video {
 }
 
 #prompt {
+    pointer-events: none;
     border-radius: 15px;
     background-color: #222b;
     margin: 10vh auto auto auto;

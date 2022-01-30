@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-    if (navigator.maxTouchPoints) {
+    if (navigator.userAgent.match(/\b(?:iphone|ipad|ipod|macintosh)/i) && navigator.maxTouchPoints) {
         document.body.classList.add("mobile");
     }
 
@@ -158,13 +158,13 @@ document.addEventListener("DOMContentLoaded", () => {
             update();
         }
 
-        updateXY(e);
+        if (window.matchMedia("(hover: hover) and (pointer: fine)").matches && !navigator.maxTouchPoints) {
+            updateXY(e);
+        }
     });
 
     document.addEventListener("touchmove", (e) => {
         e.preventDefault();
-
-        console.log(e.target);
 
         if (e.touches.length !== 1) return;
 
@@ -176,8 +176,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         e.preventDefault();
 
-        console.log(e.target);
-
         downInVideo = e.target === video;
         isMouseDown = true;
         shouldPlay = !video.paused;
@@ -185,6 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
         dragTimeoutId = setTimeout(() => {
             document.body.classList.add("pressed");
         }, 500);
+        updateXY(e);
     });
 
     document.addEventListener("mouseup", (e) => {
