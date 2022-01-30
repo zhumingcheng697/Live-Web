@@ -1,10 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
-    if (navigator.userAgent.match(/\b(?:iphone|ipad|ipod|macintosh)/i) && navigator.maxTouchPoints) {
-        document.body.classList.add("mobile");
-    }
-
     const video = document.querySelector("video");
     const time = document.getElementById("time");
+
     let isMouseDown = false;
     let shouldPlay = false;
     let dragTimeoutId;
@@ -28,7 +25,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else if (s < 60 * 60) {
             return `${ Math.floor(s / 60) }:${ numToTwoDigit(s % 60) }`;
         } else {
-            return `${ Math.floor(s / 60 / 60) }:${ Math.floor(s % (60 * 60)) }:${ numToTwoDigit(s % 60) }`;
+            return `${ Math.floor(s / 60 / 60) }:${ numToTwoDigit(s % (60 * 60)) }:${ numToTwoDigit(s % 60) }`;
         }
     }
 
@@ -71,8 +68,6 @@ document.addEventListener("DOMContentLoaded", () => {
         updatePrompt();
     }
 
-    setInterval(update, 5);
-
     function showPrompt() {
         clearTimeout(promptTimeoutId);
         document.body.classList.add("show-prompt");
@@ -81,7 +76,41 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 1500);
     }
 
+    // handles the movement of mouse and touches
+    function updateXY(e) {
+        const y = e.clientY / window.innerHeight;
+        let newVolume = 1 - y;
+
+        if (newVolume > 1) {
+            newVolume = 1;
+        } else if (newVolume < 0) {
+            newVolume = 0;
+        }
+        video.volume = newVolume;
+        document.documentElement.style.setProperty("--mouse-x", `${ e.clientX }px`);
+        document.documentElement.style.setProperty("--mouse-y", `${ e.clientY }px`);
+        document.documentElement.style.setProperty("--my-scale", `${ 1.5 - (y - 0.5) }`);
+    }
+
+    function setVideoTime(newTime) {
+        // makes sure not to go below 0 or more than video length
+        if (newTime < 0) {
+            newTime = 0;
+        } else if (newTime > video.duration) {
+            newTime = video.duration;
+        }
+
+        video.currentTime = newTime;
+    }
+
+    // hack for video color showing up differently on iOS
+    if (navigator.userAgent.match(/\b(?:iphone|ipad|ipod|macintosh)/i) && navigator.maxTouchPoints) {
+        document.body.classList.add("mobile");
+    }
+
     video.volume = 0.5;
+
+    setInterval(update, 5);
 
     document.addEventListener("keydown", (e) => {
         let newTime = video.currentTime;
@@ -122,54 +151,32 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
         }
 
-        if (newTime < 0) {
-            newTime = 0;
-        } else if (newTime > video.duration) {
-            newTime = video.duration;
-        }
-
-        video.currentTime = newTime;
+        setVideoTime(newTime);
 
         update();
     });
 
-    function updateXY(e) {
-        const y = e.clientY / window.innerHeight;
-        let newVolume = 1 - y;
-
-        if (newVolume > 1) {
-            newVolume = 1;
-        } else if (newVolume < 0) {
-            newVolume = 0;
-        }
-        video.volume = newVolume;
-        document.documentElement.style.setProperty("--mouse-x", `${ e.clientX }px`);
-        document.documentElement.style.setProperty("--mouse-y", `${ e.clientY }px`);
-        document.documentElement.style.setProperty("--my-scale", `${ 1.5 - (y - 0.5) }`);
-    }
-
     document.addEventListener("mousemove", (e) => {
         e.preventDefault();
 
+        // rewind or fast-forward if the mouse is pressed down
         if (isMouseDown) {
+            // pauses the video to improve performance
             if (!video.paused) {
                 video.pause();
             }
 
+            let newTime = video.currentTime;
             const diff = e.movementX / window.innerWidth;
             const coefficient = Math.abs(diff) * diff * 500 + 1.5 * diff;
-            video.currentTime += video.duration * coefficient;
+            newTime += video.duration * coefficient;
 
-            if (video.currentTime < 0) {
-                video.currentTime = 0;
-            } else if (video.currentTime > video.duration) {
-                video.currentTime = video.duration;
-            }
-
+            setVideoTime(newTime)
             showPrompt();
             update();
         }
 
+        // only update the coordinate on desktop, special treatment for touches
         if (window.matchMedia("(hover: hover) and (pointer: fine)").matches && !navigator.maxTouchPoints) {
             updateXY(e);
         }
@@ -178,6 +185,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener("touchmove", (e) => {
         e.preventDefault();
 
+        // only care about single-finger gestures
         if (e.touches.length !== 1) return;
 
         updateXY(e.touches[0]);
@@ -188,9 +196,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
         e.preventDefault();
 
+        // if touches down outside video on mobile, do not pause/resume
         downInVideo = e.target === video;
+
         isMouseDown = true;
+
+        // caches the video playback status
         shouldPlay = !video.paused;
+
         clearTimeout(dragTimeoutId);
         dragTimeoutId = setTimeout(() => {
             document.body.classList.add("pressed");
@@ -199,32 +212,36 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     document.addEventListener("mouseup", (e) => {
-        if (e.button > 1) return;
+        if (e.button > 1) return; // only care about left click (no middle click, right click, etc.)
 
         if (!autoPlayed) {
+            // if it is the first click, play the video
             video.play();
             autoPlayed = true;
         } else if (!document.body.classList.contains("pressed") && downInVideo) {
+            // if click on the video and not rewinding/fast-forwarding, pause/resume
             if (video.paused) {
                 video.play();
             } else {
                 video.pause();
             }
-        } else {
+        } else if (document.body.classList.contains("pressed")) {
+            // when rewind/fast-forward ended, resume if needed
             if (shouldPlay) {
                 video.play();
             }
         }
 
         shouldPlay = false;
-        clearTimeout(dragTimeoutId);
         isMouseDown = false;
         downInVideo = false;
+        clearTimeout(dragTimeoutId);
         document.body.classList.remove("pressed");
     });
 
+    // in case the user drags the mouse outside the viewport
     document.addEventListener("mouseleave", (e) => {
-        if (e.button > 1) return;
+        if (e.button > 1) return; // only care about left click (no middle click, right click, etc.)
 
         clearTimeout(dragTimeoutId);
         isMouseDown = false;
