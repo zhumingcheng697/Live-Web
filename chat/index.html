@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <script type="text/javascript" src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <script type="text/javascript" src="./script.js"></script>
+  </head>
+  <body class="setting-up">
+    <div id="setup-area">
+      <h1>Please choose a username first:</h1>
+      <form id="setup-form">
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Username"
+          maxlength="20"
+        />
+        <input type="submit" value="Confirm" />
+      </form>
+    </div>
+
+    <div id="message-area">
+      <div id="messages"></div>
+    </div>
+    <form id="send-form">
+      <input type="text" id="message" name="message" placeholder="Message" />
+      <input type="submit" value="Send" />
+    </form>
+  </body>
+</html>
