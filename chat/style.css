@@ -9,7 +9,6 @@ body {
   color: #111;
   text-align: center;
   background-color: #f2f2f7;
-  word-break: break-all;
 }
 
 body.chatting {
@@ -26,6 +25,11 @@ body.chatting #setup-area {
   display: none;
 }
 
+#setup-form {
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 h1 {
   margin: 10px;
 }
@@ -34,6 +38,7 @@ h1 {
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
+  word-break: break-all;
 }
 
 #messages {
