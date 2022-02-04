@@ -116,6 +116,19 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  socket.on("reconnect", () => {
+    if (username) {
+      joinRoom(username);
+      socket.emit("join", username);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    if (username) {
+      leaveRoom(username);
+    }
+  });
+
   setupForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
