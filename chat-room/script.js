@@ -1,4 +1,4 @@
-const socket = io.connect();
+const socket = io.connect("https://mccoy-zhu-chat-room.glitch.me/");
 
 window.addEventListener("DOMContentLoaded", () => {
   let username = "";
