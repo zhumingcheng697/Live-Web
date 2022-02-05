@@ -1,4 +1,4 @@
-## Self Portrait
+# Self Portrait
 
 **Live Web Week 1 Session 2 Assignment**
 
