@@ -14,12 +14,14 @@
       <h1>Please choose a username first:</h1>
       <form id="setup-form">
         <input
+          enterkeyhint="go"
           type="text"
           id="username"
           name="username"
           placeholder="Username"
           maxlength="20"
           autocomplete="name"
+          required
         />
         <input type="submit" value="Confirm" />
       </form>
@@ -29,7 +31,14 @@
       <div id="messages"></div>
     </div>
     <form id="send-form">
-      <input type="text" id="message" name="message" placeholder="Message" />
+      <input
+        enterkeyhint="send"
+        type="text"
+        id="message"
+        name="message"
+        placeholder="Message"
+        required
+      />
       <input type="submit" value="Send" />
     </form>
   </body>
