@@ -1,104 +1,121 @@
 :root {
-    --mouse-x: 50%;
-    --mouse-y: 50%;
-    --my-scale: 1.5;
-    --my-opacity: 1;
-    --my-duration: 0
+  --mouse-x: 50%;
+  --mouse-y: 50%;
+  --my-scale: 1.5;
+  --my-opacity: 1;
+  --my-duration: 0;
 }
 
-html, body {
-    margin: 0;
-    padding: 0;
-    background: #d9d9d9;
-    overflow: hidden;
-    max-height: 100vh;
-    max-width: 100vw;
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #d9d9d9;
+  overflow: hidden;
+  max-height: 100vh;
+  max-width: 100vw;
 }
 
 body.pressed video {
-    cursor: ew-resize;
+  cursor: ew-resize;
 }
 
 body.mobile video {
-    -webkit-filter: contrast(104%);
+  -webkit-filter: contrast(104%);
+  filter: contrast(104%);
 }
 
 video {
-    max-width: 60vw;
-    max-height: calc(calc(60vh / 16) * 9);
-    object-fit: contain;
-    display: block;
-    position: absolute;
-    left: var(--mouse-x);
-    top: var(--mouse-y);
-    transform: translate(-50%, -50%) scale(var(--my-scale));
+  max-width: 60vw;
+  max-height: calc(calc(60vh / 16) * 9);
+  object-fit: contain;
+  display: block;
+  position: absolute;
+  left: var(--mouse-x);
+  top: var(--mouse-y);
+  transform: translate(-50%, -50%) scale(var(--my-scale));
 }
 
 #video-padding {
-    width: min(80vw, 80vh);
-    height: min(80vw, 80vh);
-    position: absolute;
-    transform: translate(-50%, -50%) scale(var(--my-scale));
-    left: var(--mouse-x);
-    top: var(--mouse-y);
-    background: -webkit-radial-gradient(circle, #e4e4e4 20%, #e4e4e4 30%, #dcdcdc 53%, #d9d9d9 62%, #d9d9d9 70%);
-    background: radial-gradient(circle, #e4e4e4 20%, #e4e4e4 30%, #dcdcdc 53%, #d9d9d9 62%, #d9d9d9 70%);
-    background-position-x: max(-2vh, -2vw);
-    background-size: contain;
+  width: min(80vw, 80vh);
+  height: min(80vw, 80vh);
+  position: absolute;
+  transform: translate(-50%, -50%) scale(var(--my-scale));
+  left: var(--mouse-x);
+  top: var(--mouse-y);
+  background: -webkit-radial-gradient(
+    circle,
+    #e4e4e4 20%,
+    #e4e4e4 30%,
+    #dcdcdc 53%,
+    #d9d9d9 62%,
+    #d9d9d9 70%
+  );
+  background: radial-gradient(
+    circle,
+    #e4e4e4 20%,
+    #e4e4e4 30%,
+    #dcdcdc 53%,
+    #d9d9d9 62%,
+    #d9d9d9 70%
+  );
+  background-position-x: max(-2vh, -2vw);
+  background-size: contain;
 }
 
 #mask {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: #fff;
-    opacity: var(--my-opacity);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #fff;
+  opacity: var(--my-opacity);
 }
 
 #prompt {
-    pointer-events: none;
-    border-radius: 15px;
-    background-color: #222b;
-    margin: 10vh auto auto auto;
-    text-align: center;
-    position: relative;
-    height: max-content;
-    width: max-content;
-    padding: 15px;
-    opacity: 0;
-    transition: opacity 0.3s;
+  pointer-events: none;
+  border-radius: 15px;
+  background-color: #222b;
+  margin: 10vh auto auto auto;
+  text-align: center;
+  position: relative;
+  height: max-content;
+  width: max-content;
+  padding: 15px;
+  opacity: 0;
+  transition: opacity 0.3s;
 }
 
 body.show-prompt #prompt {
-    opacity: 1;
+  opacity: 1;
 }
 
 #time {
-    color: #ddd;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    margin: 0 12px;
-    padding-bottom: 5px;
-    font-size: 1.4em;
+  color: #ddd;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  margin: 0 12px;
+  padding-bottom: 5px;
+  font-size: 1.4em;
 }
 
 #progress {
-    height: 5px;
-    width: 100%;
-    background-color: #dddc;
-    border-radius: 10px;
-    margin-top: 5px;
-    position: relative;
+  height: 5px;
+  width: 100%;
+  background-color: #dddc;
+  border-radius: 10px;
+  margin-top: 5px;
+  position: relative;
 }
 
 #fill {
-    height: 5px;
-    position: absolute;
-    border-radius: 10px;
-    border: #07f 1px solid;
-    left: 0;
-    background-color: #0a84ff;
-    width: var(--my-duration);
-    box-sizing: border-box;
+  height: 5px;
+  position: absolute;
+  border-radius: 10px;
+  border: #07f 1px solid;
+  left: 0;
+  background-color: #0a84ff;
+  width: var(--my-duration);
+  box-sizing: border-box;
 }
