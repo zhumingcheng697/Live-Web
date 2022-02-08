@@ -63,7 +63,7 @@ body.setting-up #send-form {
   display: none;
 }
 
-input:disabled {
+body.disabled input:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -95,6 +95,9 @@ form input[type="submit"] {
   font-size: 14px;
   background-color: #07f;
   color: #fff;
+}
+
+input[type="submit"]:not(:disabled) {
   cursor: pointer;
 }
 
