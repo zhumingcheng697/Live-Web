@@ -4,11 +4,50 @@ window.addEventListener("DOMContentLoaded", () => {
   let username = "";
   let lastMessageSender = null;
   let lastMessageSentAt = 0;
+  let actionCount = 0;
+  let blockedTime = 0.5;
 
   const setupForm = document.getElementById("setup-form");
   const messageArea = document.getElementById("message-area");
   const messages = document.getElementById("messages");
   const sendForm = document.getElementById("send-form");
+  const sendInputs = sendForm.querySelectorAll("input");
+
+  function didNewAction() {
+    ++actionCount;
+    handleActionCount();
+
+    setTimeout(() => {
+      --actionCount;
+    }, 1000 * 30);
+  }
+
+  function handleActionCount() {
+    const shouldBlock = actionCount >= 15;
+    const alreadyBlocked = document.body.classList.contains("blocked");
+
+    if (shouldBlock && !alreadyBlocked) {
+      blockedTime *= 2;
+
+      sendInputs.forEach((e) => {
+        e.disabled = true;
+      });
+
+      socket.emit("block", { username, duration: blockedTime });
+      block(username, blockedTime, true);
+      document.body.classList.add("blocked");
+
+      setTimeout(() => {
+        sendInputs.forEach((e) => {
+          e.disabled = false;
+        });
+
+        socket.emit("unblock", username);
+        unblock(username, true);
+        document.body.classList.remove("blocked");
+      }, 1000 * 60 * blockedTime);
+    }
+  }
 
   function escapeHtml(unsafe) {
     return unsafe
@@ -98,6 +137,22 @@ window.addEventListener("DOMContentLoaded", () => {
     appendMessage(messageElement(`<strong>${user}</strong> left the room.`));
   }
 
+  function block(user, duration, forceScroll = false) {
+    appendMessage(
+      messageElement(
+        `<strong>${user}</strong> is blocked for ${duration} min for sending or unsending too many messages.`
+      ),
+      forceScroll
+    );
+  }
+
+  function unblock(user, forceScroll = false) {
+    appendMessage(
+      messageElement(`<strong>${user}</strong> is now unblocked.`),
+      forceScroll
+    );
+  }
+
   socket.on("post", ({ message, sender, id }) => {
     receiveMessage(message, sender, id);
   });
@@ -108,6 +163,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
   socket.on("leave", (username) => {
     leaveRoom(username);
+  });
+
+  socket.on("block", ({ username, duration }) => {
+    block(username, duration);
+  });
+
+  socket.on("unblock", (username) => {
+    unblock(username);
   });
 
   socket.on("unsend", ({ sender, id }) => {
@@ -149,12 +212,17 @@ window.addEventListener("DOMContentLoaded", () => {
     const el = e.target.message;
     if (el.value) {
       sendMessage(escapeHtml(el.value));
+      didNewAction();
 
       el.value = "";
     }
   });
 
   messages.addEventListener("dblclick", (e) => {
+    if (document.body.classList.contains("blocked")) {
+      return;
+    }
+
     const target = e.target;
     if (target.classList.contains("content")) {
       const parent = target.parentElement;
@@ -165,6 +233,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
         socket.emit("unsend", { sender: username, id });
         unsendMessage(username);
+        didNewAction();
       }
     }
   });

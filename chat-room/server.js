@@ -43,6 +43,16 @@ io.sockets.on(
       socket.broadcast.emit("unsend", data);
     });
 
+    socket.on("block", function (data) {
+      // Send it to all of the clients
+      socket.broadcast.emit("block", data);
+    });
+
+    socket.on("unblock", function (data) {
+      // Send it to all of the clients
+      socket.broadcast.emit("unblock", data);
+    });
+
     socket.on("join", function (username) {
       users.set(socket.id, username);
       socket.broadcast.emit("join", username);
