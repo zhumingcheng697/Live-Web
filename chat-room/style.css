@@ -1,6 +1,5 @@
 body {
-  display: flex;
-  height: 100vh;
+  height: 100%;
   margin: 0;
   padding: 0;
   font-size: 14px;
@@ -11,14 +10,11 @@ body {
   background-color: #f2f2f7;
 }
 
-body.chatting {
-  flex-direction: column;
-  justify-content: space-between;
-}
-
 body.setting-up {
+  display: flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 body.chatting #setup-area {
@@ -36,11 +32,15 @@ body.blocked .message.sent .content {
 }
 
 h1 {
-  margin: 10px;
+  margin: 10px 20px;
 }
 
 #message-area {
-  height: 100%;
+  position: fixed;
+  top: 0;
+  bottom: 56px;
+  left: 0;
+  right: 0;
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -57,6 +57,12 @@ body.setting-up #message-area {
 
 #send-form {
   margin: 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 56px;
+  box-sizing: border-box;
 }
 
 body.setting-up #send-form {
