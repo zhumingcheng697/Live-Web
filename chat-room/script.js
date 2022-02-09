@@ -248,6 +248,17 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  document.addEventListener("click", (e) => {
+    const activeEl = document.activeElement;
+    if (
+      [document.body, messageArea, messages].includes(e.target) &&
+      activeEl.tagName === "INPUT" &&
+      activeEl.type === "text"
+    ) {
+      activeEl.blur();
+    }
+  });
+
   messages.addEventListener("dblclick", (e) => {
     if (document.body.classList.contains("blocked")) {
       return;
