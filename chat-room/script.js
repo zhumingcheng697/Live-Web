@@ -13,6 +13,17 @@ window.addEventListener("DOMContentLoaded", () => {
   const sendForm = document.getElementById("send-form");
   const sendInputs = sendForm.querySelectorAll("input");
 
+  function textNode(text) {
+    return document.createTextNode(text);
+  }
+
+  function strongNode(text) {
+    const node = document.createElement("strong");
+    node.appendChild(textNode(text));
+
+    return node;
+  }
+
   function didNewAction() {
     ++actionCount;
     handleActionCount();
@@ -49,15 +60,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function escapeHtml(unsafe) {
-    return unsafe
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
   function randomNumber(n, base = 10) {
     return [...Array(n)]
       .map(() => Math.floor(Math.random() * base).toString(base))
@@ -83,18 +85,37 @@ window.addEventListener("DOMContentLoaded", () => {
     lastMessageSender = sender;
     lastMessageSentAt = Date.now();
 
-    return `<div class="message ${type}"${
-      id ? ` id="${id}"` : ""
-    }><span class="metadata${shouldHideMetadata ? " hidden" : ""}">${
-      sender ? `<strong>${sender}</strong> at ` : ""
-    }${dateToString(
-      new Date()
-    )}</span><pre class="content">${message}</pre></div>`;
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `message ${type}`;
+    if (id) messageDiv.id = id;
+
+    const metadata = document.createElement("span");
+    metadata.className = `metadata${shouldHideMetadata ? " hidden" : ""}`;
+    if (sender) {
+      metadata.appendChild(strongNode(sender));
+      metadata.appendChild(textNode(" at "));
+    }
+    metadata.appendChild(textNode(dateToString(new Date())));
+
+    const content = document.createElement("span");
+    content.className = "content";
+    if (Array.isArray(message)) {
+      message.forEach((e) => {
+        content.appendChild(e);
+      });
+    } else {
+      content.appendChild(textNode(message));
+    }
+
+    messageDiv.appendChild(metadata);
+    messageDiv.appendChild(content);
+
+    return messageDiv;
   }
 
   function appendMessage(messageEl, forceScroll = false) {
     const pScrollBottom = scrollBottom(messageArea);
-    messages.innerHTML += messageEl;
+    messages.appendChild(messageEl);
 
     if (pScrollBottom <= 25 || forceScroll) {
       messages.scrollIntoView(false);
@@ -112,7 +133,9 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function unsendMessage(user) {
-    appendMessage(messageElement(`<strong>${user}</strong> unsent a message.`));
+    appendMessage(
+      messageElement([strongNode(user), textNode(" unsent a message.")])
+    );
   }
 
   function removeMessage(id) {
@@ -130,25 +153,32 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function joinRoom(user) {
-    appendMessage(messageElement(`<strong>${user}</strong> joined the room.`));
+    appendMessage(
+      messageElement([strongNode(user), textNode(" joined the room.")])
+    );
   }
 
   function leaveRoom(user) {
-    appendMessage(messageElement(`<strong>${user}</strong> left the room.`));
+    appendMessage(
+      messageElement([strongNode(user), textNode(" left the room.")])
+    );
   }
 
   function block(user, duration, forceScroll = false) {
     appendMessage(
-      messageElement(
-        `<strong>${user}</strong> is blocked for ${duration} min for sending or unsending too many messages.`
-      ),
+      messageElement([
+        strongNode(user),
+        textNode(
+          ` is blocked for ${duration} min for sending or unsending too many messages.`
+        ),
+      ]),
       forceScroll
     );
   }
 
   function unblock(user, forceScroll = false) {
     appendMessage(
-      messageElement(`<strong>${user}</strong> is now unblocked.`),
+      messageElement([strongNode(user), textNode(" is now unblocked.")]),
       forceScroll
     );
   }
@@ -197,7 +227,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const name = e.target.username.value;
     if (name) {
-      username = `${escapeHtml(name)}^${randomNumber(3)}`;
+      username = `${name}^${randomNumber(3)}`;
       joinRoom(username);
       document.body.classList.remove("setting-up");
       document.body.classList.add("chatting");
@@ -211,7 +241,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const el = e.target.message;
     if (el.value) {
-      sendMessage(escapeHtml(el.value));
+      sendMessage(el.value);
       didNewAction();
 
       el.value = "";
