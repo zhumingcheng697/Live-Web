@@ -1,3 +1,11 @@
+:root {
+  --inset-left: env(safe-area-inset-left, 0);
+  --inset-right: env(safe-area-inset-right, 0);
+  --inset-top: env(safe-area-inset-top, 0);
+  --inset-bottom: env(safe-area-inset-bottom, 0);
+  -webkit-text-size-adjust: none;
+}
+
 body {
   height: 100%;
   margin: 0;
@@ -8,22 +16,6 @@ body {
   color: #111;
   text-align: center;
   background-color: #f2f2f7;
-}
-
-body.setting-up {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-body.chatting #setup-area {
-  display: none;
-}
-
-body.blocked .message.sent .content {
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 
 #setup-form {
@@ -37,41 +29,28 @@ h1 {
 
 #message-area {
   position: fixed;
-  top: 0;
-  bottom: 56px;
-  left: 0;
-  right: 0;
+  top: var(--inset-top);
+  bottom: calc(56px + var(--inset-bottom));
+  left: var(--inset-left);
+  right: var(--inset-right);
   overflow-x: hidden;
   overflow-y: auto;
 }
 
 #messages {
-  padding: 10px 20px 0 20px;
+  padding: 10px 20px;
   display: flex;
   flex-direction: column;
-}
-
-body.setting-up #message-area {
-  display: none;
 }
 
 #send-form {
   margin: 0;
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: var(--inset-bottom);
+  left: var(--inset-left);
+  right: var(--inset-right);
   height: 56px;
   box-sizing: border-box;
-}
-
-body.setting-up #send-form {
-  display: none;
-}
-
-body.blocked input:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 
 form {
@@ -172,4 +151,33 @@ input[type="submit"]:not(:disabled) {
 .message.received .content {
   background-color: #e0e0e0;
   margin-right: auto;
+}
+
+body.setting-up #message-area {
+  display: none;
+}
+
+body.setting-up #send-form {
+  display: none;
+}
+
+body.blocked input:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+body.setting-up {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+body.chatting #setup-area {
+  display: none;
+}
+
+body.blocked .message.sent .content {
+  cursor: not-allowed;
+  opacity: 0.5;
 }
