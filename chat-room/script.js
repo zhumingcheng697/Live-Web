@@ -202,7 +202,7 @@ window.addEventListener("DOMContentLoaded", () => {
       document.body.classList.remove("setting-up");
       document.body.classList.add("chatting");
       socket.emit("join", username);
-      setupForm.remove();
+      setupForm.parentNode.remove();
     }
   });
 
