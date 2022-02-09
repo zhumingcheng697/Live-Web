@@ -6,6 +6,11 @@
   -webkit-text-size-adjust: none;
 }
 
+html {
+  background-color: #f2f2f7;
+  transition: background-color 0.3s;
+}
+
 body {
   height: 100%;
   margin: 0;
@@ -15,7 +20,7 @@ body {
     Arial, sans-serif;
   color: #111;
   text-align: center;
-  background-color: #f2f2f7;
+  transition: color 0.3s;
 }
 
 #setup-form {
@@ -69,8 +74,10 @@ form input[type="text"] {
   border-radius: 6px;
   padding: 8px 10px;
   font-size: 14px;
-  background-color: #e0e0e0;
+  background-color: #e5e5ea;
   min-width: 200px;
+  color: #000;
+  transition: background-color 0.3s, color 0.3s;
 }
 
 form input[type="submit"] {
@@ -78,7 +85,7 @@ form input[type="submit"] {
   border-radius: 6px;
   padding: 8px 12px;
   font-size: 14px;
-  background-color: #07f;
+  background-color: #027aff;
   color: #fff;
 }
 
@@ -118,6 +125,7 @@ input[type="submit"]:not(:disabled) {
   color: #555;
   word-break: break-word;
   white-space: break-spaces;
+  transition: color 0.3s;
 }
 
 .message .metadata.hidden {
@@ -142,14 +150,15 @@ input[type="submit"]:not(:disabled) {
 }
 
 .message.sent .content {
-  background-color: #07f;
+  background-color: #027aff;
   color: #fff;
   margin-left: auto;
   cursor: pointer;
 }
 
 .message.received .content {
-  background-color: #e0e0e0;
+  transition: background-color 0.3s;
+  background-color: #e5e5ea;
   margin-right: auto;
 }
 
@@ -180,4 +189,27 @@ body.chatting #setup-area {
 body.blocked .message.sent .content {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
+    background-color: #1c1c1e;
+  }
+
+  body {
+    color: #ddd;
+  }
+
+  form input[type="text"] {
+    color: #fff;
+    background-color: #2c2c2e;
+  }
+
+  .message .metadata {
+    color: #999;
+  }
+
+  .message.received .content {
+    background-color: #2c2c2e;
+  }
 }
