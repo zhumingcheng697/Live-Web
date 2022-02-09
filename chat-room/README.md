@@ -25,3 +25,7 @@ The chat window intelligently scrolls down when you send a new message or when y
 I tried to escape HTML code so that people won’t be able to do anything weird like changing the style of the page or insert malicious code.
 
 The server code is mostly the same. I added a few more event listeners where the server simply broadcast the message to everyone else. The only interesting thing I did was I added a map to match the user’s WebSocket ID with their username to make the “XYZ left the room” notification work.
+
+UPDATE1: Now users who send and/or unsend too many messages in a short period of time will be blocked temporarily by the front end from sending or unsending messages.
+
+UPDATE2: I did two more things that I always do when I have time—dark mode and edge inset (“notch”) support.
