@@ -19,3 +19,5 @@ When users hover over the canvas, they can preview their brush strokes. Users ca
 Clicking on the canvas draws a dot, and dragging on the canvas draws a curve.
 
 p5 `line`s are used to draw segments of the curve after each `mousemove` event, but if opacity is set below 100%, the joints of the `line`s look a bit weird. It is not really an issue that can be solved. I can also use `curve` and connect the points together in one go, but then the curve will only be drawn after the user finishes their entire stroke, and the user experience would be much worse that way.
+
+UPDATE: I somewhat solved the issue I mentioned above by drawing the curve with `line`s in a separate “preview” canvas while the user is still drawing, and then clear that canvas and redraw the whole curve with `curveVertex` on the “main” canvas. This way, only the coordinates of the final curve will be sent to the server and drawn on other users’ “main” canvases, resulting in less packets sent and better visuals.
