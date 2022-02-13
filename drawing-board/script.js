@@ -48,8 +48,9 @@ function windowResized() {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  const colorWithOpacity = () =>
-    color_ + ("00" + opacity_.toString(16)).slice(-2);
+  const to2DigitHex = (num) => ("00" + Math.floor(num).toString(16)).slice(-2);
+
+  const colorWithOpacity = () => color_ + to2DigitHex(opacity_);
 
   const colorEl = document.getElementById("color");
   const opacityEl = document.getElementById("opacity");
@@ -58,7 +59,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const sampleEl = document.getElementById("sample");
 
   let isMouseDown = false;
-  let color_ = colorEl.value;
+  let color_ = `#${to2DigitHex(Math.random() * 255)}${to2DigitHex(
+    Math.random() * 255
+  )}${to2DigitHex(Math.random() * 255)}`;
+  colorEl.value = color_;
   let opacity_ = Number(opacityEl.value);
   let size_ = Number(sizeEl.value);
   let sampleTimeoutId;
@@ -110,12 +114,16 @@ window.addEventListener("DOMContentLoaded", () => {
     isMouseDown = false;
     lastMouseX = null;
     lastMouseY = null;
+    needToReposition = true;
+    sampleEl.classList.remove("show");
   });
 
   document.body.addEventListener("blur", () => {
     isMouseDown = false;
     lastMouseX = null;
     lastMouseY = null;
+    needToReposition = true;
+    sampleEl.classList.remove("show");
   });
 
   document.body.addEventListener("mousemove", (e) => {
@@ -156,7 +164,9 @@ window.addEventListener("DOMContentLoaded", () => {
     wasInCanvas = isInCanvas();
   });
 
-  document.body.addEventListener("touchmove", () => {
+  document.body.addEventListener("touchmove", (e) => {
+    e.preventDefault();
+
     if (isInCanvas()) {
       if (lastMouseX !== null && lastMouseY != null) {
         stroke(colorWithOpacity());
