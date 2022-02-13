@@ -197,9 +197,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.body.addEventListener("click", () => {
     if (isInCanvas()) {
-      noStroke();
-      fill(colorWithOpacity());
-      ellipse(mouseX, mouseY, toOriginal(size_), toOriginal(size_));
+      stroke(colorWithOpacity());
+      strokeWeight(toOriginal(size_));
+      point(mouseX, mouseY);
+
       socket.emit("dot", {
         x: toRelative(mouseX),
         y: toRelative(mouseY),
@@ -236,9 +237,9 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on("dot", ({ x, y, size, color }) => {
-    noStroke();
-    fill(color);
-    ellipse(toOriginal(x), toOriginal(y), toOriginal(size), toOriginal(size));
+    stroke(color);
+    strokeWeight(toOriginal(size));
+    point(toOriginal(x), toOriginal(y));
   });
 
   socket.on("line", ({ x1, y1, x2, y2, weight, color }) => {
