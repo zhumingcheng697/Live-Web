@@ -29,9 +29,9 @@ io.sockets.on(
   function (socket) {
     console.log("We have a new client: " + socket.id);
 
-    socket.on("line", function (data) {
+    socket.on("curve", function (data) {
       // Send it to all of the clients
-      socket.broadcast.emit("line", data);
+      socket.broadcast.emit("curve", data);
     });
 
     socket.on("dot", function (data) {

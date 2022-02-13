@@ -1,6 +1,7 @@
 const socket = io.connect("https://mccoy-zhu-drawing-board.glitch.me/");
 
 let canvas;
+let graphics;
 let originalScale;
 
 const originalSize = { width: 1920, height: 1080 };
@@ -17,9 +18,17 @@ const toOriginal = (unit) => unit * originalScale;
 
 function setup() {
   originalScale = actualScale();
+
   canvas = createCanvas(actualWidth(), actualHeight());
   canvas.id("drawing-board");
   canvas.parent("canvas-wrapper");
+
+  graphics = createGraphics(actualWidth(), actualHeight());
+  graphics.id("drawing-board-2");
+  graphics.parent("graphics-wrapper");
+  graphics.style("display", "block");
+
+  strokeJoin(ROUND);
 }
 
 function isInCanvas() {
@@ -35,11 +44,18 @@ function resizeWrapper() {
   document.getElementById(
     "canvas-wrapper"
   ).style.height = `calc(100% - ${toolsHeight()}px)`;
+
+  document.getElementById(
+    "graphics-wrapper"
+  ).style.height = `calc(100% - ${toolsHeight()}px)`;
 }
 
 function resizeCanvas_() {
   canvas.style("width", actualWidth() + "px");
   canvas.style("height", actualHeight() + "px");
+
+  graphics.style("width", actualWidth() + "px");
+  graphics.style("height", actualHeight() + "px");
 }
 
 function windowResized() {
@@ -70,8 +86,10 @@ window.addEventListener("DOMContentLoaded", () => {
   let needToReposition = false;
   let lastMouseX = null;
   let lastMouseY = null;
+  let coords = [];
+  let mouseMoved = false;
 
-  function previewSample(length = 1000) {
+  function previewSample(length = 1500) {
     clearTimeout(sampleTimeoutId);
     sampleEl.classList.add("show");
 
@@ -97,20 +115,45 @@ window.addEventListener("DOMContentLoaded", () => {
     sampleEl.style.transform = "";
   }
 
+  function drawCurve() {
+    if (!coords.length) return;
+
+    graphics.clear();
+    stroke(colorWithOpacity());
+    strokeWeight(toOriginal(size_));
+    noFill();
+    beginShape();
+    for (let [x, y] of coords) {
+      curveVertex(toOriginal(x), toOriginal(y));
+    }
+    endShape();
+
+    socket.emit("curve", {
+      coords,
+      weight: size_,
+      color: colorWithOpacity(),
+    });
+
+    coords = [];
+  }
+
   updateSample();
   resizeWrapper();
 
   document.body.addEventListener("mousedown", () => {
     isMouseDown = true;
+    mouseMoved = false;
   });
 
   document.body.addEventListener("mouseup", () => {
+    drawCurve();
     isMouseDown = false;
     lastMouseX = null;
     lastMouseY = null;
   });
 
   document.body.addEventListener("mouseleave", () => {
+    drawCurve();
     isMouseDown = false;
     lastMouseX = null;
     lastMouseY = null;
@@ -119,6 +162,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   document.body.addEventListener("blur", () => {
+    drawCurve();
     isMouseDown = false;
     lastMouseX = null;
     lastMouseY = null;
@@ -127,7 +171,11 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   document.body.addEventListener("mousemove", (e) => {
-    if (isInCanvas()) {
+    if (
+      isInCanvas() &&
+      window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
+      !navigator.maxTouchPoints
+    ) {
       needToReposition = false;
       sampleEl.classList.add("show");
       sampleEl.style.left = e.clientX;
@@ -144,21 +192,20 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (isInCanvas() && isMouseDown) {
       if (lastMouseX !== null && lastMouseY != null) {
-        stroke(colorWithOpacity());
-        strokeWeight(toOriginal(size_));
-        line(lastMouseX, lastMouseY, mouseX, mouseY);
-
-        socket.emit("line", {
-          x1: toRelative(lastMouseX),
-          y1: toRelative(lastMouseY),
-          x2: toRelative(mouseX),
-          y2: toRelative(mouseY),
-          weight: size_,
-          color: colorWithOpacity(),
-        });
+        mouseMoved = true;
+        graphics.style("opacity", (opacity_ + 35) / 255);
+        graphics.stroke(colorWithOpacity());
+        graphics.strokeWeight(toOriginal(size_));
+        graphics.line(lastMouseX, lastMouseY, mouseX, mouseY);
+        if (!coords.length) {
+          coords.push([toRelative(lastMouseX), toRelative(lastMouseY)]);
+        }
+        coords.push([toRelative(mouseX), toRelative(mouseY)]);
       }
       lastMouseX = mouseX;
       lastMouseY = mouseY;
+    } else {
+      drawCurve();
     }
 
     wasInCanvas = isInCanvas();
@@ -169,34 +216,37 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (isInCanvas()) {
       if (lastMouseX !== null && lastMouseY != null) {
-        stroke(colorWithOpacity());
-        strokeWeight(toOriginal(size_));
-        line(lastMouseX, lastMouseY, mouseX, mouseY);
-
-        socket.emit("line", {
-          x1: toRelative(lastMouseX),
-          y1: toRelative(lastMouseY),
-          x2: toRelative(mouseX),
-          y2: toRelative(mouseY),
-          weight: size_,
-          color: colorWithOpacity(),
-        });
+        mouseMoved = true;
+        graphics.style("opacity", (opacity_ + 35) / 255);
+        graphics.stroke(colorWithOpacity());
+        graphics.strokeWeight(toOriginal(size_));
+        graphics.line(lastMouseX, lastMouseY, mouseX, mouseY);
+        if (!coords.length) {
+          coords.push([toRelative(lastMouseX), toRelative(lastMouseY)]);
+        }
+        coords.push([toRelative(mouseX), toRelative(mouseY)]);
       }
       lastMouseX = mouseX;
       lastMouseY = mouseY;
     } else {
+      drawCurve();
       lastMouseX = null;
       lastMouseY = null;
     }
   });
 
+  document.body.addEventListener("touchstart", () => {
+    mouseMoved = false;
+  });
+
   document.body.addEventListener("touchend", () => {
+    drawCurve();
     lastMouseX = null;
     lastMouseY = null;
   });
 
   document.body.addEventListener("click", () => {
-    if (isInCanvas()) {
+    if (isInCanvas() && !mouseMoved) {
       stroke(colorWithOpacity());
       strokeWeight(toOriginal(size_));
       point(mouseX, mouseY);
@@ -242,9 +292,15 @@ window.addEventListener("DOMContentLoaded", () => {
     point(toOriginal(x), toOriginal(y));
   });
 
-  socket.on("line", ({ x1, y1, x2, y2, weight, color }) => {
+  socket.on("curve", ({ coords, weight, color }) => {
+    strokeJoin(ROUND);
     stroke(color);
     strokeWeight(toOriginal(weight));
-    line(toOriginal(x1), toOriginal(y1), toOriginal(x2), toOriginal(y2));
+    noFill();
+    beginShape();
+    for (let [x, y] of coords) {
+      curveVertex(toOriginal(x), toOriginal(y));
+    }
+    endShape();
   });
 });
