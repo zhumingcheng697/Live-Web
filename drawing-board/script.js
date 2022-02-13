@@ -118,7 +118,7 @@ window.addEventListener("DOMContentLoaded", () => {
     lastMouseY = null;
   });
 
-  document.body.addEventListener("mousemove", () => {
+  document.body.addEventListener("mousemove", (e) => {
     if (isInCanvas()) {
       needToReposition = false;
       sampleEl.classList.add("show");
