@@ -140,19 +140,25 @@ window.addEventListener("DOMContentLoaded", () => {
   updateSample();
   resizeWrapper();
 
-  document.body.addEventListener("mousedown", () => {
+  document.body.addEventListener("mousedown", (e) => {
+    if (e.button > 1) return;
+
     isMouseDown = true;
     mouseMoved = false;
   });
 
-  document.body.addEventListener("mouseup", () => {
+  document.body.addEventListener("mouseup", (e) => {
+    if (e.button > 1) return;
+
     drawCurve();
     isMouseDown = false;
     lastMouseX = null;
     lastMouseY = null;
   });
 
-  document.body.addEventListener("mouseleave", () => {
+  document.body.addEventListener("mouseleave", (e) => {
+    if (e.button > 1) return;
+
     drawCurve();
     isMouseDown = false;
     lastMouseX = null;
@@ -171,6 +177,8 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   document.body.addEventListener("mousemove", (e) => {
+    if (e.button > 1) return;
+
     if (
       isInCanvas() &&
       window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
@@ -245,7 +253,9 @@ window.addEventListener("DOMContentLoaded", () => {
     lastMouseY = null;
   });
 
-  document.body.addEventListener("click", () => {
+  document.body.addEventListener("click", (e) => {
+    if (e.button > 1) return;
+
     if (isInCanvas() && !mouseMoved) {
       stroke(colorWithOpacity());
       strokeWeight(toOriginal(size_));
