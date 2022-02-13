@@ -185,9 +185,7 @@ window.addEventListener("DOMContentLoaded", () => {
     lastMouseY = null;
   });
 
-  document.body.addEventListener("click", (e) => {
-    e.preventDefault();
-
+  document.body.addEventListener("click", () => {
     if (isInCanvas()) {
       noStroke();
       fill(colorWithOpacity());
