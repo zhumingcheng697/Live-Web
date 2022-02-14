@@ -115,18 +115,30 @@ window.addEventListener("DOMContentLoaded", () => {
     sampleEl.style.transform = "";
   }
 
-  function drawCurve() {
-    if (!coords.length) return;
-
-    graphics.clear();
-    stroke(colorWithOpacity());
-    strokeWeight(toOriginal(size_));
+  function addCurve(coords, weight, color) {
+    stroke(color);
+    strokeWeight(toOriginal(weight));
     noFill();
     beginShape();
+    const [firstX, firstY] = coords[0];
+    curveVertex(toOriginal(firstX), toOriginal(firstY));
     for (let [x, y] of coords) {
       curveVertex(toOriginal(x), toOriginal(y));
     }
+    const [lastX, lastY] = coords[coords.length - 1];
+    curveVertex(toOriginal(lastX), toOriginal(lastY));
     endShape();
+  }
+
+  function drawCurve() {
+    if (coords.length < 2) {
+      coords = [];
+      return;
+    }
+
+    graphics.clear();
+
+    addCurve(coords, size_, colorWithOpacity());
 
     socket.emit("curve", {
       coords,
@@ -143,12 +155,24 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener("mousedown", (e) => {
     if (e.button > 1) return;
 
+    if (
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      navigator.maxTouchPoints
+    )
+      return;
+
     isMouseDown = true;
     mouseMoved = false;
   });
 
   document.body.addEventListener("mouseup", (e) => {
     if (e.button > 1) return;
+
+    if (
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      navigator.maxTouchPoints
+    )
+      return;
 
     drawCurve();
     isMouseDown = false;
@@ -180,10 +204,12 @@ window.addEventListener("DOMContentLoaded", () => {
     if (e.button > 1) return;
 
     if (
-      isInCanvas() &&
-      window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
-      !navigator.maxTouchPoints
-    ) {
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      navigator.maxTouchPoints
+    )
+      return;
+
+    if (isInCanvas()) {
       needToReposition = false;
       sampleEl.classList.add("show");
       sampleEl.style.left = e.clientX;
@@ -205,11 +231,8 @@ window.addEventListener("DOMContentLoaded", () => {
         graphics.stroke(colorWithOpacity());
         graphics.strokeWeight(toOriginal(size_));
         graphics.line(lastMouseX, lastMouseY, mouseX, mouseY);
-        if (!coords.length) {
-          coords.push([toRelative(lastMouseX), toRelative(lastMouseY)]);
-        }
-        coords.push([toRelative(mouseX), toRelative(mouseY)]);
       }
+      coords.push([toRelative(mouseX), toRelative(mouseY)]);
       lastMouseX = mouseX;
       lastMouseY = mouseY;
     } else {
@@ -229,17 +252,10 @@ window.addEventListener("DOMContentLoaded", () => {
         graphics.stroke(colorWithOpacity());
         graphics.strokeWeight(toOriginal(size_));
         graphics.line(lastMouseX, lastMouseY, mouseX, mouseY);
-        if (!coords.length) {
-          coords.push([toRelative(lastMouseX), toRelative(lastMouseY)]);
-        }
-        coords.push([toRelative(mouseX), toRelative(mouseY)]);
       }
+      coords.push([toRelative(mouseX), toRelative(mouseY)]);
       lastMouseX = mouseX;
       lastMouseY = mouseY;
-    } else {
-      drawCurve();
-      lastMouseX = null;
-      lastMouseY = null;
     }
   });
 
@@ -303,14 +319,6 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on("curve", ({ coords, weight, color }) => {
-    strokeJoin(ROUND);
-    stroke(color);
-    strokeWeight(toOriginal(weight));
-    noFill();
-    beginShape();
-    for (let [x, y] of coords) {
-      curveVertex(toOriginal(x), toOriginal(y));
-    }
-    endShape();
+    addCurve(coords, weight, color);
   });
 });
