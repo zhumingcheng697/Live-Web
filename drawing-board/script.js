@@ -243,6 +243,8 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   document.body.addEventListener("touchmove", (e) => {
+    if (e.touches.length != 1) return;
+
     e.preventDefault();
 
     if (isInCanvas()) {
