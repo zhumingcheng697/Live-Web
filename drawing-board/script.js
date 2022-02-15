@@ -310,7 +310,8 @@ window.addEventListener("DOMContentLoaded", () => {
     previewSample();
   });
 
-  resetEl.addEventListener("click", () => {
+  resetEl.addEventListener("click", (e) => {
+    e.stopPropagation();
     clear();
   });
 
