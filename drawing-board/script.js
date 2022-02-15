@@ -76,12 +76,14 @@ window.addEventListener("DOMContentLoaded", () => {
   const sampleEl = document.getElementById("sample");
 
   let isMouseDown = false;
-  let color_ = `#${to2DigitHex(Math.random() * 255)}${to2DigitHex(
-    Math.random() * 255
-  )}${to2DigitHex(Math.random() * 255)}`;
+  let color_ = `#${to2DigitHex(Math.random() * 256)}${to2DigitHex(
+    Math.random() * 256
+  )}${to2DigitHex(Math.random() * 256)}`;
   colorEl.value = color_;
-  let opacity_ = Number(opacityEl.value);
-  let size_ = Number(sizeEl.value);
+  let opacity_ = Math.floor(Math.random() * 255) + 1;
+  opacityEl.value = `${opacity_}`;
+  let size_ = Math.floor(Math.random() * 100) + 1;
+  sizeEl.value = `${size_}`;
   let sampleTimeoutId;
   let wasInCanvas;
   let needToReposition = false;
