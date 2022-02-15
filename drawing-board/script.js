@@ -72,6 +72,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const opacityEl = document.getElementById("opacity");
   const sizeEl = document.getElementById("size");
   const resetEl = document.getElementById("reset");
+  const saveEl = document.getElementById("save");
   const sampleEl = document.getElementById("sample");
 
   let isMouseDown = false;
@@ -313,6 +314,11 @@ window.addEventListener("DOMContentLoaded", () => {
   resetEl.addEventListener("click", (e) => {
     e.stopPropagation();
     clear();
+  });
+
+  saveEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    saveCanvas(canvas, "drawing-board.png");
   });
 
   socket.on("dot", ({ x, y, size, color }) => {

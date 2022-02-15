@@ -45,7 +45,8 @@ input[type="range"] {
   transition: background 0.3s;
 }
 
-input[type="reset"] {
+input[type="reset"],
+input[type="button"] {
   -webkit-appearance: none;
   padding: 5px 10px;
   background: #ccc;
@@ -55,6 +56,7 @@ input[type="reset"] {
   transition: background 0.3s, color 0.3s;
   cursor: pointer;
   font-size: 1em;
+  margin: 2px 0;
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -179,7 +181,8 @@ label {
     box-shadow: #aaa8 0 0 5px;
   }
 
-  input[type="reset"] {
+  input[type="reset"],
+  input[type="button"] {
     background: #333;
     color: #aaa;
   }
