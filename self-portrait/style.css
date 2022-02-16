@@ -4,6 +4,7 @@
   --my-scale: 1.5;
   --my-opacity: 1;
   --my-duration: 0;
+  --inset-top: env(safe-area-inset-top, 0);
 }
 
 html,
@@ -16,15 +17,6 @@ body {
   max-width: 100vw;
 }
 
-body.pressed video {
-  cursor: ew-resize;
-}
-
-body.mobile video {
-  -webkit-filter: contrast(104%);
-  filter: contrast(104%);
-}
-
 video {
   max-width: 60vw;
   max-height: calc(calc(60vh / 16) * 9);
@@ -34,6 +26,15 @@ video {
   left: var(--mouse-x);
   top: var(--mouse-y);
   transform: translate(-50%, -50%) scale(var(--my-scale));
+}
+
+body.pressed video {
+  cursor: ew-resize;
+}
+
+body.mobile video {
+  -webkit-filter: contrast(104%);
+  filter: contrast(104%);
 }
 
 #video-padding {
@@ -75,20 +76,24 @@ video {
 
 #prompt {
   pointer-events: none;
+  -webkit-user-select: none;
+  user-select: none;
   border-radius: 15px;
   background-color: #222b;
-  margin: 10vh auto auto auto;
+  margin: calc(10vh + var(--inset-top)) auto auto auto;
   text-align: center;
   position: relative;
   height: max-content;
   width: max-content;
   padding: 15px;
   opacity: 0;
-  transition: opacity 0.3s;
+  transition: opacity 0.3s, visibility 0.3s;
+  visibility: hidden;
 }
 
 body.show-prompt #prompt {
   opacity: 1;
+  visibility: visible;
 }
 
 #time {
