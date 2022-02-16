@@ -354,7 +354,25 @@ window.addEventListener("DOMContentLoaded", () => {
     point(toOriginal(x), toOriginal(y));
   });
 
+  socket.once("dots", (userArr) => {
+    for (let dotArr of userArr) {
+      for (let { x, y, size, color } of dotArr) {
+        stroke(color);
+        strokeWeight(toOriginal(size));
+        point(toOriginal(x), toOriginal(y));
+      }
+    }
+  });
+
   socket.on("curve", ({ coords, weight, color }) => {
     addCurve(coords, weight, color);
+  });
+
+  socket.once("curves", (userArr) => {
+    for (let curveArr of userArr) {
+      for (let { coords, weight, color } of curveArr) {
+        addCurve(coords, weight, color);
+      }
+    }
   });
 });

@@ -21,6 +21,9 @@ httpServer.listen(process.env.PORT);
 // WebSockets work with the HTTP server
 var io = require("socket.io")(httpServer);
 
+const curveDB = new Map();
+const dotDB = new Map();
+
 // Register a callback function to run when we have an individual connection
 // This is run for each individual user that connects
 io.sockets.on(
@@ -29,14 +32,37 @@ io.sockets.on(
   function (socket) {
     console.log("We have a new client: " + socket.id);
 
+    socket.emit("curves", [...curveDB.values()]);
+    socket.emit("dots", [...dotDB.values()]);
+
     socket.on("curve", function (data) {
+      if (curveDB.has(socket.id)) {
+        curveDB.get(socket.id).push(data);
+      } else {
+        curveDB.set(socket.id, [data]);
+      }
+
       // Send it to all of the clients
       socket.broadcast.emit("curve", data);
     });
 
     socket.on("dot", function (data) {
+      if (dotDB.has(socket.id)) {
+        dotDB.get(socket.id).push(data);
+      } else {
+        dotDB.set(socket.id, [data]);
+      }
+
       // Send it to all of the clients
       socket.broadcast.emit("dot", data);
+    });
+
+    socket.on("disconnect", function () {
+      // Send it to all of the clients
+      setTimeout(() => {
+        curveDB.delete(socket.id);
+        dotDB.delete(socket.id);
+      }, 1000 * 60 * 5);
     });
   }
 );
