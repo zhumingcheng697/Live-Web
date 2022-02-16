@@ -73,17 +73,11 @@ window.addEventListener("DOMContentLoaded", () => {
   const sizeEl = document.getElementById("size");
   const resetEl = document.getElementById("reset");
   const saveEl = document.getElementById("save");
+  const randomEl = document.getElementById("random");
   const sampleEl = document.getElementById("sample");
 
   let isMouseDown = false;
-  let color_ = `#${to2DigitHex(Math.random() * 256)}${to2DigitHex(
-    Math.random() * 256
-  )}${to2DigitHex(Math.random() * 256)}`;
-  colorEl.value = color_;
-  let opacity_ = Math.floor(Math.random() * 255) + 1;
-  opacityEl.value = `${opacity_}`;
-  let size_ = Math.floor(Math.random() * 100) + 1;
-  sizeEl.value = `${size_}`;
+  let color_, opacity_, size_;
   let sampleTimeoutId;
   let wasInCanvas;
   let needToReposition = false;
@@ -91,6 +85,17 @@ window.addEventListener("DOMContentLoaded", () => {
   let lastMouseY = null;
   let coords = [];
   let mouseMoved = false;
+
+  function randomize() {
+    color_ = `#${to2DigitHex(Math.random() * 256)}${to2DigitHex(
+      Math.random() * 256
+    )}${to2DigitHex(Math.random() * 256)}`;
+    colorEl.value = color_;
+    opacity_ = Math.floor(Math.random() * 255) + 1;
+    opacityEl.value = `${opacity_}`;
+    size_ = Math.floor(Math.random() * 100) + 1;
+    sizeEl.value = `${size_}`;
+  }
 
   function previewSample(length = 1500) {
     clearTimeout(sampleTimeoutId);
@@ -154,6 +159,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   updateSample();
   resizeWrapper();
+  randomize();
 
   document.body.addEventListener("mousedown", (e) => {
     if (e.button > 1) return;
@@ -321,6 +327,11 @@ window.addEventListener("DOMContentLoaded", () => {
   saveEl.addEventListener("click", (e) => {
     e.stopPropagation();
     saveCanvas(canvas, "drawing-board.png");
+  });
+
+  randomEl.addEventListener("click", (e) => {
+    e.stopPropagation();
+    randomize();
   });
 
   socket.on("dot", ({ x, y, size, color }) => {

@@ -47,6 +47,7 @@ input[type="range"] {
 
 input[type="reset"],
 input[type="button"] {
+  width: calc(1em + 20px);
   -webkit-appearance: none;
   padding: 5px 10px;
   background: #ccc;
@@ -134,11 +135,12 @@ input[type="range"]::-webkit-slider-thumb {
   display: inline-flex;
   flex-direction: column;
   justify-content: center;
+  align-items: center;
 }
 
 .shrink {
   max-width: 200px;
-  flex: 1 0 80px;
+  flex: 1 0 110px;
 }
 
 label {
