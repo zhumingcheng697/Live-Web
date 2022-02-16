@@ -157,9 +157,9 @@ window.addEventListener("DOMContentLoaded", () => {
     coords = [];
   }
 
+  randomize();
   updateSample();
   resizeWrapper();
-  randomize();
 
   document.body.addEventListener("mousedown", (e) => {
     if (e.button > 1) return;
@@ -304,19 +304,28 @@ window.addEventListener("DOMContentLoaded", () => {
   colorEl.addEventListener("input", (e) => {
     color_ = e.target.value;
     updateSample();
-    previewSample();
+
+    if (!isInCanvas()) {
+      previewSample();
+    }
   });
 
   opacityEl.addEventListener("input", (e) => {
     opacity_ = Number(e.target.value);
     updateSample();
-    previewSample();
+
+    if (!isInCanvas()) {
+      previewSample();
+    }
   });
 
   sizeEl.addEventListener("input", (e) => {
     size_ = Number(e.target.value);
     updateSample();
-    previewSample();
+
+    if (!isInCanvas()) {
+      previewSample();
+    }
   });
 
   resetEl.addEventListener("click", (e) => {
@@ -332,6 +341,11 @@ window.addEventListener("DOMContentLoaded", () => {
   randomEl.addEventListener("click", (e) => {
     e.stopPropagation();
     randomize();
+    updateSample();
+
+    if (!isInCanvas()) {
+      previewSample();
+    }
   });
 
   socket.on("dot", ({ x, y, size, color }) => {
