@@ -1,25 +1,29 @@
-# Drawing Board
+# Drawing Board v2
 
-**Live Web Week 3 Session 2 Assignment**
+**Live Web Week 4 Session 2 Assignment**
 
-[Source code](https://glitch.com/edit/#!/mccoy-zhu-drawing-board) and [deployment](https://mccoy-zhu-drawing-board.glitch.me/) available on Glitch.
+[Source code](https://glitch.com/edit/#!/mccoy-zhu-drawing-board-v2) and [deployment](https://mccoy-zhu-drawing-board-v2.glitch.me/) available on Glitch.
 
-I spent most of my time thinking how to make this drawing board look the same on every screen.
+Now the website will take a picture every time the user draws something on the board and send it to every other users.
 
-The major issue with p5 skecthes or the `<canvas>` element in general is that they cannot be easily resized. Once created, you can only scale it as if it is a raster image, or call `resizeCanvas` and start from a new canvas.
+Every stroke drawn by the same user will be presented over their latest picture.
 
-I decided to create a 16 by 9 canvas that fits the user’s screen at first and then rescale it if the window is resized.
+Users can cancel their pending stroke by pressing the escape key.
 
-Mouse positions sent to the server will be relative to each user’s screen size, so that a stroke at the center of a smart phone would also appear at the center on an 8K TV.
+As explained earlier, I am using one p5 canvas for previewing the current user’s stroke with lines, and another p5 canvas for drawing every confirmed stroke with curves.
 
-Users can choose the color, opacity, and stroke weight of their brushes.
+I am now using a third hidden p5 canvas to render each stroke into Base64-encoded PNG images and overlaying the PNG to recreate what each user has drawn on their own.
 
-When users hover over the canvas, they can preview their brush strokes. Users can also preview their brush strokes when setting the color, opacity, or weight/size.
+I am also using a fourth hidden plain HTML5 cavas to render the video frame into Base64-encoded PNG images.
 
-Clicking on the canvas draws a dot, and dragging on the canvas draws a curve.
+I spent a lot of time thinking how to maintain the aspect ratio of the video frames and the drawing snapshot for each user, while at the same time minimizing the size of the data to transfer.
 
-p5 `line`s are used to draw segments of the curve after each `mousemove` event, but if opacity is set below 100%, the joints of the `line`s look a bit weird. It is not really an issue that can be solved. I can also use `curve` and connect the points together in one go, but then the curve will only be drawn after the user finishes their entire stroke, and the user experience would be much worse that way.
+Currently the third p5 canvas is used on the receiver end to render strokes drawn by every other user, so only the coordinates of the strokes need to be sent. I can also let whoever drew the stroke render it out and send it to everyone else so that much less computation is needed for each user on average, but much more data will have to be transferred so I decided not to do so.
 
-UPDATE 1: I somewhat solved the issue I mentioned above by drawing the curve with lines in a separate “preview” canvas while the user is still drawing, and then clear that canvas and redraw the whole curve with curveVertex on the “main” canvas as soon as the user finishes with that curve. This way, only the coordinates of the final curve will be sent to the server and drawn on other users’ “main” canvases in one go, resulting in less packets sent and better visuals.
+I was also wondering whether to create a separate canvas for each user so no PNG rendering is needed and strokes are directly drawn on the canvases. I really don’t know which is more expensive when it comes to time and memory, stacking images like what I am doing now or having multiple canvases. Theoretically if everyone only draw very few strokes and lots of people are drawing, stacking images may be better, but if only a few people draw a lot of strokes, multiple canvases may be better. Since I have no idea how people will use this website, I’ll just stick with what I already did for now.
 
-UPDATE 2: Now strokes drawn by all active users and users who quit less than 5 minutes ago will be automatically loaded the first time you enter the drawing board or when you refresh it.
+I also order the snapshots by the time each user added their last stroke, and this order is maintained in the data structure on the server.
+
+I use the ES6 Map to store the strokes and the latest picture from each user separately, and 5 minutes after a user disconnected from the server, I will remove their records to prevent the server from running out of memory.
+
+I used a Map instead of an array or an object because of its better performance when inserting and removing values. It can also maintain all stored values in the order they were inserted, which I did not know before and turned out to be really useful.
