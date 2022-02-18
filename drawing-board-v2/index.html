@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <title>McCoy’s Drawing Board</title>
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <script type="text/javascript" src="./script.js"></script>
+  </head>
+  <body>
+    <div id="canvas-wrapper"></div>
+    <div id="graphics-wrapper">
+      <div id="sample"></div>
+    </div>
+    <div id="tools">
+      <div>
+        <input id="color" type="color" value="#dddddd" />
+        <span for="color">Color</span>
+      </div>
+      <div class="shrink">
+        <input id="opacity" type="range" min="1" max="255" />
+        <span>Opacity</span>
+      </div>
+      <div class="shrink">
+        <input id="size" type="range" min="1" max="100" />
+        <span>Size</span>
+      </div>
+      <div>
+        <input id="random" type="button" value="?" />
+        <span>Randomize</span>
+      </div>
+      <div>
+        <input id="save" type="button" value="&check;" />
+        <span>Save</span>
+      </div>
+      <div>
+        <input id="reset" type="reset" value="&cross;" />
+        <span>Clear</span>
+      </div>
+    </div>
+  </body>
+</html>
