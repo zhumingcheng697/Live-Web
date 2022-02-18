@@ -25,3 +25,11 @@ Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-room/
 Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-drawing-board)
 
 Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-board/index.html) & [Glitch](https://mccoy-zhu-drawing-board.glitch.me/)
+
+## Drawing Board v2
+
+**Week 4 Session 2 Assignment**
+
+Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board-v2) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-drawing-board-v2)
+
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-board-v2/index.html) & [Glitch](https://mccoy-zhu-drawing-board-v2.glitch.me/)
