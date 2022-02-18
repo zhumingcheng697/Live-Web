@@ -23,6 +23,7 @@ var io = require("socket.io")(httpServer);
 
 const curveDB = new Map();
 const dotDB = new Map();
+const imgDB = new Map();
 
 // Register a callback function to run when we have an individual connection
 // This is run for each individual user that connects
@@ -32,34 +33,52 @@ io.sockets.on(
   function (socket) {
     console.log("We have a new client: " + socket.id);
 
-    socket.emit("curves", [...curveDB.values()]);
-    socket.emit("dots", [...dotDB.values()]);
+    socket.emit("history", {
+      imgs: [...imgDB.entries()],
+      curves: [...curveDB.values()],
+      dots: [...dotDB.values()],
+    });
 
     socket.on("curve", function (data) {
+      data.id = socket.id;
+
+      // Send it to all of the clients
+      socket.broadcast.emit("curve", data);
+
+      imgDB.delete(socket.id);
+      imgDB.set(socket.id, data.imgData);
+
+      data.imgData = null;
+
       if (curveDB.has(socket.id)) {
         curveDB.get(socket.id).push(data);
       } else {
         curveDB.set(socket.id, [data]);
       }
-
-      // Send it to all of the clients
-      socket.broadcast.emit("curve", data);
     });
 
     socket.on("dot", function (data) {
+      data.id = socket.id;
+
+      // Send it to all of the clients
+      socket.broadcast.emit("dot", data);
+
+      imgDB.delete(socket.id);
+      imgDB.set(socket.id, data.imgData);
+
+      data.imgData = null;
+
       if (dotDB.has(socket.id)) {
         dotDB.get(socket.id).push(data);
       } else {
         dotDB.set(socket.id, [data]);
       }
-
-      // Send it to all of the clients
-      socket.broadcast.emit("dot", data);
     });
 
     socket.on("disconnect", function () {
       // Send it to all of the clients
       setTimeout(() => {
+        imgDB.delete(socket.id);
         curveDB.delete(socket.id);
         dotDB.delete(socket.id);
       }, 1000 * 60 * 5);
