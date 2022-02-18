@@ -1,20 +1,34 @@
-const socket = io.connect("https://mccoy-zhu-drawing-board.glitch.me/");
+const socket = io.connect("https://mccoy-zhu-drawing-board-v2.glitch.me/");
 
-let canvas;
-let graphics;
+let canvas, graphics, bgGraph;
 let originalScale;
 
+const vh = () =>
+  Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+const vw = () =>
+  Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+const imgHeight = () => Math.min(150, vh() * 0.2, (vw() * 9) / 16 + 6);
+const imgWidth = () => 300;
+
 const originalSize = { width: 1920, height: 1080 };
+const bgSize = { width: 320, height: 180 };
 const toolsHeight = () => document.getElementById("tools").clientHeight;
-const widthScale = () => window.innerWidth / originalSize.width;
-const heightScale = () =>
+const widthScale1 = () => window.innerWidth / originalSize.width;
+const heightScale1 = () =>
+  (window.innerHeight - toolsHeight() - imgHeight()) / originalSize.height;
+const widthScale2 = () => (window.innerWidth - imgWidth()) / originalSize.width;
+const heightScale2 = () =>
   (window.innerHeight - toolsHeight()) / originalSize.height;
-const actualScale = () => Math.min(widthScale(), heightScale());
+const scale1 = () => Math.min(widthScale1(), heightScale1());
+const scale2 = () => Math.min(widthScale2(), heightScale2());
+const layoutV = () => (scale1() >= scale2() ? 1 : 2);
+const actualScale = () => (layoutV() === 1 ? scale1() : scale2());
 const actualWidth = () => actualScale() * originalSize.width;
 const actualHeight = () => actualScale() * originalSize.height;
 
 const toRelative = (unit) => unit / originalScale;
 const toOriginal = (unit) => unit * originalScale;
+const toBg = (unit) => (unit / originalSize.width) * bgSize.width;
 
 function setup() {
   originalScale = actualScale();
@@ -27,6 +41,9 @@ function setup() {
   graphics.id("drawing-board-2");
   graphics.parent("graphics-wrapper");
   graphics.style("display", "block");
+
+  bgGraph = createGraphics(bgSize.width, bgSize.height);
+  bgGraph.style("display", "none");
 
   strokeJoin(ROUND);
 }
@@ -41,13 +58,23 @@ function isInCanvas() {
 }
 
 function resizeWrapper() {
-  document.getElementById(
-    "canvas-wrapper"
-  ).style.height = `calc(100% - ${toolsHeight()}px)`;
+  if (layoutV() === 1) {
+    document.getElementById("canvas-wrapper").style.height = `calc(100% - ${
+      toolsHeight() + imgHeight()
+    }px)`;
 
-  document.getElementById(
-    "graphics-wrapper"
-  ).style.height = `calc(100% - ${toolsHeight()}px)`;
+    document.getElementById("graphics-wrapper").style.height = `calc(100% - ${
+      toolsHeight() + imgHeight()
+    }px)`;
+  } else {
+    document.getElementById(
+      "canvas-wrapper"
+    ).style.height = `calc(100% - ${toolsHeight()}px)`;
+
+    document.getElementById(
+      "graphics-wrapper"
+    ).style.height = `calc(100% - ${toolsHeight()}px)`;
+  }
 }
 
 function resizeCanvas_() {
@@ -58,9 +85,8 @@ function resizeCanvas_() {
   graphics.style("height", actualHeight() + "px");
 }
 
-function windowResized() {
-  resizeCanvas_();
-  resizeWrapper();
+function myClear(el) {
+  el.getContext("2d").clearRect(0, 0, el.width, el.height);
 }
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -75,6 +101,9 @@ window.addEventListener("DOMContentLoaded", () => {
   const saveEl = document.getElementById("save");
   const randomEl = document.getElementById("random");
   const sampleEl = document.getElementById("sample");
+  const imagesDiv = document.getElementById("images");
+  const captureEl = document.getElementById("capture");
+  let snapshotEl;
 
   let isMouseDown = false;
   let color_, opacity_, size_;
@@ -123,6 +152,16 @@ window.addEventListener("DOMContentLoaded", () => {
     sampleEl.style.transform = "";
   }
 
+  function takeSnapshot() {
+    if (!snapshotEl) return;
+
+    myClear(snapshotEl);
+
+    const context = snapshotEl.getContext("2d");
+    context.drawImage(captureEl, 0, 0, snapshotEl.width, snapshotEl.height);
+    return snapshotEl.toDataURL("image/png");
+  }
+
   function addCurve(coords, weight, color) {
     stroke(color);
     strokeWeight(toOriginal(weight));
@@ -138,20 +177,77 @@ window.addEventListener("DOMContentLoaded", () => {
     endShape();
   }
 
+  function getBg(coords, weight, color) {
+    myClear(bgGraph.elt);
+    bgGraph.stroke(color);
+    bgGraph.strokeWeight(toBg(weight));
+    bgGraph.noFill();
+    bgGraph.beginShape();
+    const [firstX, firstY] = coords[0];
+    bgGraph.curveVertex(toBg(firstX), toBg(firstY));
+    for (let [x, y] of coords) {
+      bgGraph.curveVertex(toBg(x), toBg(y));
+    }
+    const [lastX, lastY] = coords[coords.length - 1];
+    bgGraph.curveVertex(toBg(lastX), toBg(lastY));
+    bgGraph.endShape();
+
+    return bgGraph.elt.toDataURL("image/png");
+  }
+
+  function addBg(coords, weight, color, imgData, id = "myself") {
+    const divEl = document.getElementById(id) || document.createElement("DIV");
+    divEl.id = id;
+    const bgImg = document.createElement("IMG");
+    bgImg.src = getBg(coords, weight, color);
+    divEl.append(bgImg);
+
+    if (imgData) {
+      divEl.style.backgroundImage = `url(${imgData})`;
+    }
+
+    if (id !== "myself") {
+      imagesDiv.insertBefore(divEl, imagesDiv.childNodes[2]);
+    }
+  }
+
+  function addDot(x, y, size, color, imgData, id = "myself") {
+    myClear(bgGraph.elt);
+    bgGraph.stroke(color);
+    bgGraph.strokeWeight(toBg(size));
+    bgGraph.point(toBg(x), toBg(y));
+
+    const divEl = document.getElementById(id) || document.createElement("DIV");
+    divEl.id = id;
+    const bgImg = document.createElement("IMG");
+    bgImg.setAttribute("src", bgGraph.elt.toDataURL("image/png"));
+    divEl.append(bgImg);
+
+    if (imgData) {
+      divEl.style.backgroundImage = `url(${imgData})`;
+    }
+
+    if (id !== "myself") {
+      imagesDiv.insertBefore(divEl, imagesDiv.childNodes[2]);
+    }
+  }
+
   function drawCurve() {
+    myClear(graphics.elt);
+
     if (coords.length < 2) {
       coords = [];
       return;
     }
 
-    graphics.clear();
-
     addCurve(coords, size_, colorWithOpacity());
+    addBg(coords, size_, colorWithOpacity());
 
     socket.emit("curve", {
       coords,
       weight: size_,
       color: colorWithOpacity(),
+      imgData: takeSnapshot(),
     });
 
     coords = [];
@@ -160,6 +256,36 @@ window.addEventListener("DOMContentLoaded", () => {
   randomize();
   updateSample();
   resizeWrapper();
+  document.documentElement.style.setProperty(
+    "--tools-height",
+    toolsHeight() + "px"
+  );
+  document.body.className = "layout-" + layoutV();
+
+  navigator.mediaDevices
+    .getUserMedia({ audio: false, video: true })
+    .then((stream) => {
+      const info = stream.getVideoTracks()[0].getSettings();
+
+      const scale = Math.max(
+        bgSize.width / info.width,
+        bgSize.height / info.height
+      );
+
+      snapshotEl = document.createElement("CANVAS");
+      snapshotEl.width = info.width * scale;
+      snapshotEl.height = info.height * scale;
+      snapshotEl.style.display = "none";
+
+      captureEl.srcObject = stream;
+
+      captureEl.onloadedmetadata = () => {
+        captureEl.play();
+      };
+    })
+    .catch((e) => {
+      console.error(e);
+    });
 
   document.body.addEventListener("mousedown", (e) => {
     if (e.button > 1) return;
@@ -222,7 +348,8 @@ window.addEventListener("DOMContentLoaded", () => {
       needToReposition = false;
       sampleEl.classList.add("show");
       sampleEl.style.left = e.clientX;
-      sampleEl.style.top = e.clientY;
+      sampleEl.style.top =
+        layoutV() === 1 ? e.clientY - imgHeight() : e.clientY;
       sampleEl.style.transform = "translate(-50%, -50%)";
     } else {
       lastMouseX = null;
@@ -288,17 +415,43 @@ window.addEventListener("DOMContentLoaded", () => {
       strokeWeight(toOriginal(size_));
       point(mouseX, mouseY);
 
+      addDot(
+        toRelative(mouseX),
+        toRelative(mouseY),
+        size_,
+        colorWithOpacity(),
+        null
+      );
+
       socket.emit("dot", {
         x: toRelative(mouseX),
         y: toRelative(mouseY),
         size: size_,
         color: colorWithOpacity(),
+        imgData: takeSnapshot(),
       });
     }
   });
 
+  document.body.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape") return;
+
+    coords = [];
+    myClear(graphics.elt);
+    isMouseDown = false;
+    lastMouseX = null;
+    lastMouseY = null;
+  });
+
   window.addEventListener("resize", () => {
+    document.documentElement.style.setProperty(
+      "--tools-height",
+      toolsHeight() + "px"
+    );
     updateSample();
+    resizeCanvas_();
+    resizeWrapper();
+    document.body.className = "layout-" + layoutV();
   });
 
   colorEl.addEventListener("input", (e) => {
@@ -330,7 +483,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
   resetEl.addEventListener("click", (e) => {
     e.stopPropagation();
-    clear();
+    myClear(canvas.elt);
+    imagesDiv
+      .querySelectorAll("div:not(#myself), #myself > img")
+      .forEach((e) => e.remove());
   });
 
   saveEl.addEventListener("click", (e) => {
@@ -348,30 +504,42 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  socket.on("dot", ({ x, y, size, color }) => {
+  socket.on("dot", ({ x, y, size, color, imgData, id }) => {
     stroke(color);
     strokeWeight(toOriginal(size));
     point(toOriginal(x), toOriginal(y));
+
+    addDot(x, y, size, color, imgData, id);
   });
 
-  socket.once("dots", (userArr) => {
-    for (let dotArr of userArr) {
-      for (let { x, y, size, color } of dotArr) {
+  socket.on("curve", ({ coords, weight, color, imgData, id }) => {
+    addCurve(coords, weight, color);
+    addBg(coords, weight, color, imgData, id);
+  });
+
+  socket.once("history", ({ imgs, curves, dots }) => {
+    for (let curveArr of curves) {
+      for (let { coords, weight, color, id } of curveArr) {
+        addCurve(coords, weight, color);
+        addBg(coords, weight, color, null, id);
+      }
+    }
+
+    for (let dotArr of dots) {
+      for (let { x, y, size, color, id } of dotArr) {
         stroke(color);
         strokeWeight(toOriginal(size));
         point(toOriginal(x), toOriginal(y));
+        addDot(x, y, size, color, null, id);
       }
     }
-  });
 
-  socket.on("curve", ({ coords, weight, color }) => {
-    addCurve(coords, weight, color);
-  });
+    for (let [id, imgData] of imgs) {
+      const divEl = document.getElementById(id);
 
-  socket.once("curves", (userArr) => {
-    for (let curveArr of userArr) {
-      for (let { coords, weight, color } of curveArr) {
-        addCurve(coords, weight, color);
+      if (divEl) {
+        divEl.style.backgroundImage = `url(${imgData})`;
+        imagesDiv.insertBefore(divEl, imagesDiv.childNodes[2]);
       }
     }
   });
