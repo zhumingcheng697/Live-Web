@@ -157,6 +157,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
     myClear(snapshotEl);
 
+    const scale = Math.max(
+      bgSize.width / captureEl.videoWidth,
+      bgSize.height / captureEl.videoHeight
+    );
+
+    snapshotEl.width = captureEl.videoWidth * scale;
+    snapshotEl.height = captureEl.videoHeight * scale;
+
     const context = snapshotEl.getContext("2d");
     context.drawImage(captureEl, 0, 0, snapshotEl.width, snapshotEl.height);
     return snapshotEl.toDataURL("image/png");
@@ -265,20 +273,10 @@ window.addEventListener("DOMContentLoaded", () => {
   navigator.mediaDevices
     .getUserMedia({ audio: false, video: true })
     .then((stream) => {
-      const info = stream.getVideoTracks()[0].getSettings();
-
-      const scale = Math.max(
-        bgSize.width / info.width,
-        bgSize.height / info.height
-      );
-
       snapshotEl = document.createElement("CANVAS");
-      snapshotEl.width = info.width * scale;
-      snapshotEl.height = info.height * scale;
       snapshotEl.style.display = "none";
 
       captureEl.srcObject = stream;
-
       captureEl.onloadedmetadata = () => {
         captureEl.play();
       };
