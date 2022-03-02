@@ -1,0 +1,45 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
+    />
+    <title>McCoy’s Chat Room Pro Max</title>
+    <link rel="stylesheet" type="text/css" href="./style.css" />
+    <script type="text/javascript" src="./script.js"></script>
+  </head>
+  <body class="setting-up">
+    <div id="setup-area">
+      <h1>Please choose a username first:</h1>
+      <form id="setup-form">
+        <input
+          enterkeyhint="go"
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Username"
+          maxlength="20"
+          autocomplete="name"
+          required
+        />
+        <input type="submit" value="Confirm" />
+      </form>
+    </div>
+
+    <div id="message-area">
+      <div id="messages"></div>
+    </div>
+    <form id="send-form">
+      <input
+        enterkeyhint="send"
+        type="text"
+        id="message"
+        name="message"
+        placeholder="Message"
+        required
+      />
+      <input type="submit" value="Send" />
+    </form>
+  </body>
+</html>
