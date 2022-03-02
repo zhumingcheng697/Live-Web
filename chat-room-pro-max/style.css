@@ -4,6 +4,7 @@
   --inset-top: env(safe-area-inset-top, 0);
   --inset-bottom: env(safe-area-inset-bottom, 0);
   -webkit-text-size-adjust: none;
+  --blue-color: #027aff;
 }
 
 html {
@@ -23,13 +24,31 @@ body {
   transition: color 0.3s;
 }
 
+#intro-area > p {
+  margin: 28px 20px;
+}
+
 #setup-form {
   flex-wrap: wrap;
   justify-content: center;
 }
 
-h1 {
-  margin: 10px 20px;
+#generate-random {
+  cursor: pointer;
+  color: var(--blue-color);
+}
+
+#generate-random:hover {
+  text-decoration: underline;
+}
+
+#generate-random.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+#generate-random.disabled:hover {
+  text-decoration: none;
 }
 
 #message-area {
@@ -75,7 +94,7 @@ form input[type="text"] {
   padding: 8px 10px;
   font-size: 14px;
   background-color: #e5e5ea;
-  min-width: 200px;
+  min-width: 225px;
   color: #000;
   transition: background-color 0.3s, color 0.3s;
 }
@@ -85,7 +104,7 @@ form input[type="submit"] {
   border-radius: 6px;
   padding: 8px 12px;
   font-size: 14px;
-  background-color: #027aff;
+  background-color: var(--blue-color);
   color: #fff;
 }
 
@@ -150,7 +169,7 @@ input[type="submit"]:not(:disabled) {
 }
 
 .message.sent .content {
-  background-color: #027aff;
+  background-color: var(--blue-color);
   color: #fff;
   margin-left: auto;
   cursor: pointer;
@@ -162,11 +181,19 @@ input[type="submit"]:not(:disabled) {
   margin-right: auto;
 }
 
-body.setting-up #message-area {
+body:not(.intro) #intro-area {
   display: none;
 }
 
-body.setting-up #send-form {
+body:not(.setting-up) #setup-area {
+  display: none;
+}
+
+body:not(.chatting) #message-area {
+  display: none;
+}
+
+body:not(.chatting) #send-form {
   display: none;
 }
 
@@ -175,15 +202,12 @@ body.blocked input:disabled {
   opacity: 0.5;
 }
 
-body.setting-up {
+body.setting-up,
+body.intro {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-}
-
-body.chatting #setup-area {
-  display: none;
 }
 
 body.blocked .message.sent .content {

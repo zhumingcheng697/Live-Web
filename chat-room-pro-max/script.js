@@ -9,7 +9,10 @@ window.addEventListener("DOMContentLoaded", () => {
   let actionCount = 0;
   let blockedTime = 0.5;
 
+  const introForm = document.getElementById("intro-form");
   const setupForm = document.getElementById("setup-form");
+  const usernameInput = document.getElementById("username");
+  const generateBtn = document.getElementById("generate-random");
   const messageArea = document.getElementById("message-area");
   const messages = document.getElementById("messages");
   const sendForm = document.getElementById("send-form");
@@ -231,6 +234,26 @@ window.addEventListener("DOMContentLoaded", () => {
         leaveRoom(username);
       }
     });
+
+  introForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    document.body.classList.remove("intro");
+    document.body.classList.add("setting-up");
+    introForm.parentNode.remove();
+  });
+
+  generateBtn.addEventListener("click", () => {
+    generateBtn.classList.add("disabled");
+
+    fetch("https://random-word-api.herokuapp.com/word?number=2&swear=0")
+      .then((res) => res.json())
+      .then((txt) => {
+        usernameInput.value = txt.join("-");
+      })
+      .finally(() => {
+        generateBtn.classList.remove("disabled");
+      });
+  });
 
   setupForm.addEventListener("submit", (e) => {
     e.preventDefault();
