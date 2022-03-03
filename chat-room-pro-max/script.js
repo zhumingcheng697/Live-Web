@@ -27,7 +27,7 @@ window.addEventListener("DOMContentLoaded", () => {
     heartbeatInterval = setInterval(() => {
       if ((!lastActive || Date.now() - lastActive < 30 * 1000) && username) {
         enableSocket &&
-          socket.volatile.emit("heartbeat", {
+          socket.emit("heartbeat", {
             username,
             joinedTime,
             isBlocked: isBlocked(),
