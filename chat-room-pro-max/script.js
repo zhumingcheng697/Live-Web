@@ -1,10 +1,10 @@
-const enableSocket = false;
+const enableSocket = true;
 const socket =
   enableSocket && io.connect("https://mccoy-zhu-chat-room-pro-max.glitch.me/");
 
 window.addEventListener("DOMContentLoaded", () => {
   let joinedTime;
-  let isActive = true;
+  let lastActive = null;
   let username = "";
   let lastMessageSender = null;
   let lastMessageSentAt = 0;
@@ -17,6 +17,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const generateBtn = document.getElementById("generate-random");
   const messageArea = document.getElementById("message-area");
   const messages = document.getElementById("messages");
+  const usersEl = document.getElementById("users");
   const sendForm = document.getElementById("send-form");
   const sendInputs = sendForm.querySelectorAll("input");
 
@@ -77,7 +78,16 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function dateToString(date) {
+    const today = new Date();
+    const showYear = today.getFullYear() != date.getFullYear();
+    let showDate =
+      showYear ||
+      today.getMonth() != date.getMonth() ||
+      today.getDate() != date.getDate();
     return date.toLocaleString(undefined, {
+      year: showYear ? "numeric" : undefined,
+      month: showDate ? "numeric" : undefined,
+      day: showDate ? "numeric" : undefined,
       hour: "numeric",
       minute: "2-digit",
     });
@@ -193,36 +203,122 @@ window.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+  function updateUserlist(userlist) {
+    if (!userlist) return;
+
+    const activeUsers = [];
+    const inactiveUsers = [];
+    const blockedUsers = [];
+
+    for (let user of userlist) {
+      if (user.isBlocked) {
+        blockedUsers.push(user);
+      } else if (Date.now() - user.lastActive < 90 * 1000) {
+        activeUsers.push(user);
+      } else {
+        inactiveUsers.push(user);
+      }
+    }
+
+    activeUsers.sort((a, b) => (a.username < b.username ? -1 : 1));
+    inactiveUsers.sort((a, b) => (a.username < b.username ? -1 : 1));
+    blockedUsers.sort((a, b) => (a.username < b.username ? -1 : 1));
+
+    let resultHtml = "";
+
+    if (activeUsers.length) {
+      resultHtml += "<h3>Active:</h3>";
+      for (let user of activeUsers) {
+        resultHtml += `<div class="user">
+        <span class="status active"></span>
+        <div>
+          <span class="username">${user.username}</span>
+          <span class="metadata">Joined at ${dateToString(
+            new Date(user.joinedTime)
+          )}</span>
+          <span class="metadata">Active Now</span>
+        </div>
+      </div>`;
+      }
+    }
+
+    if (inactiveUsers.length) {
+      resultHtml += "<h3>Inactive:</h3>";
+      for (let user of inactiveUsers) {
+        resultHtml += `<div class="user">
+        <span class="status inactive"></span>
+        <div>
+          <span class="username">${user.username}</span>
+          <span class="metadata">Joined at ${dateToString(
+            new Date(user.joinedTime)
+          )}</span>
+          <span class="metadata">Last Active ${dateToString(
+            new Date(user.lastActive)
+          )}</span>
+        </div>
+      </div>`;
+      }
+    }
+
+    if (blockedUsers.length) {
+      resultHtml += "<h3>Blocked:</h3>";
+      for (let user of blockedUsers) {
+        resultHtml += `<div class="user">
+        <span class="status blocked"></span>
+        <div>
+          <span class="username">${user.username}</span>
+          <span class="metadata">Joined at ${dateToString(
+            new Date(user.joinedTime)
+          )}</span>
+          <span class="metadata">${
+            Date.now() - user.lastActive < 60 * 1000
+              ? "Active Now"
+              : `Last Active ${dateToString(new Date(user.lastActive))}`
+          }</span>
+        </div>
+      </div>`;
+      }
+    }
+
+    usersEl.innerHTML = resultHtml;
+  }
+
   enableSocket &&
-    socket.on("post", ({ message, sender, id }) => {
+    socket.on("post", ({ message, sender, id }, userlist) => {
       receiveMessage(message, sender, id);
+      updateUserlist(userlist);
     });
 
   enableSocket &&
     socket.on("join", (username, userlist) => {
       joinRoom(username);
+      updateUserlist(userlist);
     });
 
   enableSocket &&
     socket.on("leave", (username, userlist) => {
       leaveRoom(username);
+      updateUserlist(userlist);
     });
 
   enableSocket &&
     socket.on("block", ({ username, duration }, userlist) => {
       block(username, duration);
+      updateUserlist(userlist);
     });
 
   enableSocket &&
     socket.on("unblock", (username, userlist) => {
       unblock(username);
+      updateUserlist(userlist);
     });
 
   enableSocket &&
-    socket.on("unsend", ({ sender, id }) => {
+    socket.on("unsend", ({ sender, id }, userlist) => {
       if (removeMessage(id)) {
         unsendMessage(sender);
       }
+      updateUserlist(userlist);
     });
 
   enableSocket &&
@@ -230,7 +326,12 @@ window.addEventListener("DOMContentLoaded", () => {
       if (username) {
         joinRoom(username);
         enableSocket &&
-          socket.emit("join", { username, joinedTime, isBlocked: isBlocked() });
+          socket.emit("join", {
+            username,
+            joinedTime,
+            lastActive,
+            isBlocked: isBlocked(),
+          });
       }
     });
 
@@ -241,7 +342,10 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-  enableSocket && socket.on("userlist", (data) => {});
+  enableSocket &&
+    socket.on("userlist", (userlist) => {
+      updateUserlist(userlist);
+    });
 
   introForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -274,7 +378,12 @@ window.addEventListener("DOMContentLoaded", () => {
       document.body.classList.remove("setting-up");
       document.body.classList.add("chatting");
       enableSocket &&
-        socket.emit("join", { username, joinedTime, isBlocked: isBlocked() });
+        socket.emit("join", {
+          username,
+          joinedTime,
+          lastActive,
+          isBlocked: isBlocked(),
+        });
       setupForm.parentNode.remove();
     }
   });
@@ -323,15 +432,23 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("focus", () => {
-    isActive = true;
+    if (Date.now() - lastActive > 30 * 1000 && username) {
+      enableSocket &&
+        socket.emit("back", {
+          username,
+          joinedTime,
+          isBlocked: isBlocked(),
+        });
+    }
+    lastActive = null;
   });
 
   window.addEventListener("blur", () => {
-    isActive = false;
+    lastActive = Date.now();
   });
 
   setInterval(() => {
-    if (isActive && username) {
+    if ((!lastActive || Date.now() - lastActive < 30 * 1000) && username) {
       enableSocket &&
         socket.emit("heartbeat", {
           username,

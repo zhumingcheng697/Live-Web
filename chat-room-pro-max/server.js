@@ -22,22 +22,38 @@ const userlist = () => [...users.values()];
 io.sockets.on("connection", function (socket) {
   socket.on("post", function (data) {
     const user = users.get(socket.id);
+    let shouldPushList = false;
 
     if (user) {
+      shouldPushList = Date.now() - user.lastActive > 15 * 1000;
       user.lastActive = Date.now();
     }
 
-    socket.broadcast.emit("post", data);
+    const list = userlist();
+    if (shouldPushList) {
+      socket.emit("userlist", list);
+      socket.broadcast.emit("post", data, list);
+    } else {
+      socket.broadcast.emit("post", data);
+    }
   });
 
   socket.on("unsend", function (data) {
     const user = users.get(socket.id);
+    let shouldPushList = false;
 
     if (user) {
+      shouldPushList = Date.now() - user.lastActive > 15 * 1000;
       user.lastActive = Date.now();
     }
 
-    socket.broadcast.emit("unsend", data);
+    const list = userlist();
+    if (shouldPushList) {
+      socket.emit("userlist", list);
+      socket.broadcast.emit("unsend", data, list);
+    } else {
+      socket.broadcast.emit("unsend", data);
+    }
   });
 
   socket.on("block", function (data) {
@@ -65,11 +81,22 @@ io.sockets.on("connection", function (socket) {
     socket.broadcast.emit("unblock", data, list);
   });
 
-  socket.on("join", function ({ username, joinedTime, isBlocked }) {
+  socket.on("back", function ({ username, joinedTime, isBlocked }) {
     users.set(socket.id, {
       username,
       joinedTime,
       lastActive: Date.now(),
+      isBlocked,
+    });
+
+    io.emit("userlist", username, userlist());
+  });
+
+  socket.on("join", function ({ username, joinedTime, lastActive, isBlocked }) {
+    users.set(socket.id, {
+      username,
+      joinedTime,
+      lastActive: lastActive || Date.now(),
       isBlocked,
     });
 
@@ -81,8 +108,8 @@ io.sockets.on("connection", function (socket) {
   socket.on("disconnect", function () {
     const user = users.get(socket.id);
     if (user) {
-      socket.broadcast.emit("leave", user.username, userlist());
       users.delete(socket.id);
+      socket.broadcast.emit("leave", user.username, userlist());
     }
   });
 
