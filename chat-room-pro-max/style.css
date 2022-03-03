@@ -5,6 +5,9 @@
   --inset-bottom: env(safe-area-inset-bottom, 0);
   -webkit-text-size-adjust: none;
   --blue-color: #027aff;
+  --user-list-width: 250px;
+  --secondary-bg: #e5e5ea;
+  --secondary-txt: #555;
 }
 
 html {
@@ -19,12 +22,19 @@ body {
   font-size: 14px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
-  color: #111;
+  color: #000;
   text-align: center;
   transition: color 0.3s;
 }
 
-#intro-area > p {
+.break-word,
+.message span,
+.user span {
+  word-break: break-word;
+  white-space: break-spaces;
+}
+
+#intro-area p {
   margin: 28px 20px;
 }
 
@@ -51,20 +61,45 @@ body {
   text-decoration: none;
 }
 
-#message-area {
+#message-area,
+#user-area {
   position: fixed;
   top: var(--inset-top);
-  bottom: calc(56px + var(--inset-bottom));
-  left: var(--inset-left);
-  right: var(--inset-right);
   overflow-x: hidden;
   overflow-y: auto;
 }
 
-#messages {
-  padding: 10px 20px;
+#message-area {
+  left: var(--inset-left);
+  right: calc(var(--inset-right) + var(--user-list-width));
+  bottom: calc(56px + var(--inset-bottom));
+}
+
+#user-area {
+  background-color: var(--secondary-bg);
+  width: var(--user-list-width);
+  right: var(--inset-right);
+  bottom: var(--inset-bottom);
+  transition: background-color 0.3s;
+}
+
+#messages,
+#users {
   display: flex;
   flex-direction: column;
+}
+
+#messages {
+  padding: 10px 20px;
+}
+
+#users {
+  padding: 10px 15px;
+}
+
+#users > h3 {
+  margin-bottom: 2px;
+  text-align: start;
 }
 
 #send-form {
@@ -72,7 +107,7 @@ body {
   position: fixed;
   bottom: var(--inset-bottom);
   left: var(--inset-left);
-  right: var(--inset-right);
+  right: calc(var(--inset-right) + var(--user-list-width));
   height: 56px;
   box-sizing: border-box;
 }
@@ -93,7 +128,7 @@ form input[type="text"] {
   border-radius: 6px;
   padding: 8px 10px;
   font-size: 14px;
-  background-color: #e5e5ea;
+  background-color: var(--secondary-bg);
   min-width: 225px;
   color: #000;
   transition: background-color 0.3s, color 0.3s;
@@ -116,11 +151,21 @@ input[type="submit"]:not(:disabled) {
   width: 100%;
 }
 
-.message {
-  max-width: 90%;
+.message,
+.user {
   margin: 5px 0;
   display: inline-flex;
+}
+
+.message {
+  max-width: 90%;
   flex-direction: column;
+}
+
+.user {
+  text-align: start;
+  align-items: center;
+  align-content: center;
 }
 
 .message.other {
@@ -138,13 +183,14 @@ input[type="submit"]:not(:disabled) {
   margin-right: auto;
 }
 
-.message .metadata {
+.metadata {
   display: inline-block;
-  margin: 8px;
-  color: #555;
-  word-break: break-word;
-  white-space: break-spaces;
+  color: var(--secondary-txt);
   transition: color 0.3s;
+}
+
+.message .metadata {
+  margin: 8px;
 }
 
 .message .metadata.hidden {
@@ -177,8 +223,43 @@ input[type="submit"]:not(:disabled) {
 
 .message.received .content {
   transition: background-color 0.3s;
-  background-color: #e5e5ea;
+  background-color: var(--secondary-bg);
   margin-right: auto;
+}
+
+.user span {
+  display: inline-block;
+  margin: 2px 0;
+}
+
+.user .metadata {
+  margin: 1px 0;
+}
+
+.user .status {
+  height: 12px;
+  width: 12px;
+  margin-right: 9px;
+  flex-shrink: 0;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.user .status.active {
+  background: #3c5;
+}
+
+.user .status.inactive {
+  border: solid 2px #999;
+}
+
+.user .status.blocked {
+  background: #f43;
+}
+
+.user > div {
+  display: inline-flex;
+  flex-direction: column;
 }
 
 body:not(.intro) #intro-area {
@@ -190,6 +271,10 @@ body:not(.setting-up) #setup-area {
 }
 
 body:not(.chatting) #message-area {
+  display: none;
+}
+
+body:not(.chatting) #user-area {
   display: none;
 }
 
@@ -216,24 +301,20 @@ body.blocked .message.sent .content {
 }
 
 @media (prefers-color-scheme: dark) {
+  :root {
+    --secondary-bg: #2c2c2e;
+    --secondary-txt: #999;
+  }
+
   html {
     background-color: #1c1c1e;
   }
 
   body {
-    color: #ddd;
+    color: #fff;
   }
 
   form input[type="text"] {
     color: #fff;
-    background-color: #2c2c2e;
-  }
-
-  .message .metadata {
-    color: #999;
-  }
-
-  .message.received .content {
-    background-color: #2c2c2e;
   }
 }
