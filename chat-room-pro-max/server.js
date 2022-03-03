@@ -29,21 +29,11 @@ io.sockets.on("connection", function (socket) {
   ["post", "unsend"].forEach((e) => {
     socket.on(e, function (data) {
       const user = users.get(socket.id);
-      let shouldPushList = false;
-
       if (user) {
-        shouldPushList = Date.now() - user.lastActive > 30 * 1000;
         user.lastActive = Date.now();
       }
 
-      const list = userlist();
-      if (shouldPushList) {
-        resetUserlistInterval();
-        socket.emit("userlist", list);
-        socket.broadcast.emit(e, data, list);
-      } else {
-        socket.broadcast.emit(e, data);
-      }
+      socket.broadcast.emit(e, data);
     });
   });
 
@@ -52,7 +42,7 @@ io.sockets.on("connection", function (socket) {
       const user = users.get(socket.id);
 
       if (user) {
-        user.lastActive = Date.now();
+        user.lastActive = data.lastActive || Date.now();
         user.isBlocked = true;
       }
 

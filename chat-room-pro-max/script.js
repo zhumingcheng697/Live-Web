@@ -27,7 +27,7 @@ window.addEventListener("DOMContentLoaded", () => {
     heartbeatInterval = setInterval(() => {
       if ((!lastActive || Date.now() - lastActive < 30 * 1000) && username) {
         enableSocket &&
-          socket.emit("heartbeat", {
+          socket.volatile.emit("heartbeat", {
             username,
             joinedTime,
             isBlocked: isBlocked(),
@@ -71,7 +71,8 @@ window.addEventListener("DOMContentLoaded", () => {
       });
 
       enableSocket && resetHearbeatInterval();
-      enableSocket && socket.emit("block", { username, duration: blockedTime });
+      enableSocket &&
+        socket.emit("block", { username, duration: blockedTime, lastActive });
       block(username, blockedTime, true);
       document.body.classList.add("blocked");
 
@@ -81,7 +82,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
 
         enableSocket && resetHearbeatInterval();
-        enableSocket && socket.emit("unblock", username);
+        enableSocket && socket.emit("unblock", { username, lastActive });
         unblock(username, true);
         document.body.classList.remove("blocked");
       }, 1000 * 60 * blockedTime);
@@ -231,7 +232,7 @@ window.addEventListener("DOMContentLoaded", () => {
     for (let user of userlist) {
       if (user.isBlocked) {
         blockedUsers.push(user);
-      } else if (Date.now() - user.lastActive < 90 * 1000) {
+      } else if (Date.now() - user.lastActive <= 60 * 1000) {
         activeUsers.push(user);
       } else {
         inactiveUsers.push(user);
@@ -302,9 +303,15 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   enableSocket &&
-    socket.on("post", ({ message, sender, id }, userlist) => {
+    socket.on("post", ({ message, sender, id }) => {
       receiveMessage(message, sender, id);
-      updateUserlist(userlist);
+    });
+
+  enableSocket &&
+    socket.on("unsend", ({ sender, id }) => {
+      if (removeMessage(id)) {
+        unsendMessage(sender);
+      }
     });
 
   enableSocket &&
@@ -326,16 +333,8 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
   enableSocket &&
-    socket.on("unblock", (username, userlist) => {
+    socket.on("unblock", ({ username }, userlist) => {
       unblock(username);
-      updateUserlist(userlist);
-    });
-
-  enableSocket &&
-    socket.on("unsend", ({ sender, id }, userlist) => {
-      if (removeMessage(id)) {
-        unsendMessage(sender);
-      }
       updateUserlist(userlist);
     });
 
