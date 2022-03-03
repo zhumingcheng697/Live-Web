@@ -16,49 +16,86 @@ httpServer.listen(process.env.PORT);
 // WebSockets work with the HTTP server
 var io = require("socket.io")(httpServer);
 
-let userNames = new Map();
+const users = new Map();
+const userlist = () => [...users.values()];
 
-// Register a callback function to run when we have an individual connection
-// This is run for each individual user that connects
-io.sockets.on(
-  "connection",
-  // We are given a websocket object in our function
-  function (socket) {
-    console.log(userNames);
+io.sockets.on("connection", function (socket) {
+  socket.on("post", function (data) {
+    const user = users.get(socket.id);
 
-    console.log("We have a new client: " + socket.id);
+    if (user) {
+      user.lastActive = Date.now();
+    }
 
-    socket.on("post", function (data) {
-      // Send it to all of the clients
-      socket.broadcast.emit("post", data);
+    socket.broadcast.emit("post", data);
+  });
+
+  socket.on("unsend", function (data) {
+    const user = users.get(socket.id);
+
+    if (user) {
+      user.lastActive = Date.now();
+    }
+
+    socket.broadcast.emit("unsend", data);
+  });
+
+  socket.on("block", function (data) {
+    const user = users.get(socket.id);
+
+    if (user) {
+      user.lastActive = Date.now();
+      user.isBlocked = true;
+    }
+
+    const list = userlist();
+    socket.emit("userlist", list);
+    socket.broadcast.emit("block", data, list);
+  });
+
+  socket.on("unblock", function (data) {
+    const user = users.get(socket.id);
+
+    if (user) {
+      user.isBlocked = false;
+    }
+
+    const list = userlist();
+    socket.emit("userlist", list);
+    socket.broadcast.emit("unblock", data, list);
+  });
+
+  socket.on("join", function ({ username, joinedTime, isBlocked }) {
+    users.set(socket.id, {
+      username,
+      joinedTime,
+      lastActive: Date.now(),
+      isBlocked,
     });
 
-    socket.on("unsend", function (data) {
-      // Send it to all of the clients
-      socket.broadcast.emit("unsend", data);
-    });
+    const list = userlist();
+    socket.emit("userlist", list);
+    socket.broadcast.emit("join", username, list);
+  });
 
-    socket.on("block", function (data) {
-      // Send it to all of the clients
-      socket.broadcast.emit("block", data);
-    });
+  socket.on("disconnect", function () {
+    const user = users.get(socket.id);
+    if (user) {
+      socket.broadcast.emit("leave", user.username, userlist());
+      users.delete(socket.id);
+    }
+  });
 
-    socket.on("unblock", function (data) {
-      // Send it to all of the clients
-      socket.broadcast.emit("unblock", data);
+  socket.on("heartbeat", function ({ username, joinedTime, isBlocked }) {
+    users.set(socket.id, {
+      username,
+      joinedTime,
+      lastActive: Date.now(),
+      isBlocked,
     });
+  });
+});
 
-    socket.on("join", function (username) {
-      userNames.set(socket.id, username);
-      socket.broadcast.emit("join", username);
-    });
-
-    socket.on("disconnect", function () {
-      const username = userNames.get(socket.id);
-      if (username) {
-        socket.broadcast.emit("leave", username);
-        userNames.delete(socket.id);
-      }
-    });
-  }
-);
+setInterval(() => {
+  io.emit("userlist", userlist());
+}, 60 * 1000);

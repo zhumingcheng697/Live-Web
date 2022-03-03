@@ -3,6 +3,8 @@ const socket =
   enableSocket && io.connect("https://mccoy-zhu-chat-room-pro-max.glitch.me/");
 
 window.addEventListener("DOMContentLoaded", () => {
+  let joinedTime;
+  let isActive = true;
   let username = "";
   let lastMessageSender = null;
   let lastMessageSentAt = 0;
@@ -17,6 +19,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const messages = document.getElementById("messages");
   const sendForm = document.getElementById("send-form");
   const sendInputs = sendForm.querySelectorAll("input");
+
+  function isBlocked() {
+    return document.body.classList.contains("blocked");
+  }
 
   function textNode(text) {
     return document.createTextNode(text);
@@ -40,9 +46,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function handleActionCount() {
     const shouldBlock = actionCount >= 15;
-    const alreadyBlocked = document.body.classList.contains("blocked");
 
-    if (shouldBlock && !alreadyBlocked) {
+    if (shouldBlock && !isBlocked()) {
       blockedTime *= 2;
 
       sendInputs.forEach((e) => {
@@ -194,22 +199,22 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
   enableSocket &&
-    socket.on("join", (username) => {
+    socket.on("join", (username, userlist) => {
       joinRoom(username);
     });
 
   enableSocket &&
-    socket.on("leave", (username) => {
+    socket.on("leave", (username, userlist) => {
       leaveRoom(username);
     });
 
   enableSocket &&
-    socket.on("block", ({ username, duration }) => {
+    socket.on("block", ({ username, duration }, userlist) => {
       block(username, duration);
     });
 
   enableSocket &&
-    socket.on("unblock", (username) => {
+    socket.on("unblock", (username, userlist) => {
       unblock(username);
     });
 
@@ -224,7 +229,8 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.on("reconnect", () => {
       if (username) {
         joinRoom(username);
-        enableSocket && socket.emit("join", username);
+        enableSocket &&
+          socket.emit("join", { username, joinedTime, isBlocked: isBlocked() });
       }
     });
 
@@ -234,6 +240,8 @@ window.addEventListener("DOMContentLoaded", () => {
         leaveRoom(username);
       }
     });
+
+  enableSocket && socket.on("userlist", (data) => {});
 
   introForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -261,10 +269,12 @@ window.addEventListener("DOMContentLoaded", () => {
     const name = e.target.username.value;
     if (name) {
       username = `${name}^${randomNumber(3)}`;
+      joinedTime = Date.now();
       joinRoom(username);
       document.body.classList.remove("setting-up");
       document.body.classList.add("chatting");
-      enableSocket && socket.emit("join", username);
+      enableSocket &&
+        socket.emit("join", { username, joinedTime, isBlocked: isBlocked() });
       setupForm.parentNode.remove();
     }
   });
@@ -311,4 +321,23 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
+  window.addEventListener("focus", () => {
+    isActive = true;
+  });
+
+  window.addEventListener("blur", () => {
+    isActive = false;
+  });
+
+  setInterval(() => {
+    if (isActive && username) {
+      enableSocket &&
+        socket.emit("heartbeat", {
+          username,
+          joinedTime,
+          isBlocked: isBlocked(),
+        });
+    }
+  }, 30 * 1000);
 });
