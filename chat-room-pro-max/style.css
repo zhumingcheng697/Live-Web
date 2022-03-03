@@ -6,6 +6,8 @@
   -webkit-text-size-adjust: none;
   --blue-color: #027aff;
   --user-list-width: 250px;
+  --send-form-height: 56px;
+  --user-header-height: 40px;
   --secondary-bg: #e5e5ea;
   --secondary-txt: #555;
 }
@@ -43,12 +45,16 @@ body {
   justify-content: center;
 }
 
-#generate-random {
+#generate-random,
+#show-all-user,
+#back-to-chat {
   cursor: pointer;
   color: var(--blue-color);
 }
 
-#generate-random:hover {
+#generate-random:hover,
+#show-all-user:hover,
+#back-to-chat:hover {
   text-decoration: underline;
 }
 
@@ -59,6 +65,21 @@ body {
 
 #generate-random.disabled:hover {
   text-decoration: none;
+}
+
+#user-header-area {
+  position: fixed;
+  top: var(--inset-top);
+  height: var(--user-header-height);
+  left: var(--inset-left);
+  right: var(--inset-right);
+  background-color: var(--secondary-bg);
+  transition: background-color 0.3s;
+  display: none;
+}
+
+#user-header-area > * {
+  margin: 0 10px;
 }
 
 #message-area,
@@ -72,7 +93,7 @@ body {
 #message-area {
   left: var(--inset-left);
   right: calc(var(--inset-right) + var(--user-list-width));
-  bottom: calc(56px + var(--inset-bottom));
+  bottom: calc(var(--send-form-height) + var(--inset-bottom));
 }
 
 #user-area {
@@ -108,7 +129,7 @@ body {
   bottom: var(--inset-bottom);
   left: var(--inset-left);
   right: calc(var(--inset-right) + var(--user-list-width));
-  height: 56px;
+  height: var(--send-form-height);
   box-sizing: border-box;
 }
 
@@ -129,7 +150,8 @@ form input[type="text"] {
   padding: 8px 10px;
   font-size: 14px;
   background-color: var(--secondary-bg);
-  min-width: 225px;
+  flex-basis: 225px;
+  flex-grow: 1;
   color: #000;
   transition: background-color 0.3s, color 0.3s;
 }
@@ -298,6 +320,52 @@ body.intro {
 body.blocked .message.sent .content {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+@media (max-width: 600px) {
+  #user-header-area {
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    align-items: center;
+    position: fixed;
+  }
+
+  #message-area {
+    top: calc(var(--inset-top) + var(--user-header-height));
+    right: var(--inset-right);
+  }
+
+  #user-area {
+    top: calc(var(--inset-top) + var(--user-header-height));
+    left: var(--inset-left);
+    width: auto;
+    z-index: 5;
+  }
+
+  #users {
+    padding: 10px 20px;
+  }
+
+  #users > h3:first-of-type {
+    margin-top: 0;
+  }
+
+  body.show-users #show-all-user {
+    display: none;
+  }
+
+  body:not(.show-users) #back-to-chat {
+    display: none;
+  }
+
+  body:not(.show-users) #user-area {
+    display: none;
+  }
+
+  #send-form {
+    right: var(--inset-right);
+  }
 }
 
 @media (prefers-color-scheme: dark) {

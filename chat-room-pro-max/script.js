@@ -1,6 +1,15 @@
-const enableSocket = true;
+const enableSocket = false;
 const socket =
   enableSocket && io.connect("https://mccoy-zhu-chat-room-pro-max.glitch.me/");
+
+let addClickOrKeyListener = (target, listener) => {
+  target.addEventListener("click", listener);
+  target.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      listener();
+    }
+  });
+};
 
 window.addEventListener("DOMContentLoaded", () => {
   let joinedTime;
@@ -17,8 +26,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const usernameInput = document.getElementById("username");
   const generateBtn = document.getElementById("generate-random");
   const messageArea = document.getElementById("message-area");
-  const messages = document.getElementById("messages");
+  const messages = messageArea.querySelector("#messages");
   const usersEl = document.getElementById("users");
+  const showHideUserEl = document.querySelector("#user-header-area > span");
+  const showUserEl = showHideUserEl.querySelector("#show-all-user");
   const sendForm = document.getElementById("send-form");
   const sendInputs = sendForm.querySelectorAll("input");
 
@@ -232,7 +243,7 @@ window.addEventListener("DOMContentLoaded", () => {
     for (let user of userlist) {
       if (user.isBlocked) {
         blockedUsers.push(user);
-      } else if (Date.now() - user.lastActive <= 60 * 1000) {
+      } else if (Date.now() - user.lastActive < 60 * 1000) {
         activeUsers.push(user);
       } else {
         inactiveUsers.push(user);
@@ -246,7 +257,7 @@ window.addEventListener("DOMContentLoaded", () => {
     let resultHtml = "";
 
     if (activeUsers.length) {
-      resultHtml += "<h3>Active:</h3>";
+      resultHtml += `<h3>Active (${activeUsers.length}):</h3>`;
       for (let user of activeUsers) {
         resultHtml += `<div class="user">
         <span class="status active"></span>
@@ -262,7 +273,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     if (inactiveUsers.length) {
-      resultHtml += "<h3>Inactive:</h3>";
+      resultHtml += `<h3>Inactive (${inactiveUsers.length}):</h3>`;
       for (let user of inactiveUsers) {
         resultHtml += `<div class="user">
         <span class="status inactive"></span>
@@ -280,7 +291,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     if (blockedUsers.length) {
-      resultHtml += "<h3>Blocked:</h3>";
+      resultHtml += `<h3>Blocked (${blockedUsers.length}):</h3>`;
       for (let user of blockedUsers) {
         resultHtml += `<div class="user">
         <span class="status blocked"></span>
@@ -298,6 +309,11 @@ window.addEventListener("DOMContentLoaded", () => {
       </div>`;
       }
     }
+
+    const userCount = userlist.length;
+    showUserEl.innerHTML = `${userCount} User${
+      userCount === 1 ? "" : "s"
+    } Online &rsaquo;`;
 
     usersEl.innerHTML = resultHtml;
   }
@@ -372,7 +388,7 @@ window.addEventListener("DOMContentLoaded", () => {
     introForm.parentNode.remove();
   });
 
-  generateBtn.addEventListener("click", () => {
+  addClickOrKeyListener(generateBtn, () => {
     generateBtn.classList.add("disabled");
 
     fetch("https://random-word-api.herokuapp.com/word?number=2&swear=0")
@@ -417,6 +433,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
       el.value = "";
     }
+  });
+
+  addClickOrKeyListener(showHideUserEl, () => {
+    document.body.classList.toggle("show-users");
   });
 
   document.addEventListener("click", (e) => {
