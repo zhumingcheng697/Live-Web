@@ -16,69 +16,51 @@ httpServer.listen(process.env.PORT);
 // WebSockets work with the HTTP server
 var io = require("socket.io")(httpServer);
 
+let userlistIntervalId;
 const users = new Map();
 const userlist = () => [...users.values()];
+const sendUserlist = () => io.emit("userlist", userlist());
+const resetUserlistInterval = () => {
+  clearInterval(userlistIntervalId);
+  userlistIntervalId = setInterval(sendUserlist, 60 * 1000);
+};
 
 io.sockets.on("connection", function (socket) {
-  socket.on("post", function (data) {
-    const user = users.get(socket.id);
-    let shouldPushList = false;
+  ["post", "unsend"].forEach((e) => {
+    socket.on(e, function (data) {
+      const user = users.get(socket.id);
+      let shouldPushList = false;
 
-    if (user) {
-      shouldPushList = Date.now() - user.lastActive > 15 * 1000;
-      user.lastActive = Date.now();
-    }
+      if (user) {
+        shouldPushList = Date.now() - user.lastActive > 30 * 1000;
+        user.lastActive = Date.now();
+      }
 
-    const list = userlist();
-    if (shouldPushList) {
+      const list = userlist();
+      if (shouldPushList) {
+        resetUserlistInterval();
+        socket.emit("userlist", list);
+        socket.broadcast.emit(e, data, list);
+      } else {
+        socket.broadcast.emit(e, data);
+      }
+    });
+  });
+
+  ["block", "unblock"].forEach((e) => {
+    socket.on(e, function (data) {
+      const user = users.get(socket.id);
+
+      if (user) {
+        user.lastActive = Date.now();
+        user.isBlocked = true;
+      }
+
+      resetUserlistInterval();
+      const list = userlist();
       socket.emit("userlist", list);
-      socket.broadcast.emit("post", data, list);
-    } else {
-      socket.broadcast.emit("post", data);
-    }
-  });
-
-  socket.on("unsend", function (data) {
-    const user = users.get(socket.id);
-    let shouldPushList = false;
-
-    if (user) {
-      shouldPushList = Date.now() - user.lastActive > 15 * 1000;
-      user.lastActive = Date.now();
-    }
-
-    const list = userlist();
-    if (shouldPushList) {
-      socket.emit("userlist", list);
-      socket.broadcast.emit("unsend", data, list);
-    } else {
-      socket.broadcast.emit("unsend", data);
-    }
-  });
-
-  socket.on("block", function (data) {
-    const user = users.get(socket.id);
-
-    if (user) {
-      user.lastActive = Date.now();
-      user.isBlocked = true;
-    }
-
-    const list = userlist();
-    socket.emit("userlist", list);
-    socket.broadcast.emit("block", data, list);
-  });
-
-  socket.on("unblock", function (data) {
-    const user = users.get(socket.id);
-
-    if (user) {
-      user.isBlocked = false;
-    }
-
-    const list = userlist();
-    socket.emit("userlist", list);
-    socket.broadcast.emit("unblock", data, list);
+      socket.broadcast.emit(e, data, list);
+    });
   });
 
   socket.on("back", function ({ username, joinedTime, isBlocked }) {
@@ -89,7 +71,8 @@ io.sockets.on("connection", function (socket) {
       isBlocked,
     });
 
-    io.emit("userlist", username, userlist());
+    resetUserlistInterval();
+    sendUserlist();
   });
 
   socket.on("join", function ({ username, joinedTime, lastActive, isBlocked }) {
@@ -100,6 +83,7 @@ io.sockets.on("connection", function (socket) {
       isBlocked,
     });
 
+    resetUserlistInterval();
     const list = userlist();
     socket.emit("userlist", list);
     socket.broadcast.emit("join", username, list);
@@ -108,6 +92,7 @@ io.sockets.on("connection", function (socket) {
   socket.on("disconnect", function () {
     const user = users.get(socket.id);
     if (user) {
+      resetUserlistInterval();
       users.delete(socket.id);
       socket.broadcast.emit("leave", user.username, userlist());
     }
@@ -123,6 +108,4 @@ io.sockets.on("connection", function (socket) {
   });
 });
 
-setInterval(() => {
-  io.emit("userlist", userlist());
-}, 60 * 1000);
+resetUserlistInterval();

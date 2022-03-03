@@ -10,6 +10,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let lastMessageSentAt = 0;
   let actionCount = 0;
   let blockedTime = 0.5;
+  let heartbeatInterval;
 
   const introForm = document.getElementById("intro-form");
   const setupForm = document.getElementById("setup-form");
@@ -20,6 +21,20 @@ window.addEventListener("DOMContentLoaded", () => {
   const usersEl = document.getElementById("users");
   const sendForm = document.getElementById("send-form");
   const sendInputs = sendForm.querySelectorAll("input");
+
+  function resetHearbeatInterval() {
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = setInterval(() => {
+      if ((!lastActive || Date.now() - lastActive < 30 * 1000) && username) {
+        enableSocket &&
+          socket.emit("heartbeat", {
+            username,
+            joinedTime,
+            isBlocked: isBlocked(),
+          });
+      }
+    }, 30 * 1000);
+  }
 
   function isBlocked() {
     return document.body.classList.contains("blocked");
@@ -55,6 +70,7 @@ window.addEventListener("DOMContentLoaded", () => {
         e.disabled = true;
       });
 
+      enableSocket && resetHearbeatInterval();
       enableSocket && socket.emit("block", { username, duration: blockedTime });
       block(username, blockedTime, true);
       document.body.classList.add("blocked");
@@ -64,6 +80,7 @@ window.addEventListener("DOMContentLoaded", () => {
           e.disabled = false;
         });
 
+        enableSocket && resetHearbeatInterval();
         enableSocket && socket.emit("unblock", username);
         unblock(username, true);
         document.body.classList.remove("blocked");
@@ -144,6 +161,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function sendMessage(message) {
     const id = randomNumber(16, 16);
+    enableSocket && resetHearbeatInterval();
     enableSocket && socket.emit("post", { message, sender: username, id });
     appendMessage(messageElement(message, "sent", username, id), true);
   }
@@ -325,6 +343,7 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.on("reconnect", () => {
       if (username) {
         joinRoom(username);
+        enableSocket && resetHearbeatInterval();
         enableSocket &&
           socket.emit("join", {
             username,
@@ -377,6 +396,7 @@ window.addEventListener("DOMContentLoaded", () => {
       joinRoom(username);
       document.body.classList.remove("setting-up");
       document.body.classList.add("chatting");
+      enableSocket && resetHearbeatInterval();
       enableSocket &&
         socket.emit("join", {
           username,
@@ -424,6 +444,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (id && parent.classList.contains("sent")) {
         removeMessage(id);
 
+        enableSocket && resetHearbeatInterval();
         enableSocket && socket.emit("unsend", { sender: username, id });
         unsendMessage(username);
         didNewAction();
@@ -433,6 +454,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   window.addEventListener("focus", () => {
     if (Date.now() - lastActive > 30 * 1000 && username) {
+      enableSocket && resetHearbeatInterval();
       enableSocket &&
         socket.emit("back", {
           username,
@@ -446,15 +468,4 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("blur", () => {
     lastActive = Date.now();
   });
-
-  setInterval(() => {
-    if ((!lastActive || Date.now() - lastActive < 30 * 1000) && username) {
-      enableSocket &&
-        socket.emit("heartbeat", {
-          username,
-          joinedTime,
-          isBlocked: isBlocked(),
-        });
-    }
-  }, 30 * 1000);
 });
