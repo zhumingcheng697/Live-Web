@@ -352,6 +352,8 @@ window.addEventListener("DOMContentLoaded", () => {
   function updateUserlist(userlist) {
     if (!userlist) return;
 
+    document.body.classList.remove("connecting");
+
     const activeUsers = [];
     const inactiveUsers = [];
     const blockedUsers = [];
@@ -514,7 +516,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   enableSocket &&
     socket.on("userlist", (userlist) => {
-      document.body.classList.remove("connecting");
       updateUserlist(userlist);
     });
 
