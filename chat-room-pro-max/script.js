@@ -2,19 +2,34 @@ const enableSocket = false;
 const socket =
   enableSocket && io.connect("https://mccoy-zhu-chat-room-pro-max.glitch.me/");
 
-let addClickOrKeyListener = (target, listener) => {
+const addClickOrKeyListener = (target, listener) => {
   target.addEventListener("click", listener);
   target.addEventListener("keypress", (e) => {
     if (e.key === "Enter" || e.key === " ") {
-      listener();
+      listener(e);
     }
+  });
+};
+
+const addDoubleClickOrKeyListener = (target, listener) => {
+  let lastTime = null;
+  let lastTarget = null;
+  target.addEventListener("dblclick", listener);
+  target.addEventListener("keypress", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      if (lastTime && Date.now() - lastTime < 500 && lastTarget == e.target) {
+        listener(e);
+      }
+    }
+    lastTime = Date.now();
+    lastTarget = e.target;
   });
 };
 
 window.addEventListener("DOMContentLoaded", () => {
   let joinedTime;
   let lastActive = null;
-  let username = "";
+  let myUsername = "";
   let lastMessageSender = null;
   let lastMessageSentAt = 0;
   let actionCount = 0;
@@ -36,12 +51,16 @@ window.addEventListener("DOMContentLoaded", () => {
   function resetHearbeatInterval() {
     clearInterval(heartbeatInterval);
     heartbeatInterval = setInterval(() => {
-      if ((!lastActive || Date.now() - lastActive < 30 * 1000) && username) {
+      if (
+        (!lastActive || Date.now() - lastActive < 30 * 1000) &&
+        myUsername &&
+        joinedTime
+      ) {
         enableSocket &&
           socket.emit("heartbeat", {
-            username,
+            username: myUsername,
             joinedTime,
-            isBlocked: isBlocked(),
+            isBlocked: isBlocked() || isSeverBlocked(),
           });
       }
     }, 30 * 1000);
@@ -49,6 +68,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function isBlocked() {
     return document.body.classList.contains("blocked");
+  }
+
+  function isSeverBlocked() {
+    return document.body.classList.contains("server-blocked");
   }
 
   function textNode(text) {
@@ -83,21 +106,49 @@ window.addEventListener("DOMContentLoaded", () => {
 
       enableSocket && resetHearbeatInterval();
       enableSocket &&
-        socket.emit("block", { username, duration: blockedTime, lastActive });
-      block(username, blockedTime, true);
+        socket.emit("block", {
+          username: myUsername,
+          duration: blockedTime,
+          lastActive,
+        });
+      block(myUsername, blockedTime, true);
       document.body.classList.add("blocked");
 
       setTimeout(() => {
+        document.body.classList.remove("blocked");
+        if (!isSeverBlocked()) {
+          sendInputs.forEach((e) => {
+            e.disabled = false;
+          });
+
+          enableSocket && resetHearbeatInterval();
+          enableSocket &&
+            socket.emit("unblock", { username: myUsername, lastActive });
+          unblock(myUsername, true);
+        }
+      }, 1000 * 60 * blockedTime);
+    }
+  }
+
+  function serverBlockMyself(duration) {
+    sendInputs.forEach((e) => {
+      e.disabled = true;
+    });
+
+    document.body.classList.add("server-blocked");
+    setTimeout(() => {
+      document.body.classList.remove("server-blocked");
+      if (!isBlocked()) {
         sendInputs.forEach((e) => {
           e.disabled = false;
         });
 
         enableSocket && resetHearbeatInterval();
-        enableSocket && socket.emit("unblock", { username, lastActive });
-        unblock(username, true);
-        document.body.classList.remove("blocked");
-      }, 1000 * 60 * blockedTime);
-    }
+        enableSocket &&
+          socket.emit("unblock", { username: myUsername, lastActive });
+        unblock(myUsername, true);
+      }
+    }, 1000 * 60 * duration);
   }
 
   function randomNumber(n, base = 10) {
@@ -126,7 +177,13 @@ window.addEventListener("DOMContentLoaded", () => {
     return el.scrollHeight - el.clientHeight - el.scrollTop;
   }
 
-  function messageElement(message, type = "other", sender = null, id = null) {
+  function messageElement(
+    message,
+    type,
+    sender = null,
+    id = null,
+    socketId = null
+  ) {
     const shouldHideMetadata =
       sender === lastMessageSender &&
       Date.now() - lastMessageSentAt < 30 * 1000;
@@ -135,7 +192,7 @@ window.addEventListener("DOMContentLoaded", () => {
     lastMessageSentAt = Date.now();
 
     const messageDiv = document.createElement("div");
-    messageDiv.className = `message ${type}`;
+    messageDiv.className = `message ${type || "other"}`;
     if (id) messageDiv.id = id;
 
     const metadata = document.createElement("span");
@@ -143,11 +200,16 @@ window.addEventListener("DOMContentLoaded", () => {
     if (sender) {
       metadata.appendChild(strongNode(sender));
       metadata.appendChild(textNode(" at "));
+      messageDiv.dataset.sender = sender;
+    }
+    if (socketId) {
+      messageDiv.dataset.socketId = socketId;
     }
     metadata.appendChild(textNode(dateToString(new Date())));
 
     const content = document.createElement("span");
     content.className = "content";
+    if (type) content.tabIndex = 0;
     if (Array.isArray(message)) {
       message.forEach((e) => {
         content.appendChild(e);
@@ -174,12 +236,12 @@ window.addEventListener("DOMContentLoaded", () => {
   function sendMessage(message) {
     const id = randomNumber(16, 16);
     enableSocket && resetHearbeatInterval();
-    enableSocket && socket.emit("post", { message, sender: username, id });
-    appendMessage(messageElement(message, "sent", username, id), true);
+    enableSocket && socket.emit("post", { message, sender: myUsername, id });
+    appendMessage(messageElement(message, "sent", myUsername, id), true);
   }
 
-  function receiveMessage(message, sender, id) {
-    appendMessage(messageElement(message, "received", sender, id));
+  function receiveMessage(message, sender, id, socketId) {
+    appendMessage(messageElement(message, "received", sender, id, socketId));
   }
 
   function unsendMessage(user) {
@@ -188,7 +250,28 @@ window.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  function removeMessage(id) {
+  function removeMessage(user) {
+    appendMessage(
+      messageElement([
+        textNode("An inappropriate message from "),
+        strongNode(user),
+        textNode(" has been removed."),
+      ])
+    );
+  }
+
+  function reportMessage() {
+    appendMessage(
+      messageElement([
+        strongNode(myUsername),
+        textNode(" reported a message."),
+        document.createElement("br"),
+        textNode("(This notification is only visible to you)"),
+      ])
+    );
+  }
+
+  function removePost(id) {
     const el = document.getElementById(id);
 
     if (el) {
@@ -200,6 +283,14 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     return !!el;
+  }
+
+  function removeAllPost(username) {
+    messages
+      .querySelectorAll(`div.message[data-sender="${username}"]`)
+      .forEach((e) => {
+        e.remove();
+      });
   }
 
   function joinRoom(user) {
@@ -233,6 +324,20 @@ window.addEventListener("DOMContentLoaded", () => {
     );
   }
 
+  function serverBlock(user, duration, forceScroll = false) {
+    appendMessage(
+      messageElement([
+        strongNode(user),
+        textNode(
+          ` is blocked for ${duration} min for sending inappropriate messages.`
+        ),
+        document.createElement("br"),
+        textNode("All their previous messages have been removed."),
+      ]),
+      forceScroll
+    );
+  }
+
   function updateUserlist(userlist) {
     if (!userlist) return;
 
@@ -243,7 +348,7 @@ window.addEventListener("DOMContentLoaded", () => {
     for (let user of userlist) {
       if (user.isBlocked) {
         blockedUsers.push(user);
-      } else if (Date.now() - user.lastActive < 60 * 1000) {
+      } else if (Date.now() - user.lastActive < 45 * 1000) {
         activeUsers.push(user);
       } else {
         inactiveUsers.push(user);
@@ -301,7 +406,7 @@ window.addEventListener("DOMContentLoaded", () => {
             new Date(user.joinedTime)
           )}</span>
           <span class="metadata">${
-            Date.now() - user.lastActive < 60 * 1000
+            Date.now() - user.lastActive < 45 * 1000
               ? "Active Now"
               : `Last Active ${dateToString(new Date(user.lastActive))}`
           }</span>
@@ -319,14 +424,21 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   enableSocket &&
-    socket.on("post", ({ message, sender, id }) => {
-      receiveMessage(message, sender, id);
+    socket.on("post", ({ message, sender, id, socketId }) => {
+      receiveMessage(message, sender, id, socketId);
     });
 
   enableSocket &&
     socket.on("unsend", ({ sender, id }) => {
-      if (removeMessage(id)) {
+      if (removePost(id)) {
         unsendMessage(sender);
+      }
+    });
+
+  enableSocket &&
+    socket.on("remove", ({ sender, id }) => {
+      if (removePost(id)) {
+        removeMessage(sender);
       }
     });
 
@@ -355,24 +467,35 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
   enableSocket &&
+    socket.on("server-block", ({ username, duration }, userlist) => {
+      serverBlock(username, duration);
+      removeAllPost(username);
+      updateUserlist(userlist);
+
+      if (username === myUsername) {
+        serverBlockMyself(duration);
+      }
+    });
+
+  enableSocket &&
     socket.on("reconnect", () => {
-      if (username) {
-        joinRoom(username);
+      if (myUsername && joinedTime) {
+        joinRoom(myUsername);
         enableSocket && resetHearbeatInterval();
         enableSocket &&
           socket.emit("join", {
-            username,
+            username: myUsername,
             joinedTime,
             lastActive,
-            isBlocked: isBlocked(),
+            isBlocked: isBlocked() || isSeverBlocked(),
           });
       }
     });
 
   enableSocket &&
     socket.on("disconnect", () => {
-      if (username) {
-        leaveRoom(username);
+      if (myUsername && joinedTime) {
+        leaveRoom(myUsername);
       }
     });
 
@@ -406,18 +529,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const name = e.target.username.value;
     if (name) {
-      username = `${name}^${randomNumber(3)}`;
+      myUsername = `${name}^${randomNumber(3)}`;
       joinedTime = Date.now();
-      joinRoom(username);
+      joinRoom(myUsername);
       document.body.classList.remove("setting-up");
       document.body.classList.add("chatting");
       enableSocket && resetHearbeatInterval();
       enableSocket &&
         socket.emit("join", {
-          username,
+          username: myUsername,
           joinedTime,
           lastActive,
-          isBlocked: isBlocked(),
+          isBlocked: isBlocked() || isSeverBlocked(),
         });
       setupForm.parentNode.remove();
     }
@@ -450,7 +573,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  messages.addEventListener("dblclick", (e) => {
+  addDoubleClickOrKeyListener(messages, (e) => {
     if (document.body.classList.contains("blocked")) {
       return;
     }
@@ -459,26 +582,33 @@ window.addEventListener("DOMContentLoaded", () => {
     if (target.classList.contains("content")) {
       const parent = target.parentElement;
       const id = parent.id;
+      const sender = parent.dataset.sender;
 
-      if (id && parent.classList.contains("sent")) {
-        removeMessage(id);
-
+      if (id && sender && !parent.classList.contains("other")) {
+        removePost(id);
         enableSocket && resetHearbeatInterval();
-        enableSocket && socket.emit("unsend", { sender: username, id });
-        unsendMessage(username);
-        didNewAction();
+
+        if (parent.classList.contains("sent")) {
+          enableSocket && socket.emit("unsend", { sender: myUsername, id });
+          unsendMessage(myUsername);
+          didNewAction();
+        } else {
+          const socketId = parent.dataset.socketId;
+          enableSocket && socket.emit("report", { sender, id, socketId });
+          reportMessage();
+        }
       }
     }
   });
 
   window.addEventListener("focus", () => {
-    if (Date.now() - lastActive > 30 * 1000 && username) {
+    if (Date.now() - lastActive > 30 * 1000 && myUsername && joinedTime) {
       enableSocket && resetHearbeatInterval();
       enableSocket &&
         socket.emit("back", {
-          username,
+          username: myUsername,
           joinedTime,
-          isBlocked: isBlocked(),
+          isBlocked: isBlocked() || isSeverBlocked(),
         });
     }
     lastActive = null;
