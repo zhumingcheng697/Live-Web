@@ -373,6 +373,14 @@ body.server-blocked .message:not(.other) .content {
     margin-top: 0;
   }
 
+  body.show-users #message-area {
+    display: none;
+  }
+
+  body.show-users #send-form {
+    display: none;
+  }
+
   body.show-users #show-all-user {
     display: none;
   }
