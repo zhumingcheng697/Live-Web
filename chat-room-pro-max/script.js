@@ -97,28 +97,24 @@ window.addEventListener("DOMContentLoaded", () => {
     }, 1000 * 30);
   }
 
-  function disableInputs() {
+  function resetInputs(enable) {
     messages
       .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
       .forEach((e) => {
-        e.removeAttribute("tabindex");
+        if (enable) {
+          e.tabIndex = 0;
+        } else {
+          e.removeAttribute("tabindex");
+        }
       });
 
     sendInputs.forEach((e) => {
-      e.disabled = true;
+      e.disabled = !enable;
     });
   }
 
   function unblockMyself() {
-    messages
-      .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
-      .forEach((e) => {
-        e.tabIndex = 0;
-      });
-
-    sendInputs.forEach((e) => {
-      e.disabled = false;
-    });
+    resetInputs(true);
 
     enableSocket && resetHearbeatInterval();
     enableSocket &&
@@ -132,7 +128,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (shouldBlock && !isBlocked()) {
       blockedTime *= 2;
 
-      disableInputs();
+      resetInputs(false);
 
       enableSocket && resetHearbeatInterval();
       enableSocket &&
@@ -154,7 +150,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function serverBlockMyself(duration) {
-    disableInputs();
+    resetInputs(false);
 
     clearTimeout(serverBlockTimeout);
     document.body.classList.add("server-blocked");
