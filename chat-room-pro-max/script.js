@@ -505,8 +505,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   enableSocket &&
     socket.on("disconnect", () => {
-      document.body.classList.add("conntecting");
-      usersEl.innerHTML = "<h3>Conntecting to Server…</h3>";
+      document.body.classList.add("connecting");
+      usersEl.innerHTML = "<h3>Connecting to Server…</h3>";
       if (myUsername && joinedTime) {
         leaveRoom(myUsername);
       }
@@ -514,7 +514,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   enableSocket &&
     socket.on("userlist", (userlist) => {
-      document.body.classList.remove("conntecting");
+      document.body.classList.remove("connecting");
       updateUserlist(userlist);
     });
 
@@ -590,7 +590,10 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   addDoubleClickOrKeyListener(messages, (e) => {
-    if (document.body.classList.contains("blocked")) {
+    if (
+      document.body.classList.contains("blocked") ||
+      document.body.classList.contains("server-blocked")
+    ) {
       return;
     }
 
