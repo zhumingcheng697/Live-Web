@@ -76,7 +76,15 @@ io.sockets.on("connection", function (socket) {
       userReport = reports.get(sender);
     }
 
-    if (count >= 3 || count >= (users.size - 1) * 0.5) {
+    if (
+      count >= 3 ||
+      count >=
+        [...users.values()].filter(
+          (user) =>
+            Date.now() - user.lastActive < 45 * 1000 && user.username !== sender
+        ).length *
+          0.5
+    ) {
       total += 1;
       userReport.set("total_removal", total);
 
