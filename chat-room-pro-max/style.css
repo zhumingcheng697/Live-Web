@@ -45,6 +45,10 @@ body {
   justify-content: center;
 }
 
+#setup-form > * {
+  margin: 10px 4px;
+}
+
 #generate-random,
 #show-all-user,
 #back-to-chat {
@@ -69,13 +73,17 @@ body {
 
 #user-header-area {
   position: fixed;
-  top: var(--inset-top);
-  height: var(--user-header-height);
-  left: var(--inset-left);
-  right: var(--inset-right);
+  top: 0;
+  padding-top: var(--inset-top);
+  height: calc(var(--user-header-height) + var(--inset-top));
+  left: 0;
+  padding-left: (--inset-left);
+  right: 0;
+  padding-right: var(--inset-right);
   background-color: var(--secondary-bg);
   transition: background-color 0.3s;
   display: none;
+  box-sizing: border-box;
 }
 
 #user-header-area > * {
@@ -98,10 +106,13 @@ body {
 
 #user-area {
   background-color: var(--secondary-bg);
-  width: var(--user-list-width);
-  right: var(--inset-right);
-  bottom: var(--inset-bottom);
+  width: calc(var(--user-list-width) + var(--inset-right));
+  right: 0;
+  padding-right: var(--inset-right);
+  bottom: 0;
+  padding-bottom: var(--inset-bottom);
   transition: background-color 0.3s;
+  box-sizing: border-box;
 }
 
 #messages,
@@ -240,6 +251,9 @@ input[type="submit"]:not(:disabled) {
   background-color: var(--blue-color);
   color: #fff;
   margin-left: auto;
+}
+
+.message:not(.other) .content {
   cursor: pointer;
 }
 
@@ -304,7 +318,12 @@ body:not(.chatting) #send-form {
   display: none;
 }
 
-body.blocked input:disabled {
+body:not(.chatting) #user-header-area {
+  display: none;
+}
+
+body.blocked input:disabled,
+body.server-blocked input:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -317,7 +336,8 @@ body.intro {
   align-items: center;
 }
 
-body.blocked .message.sent .content {
+body.blocked .message:not(.other) .content,
+body.server-blocked .message:not(.other) .content {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -338,9 +358,11 @@ body.blocked .message.sent .content {
 
   #user-area {
     top: calc(var(--inset-top) + var(--user-header-height));
-    left: var(--inset-left);
+    left: 0;
+    padding-left: var(--inset-left);
     width: auto;
     z-index: 5;
+    box-sizing: border-box;
   }
 
   #users {
