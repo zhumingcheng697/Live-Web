@@ -97,21 +97,42 @@ window.addEventListener("DOMContentLoaded", () => {
     }, 1000 * 30);
   }
 
+  function disableInputs() {
+    messages
+      .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
+      .forEach((e) => {
+        e.removeAttribute("tabindex");
+      });
+
+    sendInputs.forEach((e) => {
+      e.disabled = true;
+    });
+  }
+
+  function unblockMyself() {
+    messages
+      .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
+      .forEach((e) => {
+        e.tabIndex = 0;
+      });
+
+    sendInputs.forEach((e) => {
+      e.disabled = false;
+    });
+
+    enableSocket && resetHearbeatInterval();
+    enableSocket &&
+      socket.emit("unblock", { username: myUsername, lastActive });
+    unblock(myUsername, true);
+  }
+
   function handleActionCount() {
     const shouldBlock = actionCount >= 15;
 
     if (shouldBlock && !isBlocked()) {
       blockedTime *= 2;
 
-      messages
-        .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
-        .forEach((e) => {
-          e.removeAttribute("tabindex");
-        });
-
-      sendInputs.forEach((e) => {
-        e.disabled = true;
-      });
+      disableInputs();
 
       enableSocket && resetHearbeatInterval();
       enableSocket &&
@@ -126,57 +147,21 @@ window.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         document.body.classList.remove("blocked");
         if (!isSeverBlocked()) {
-          messages
-            .querySelectorAll(
-              ".message[id][data-sender]:not(.other) > .content"
-            )
-            .forEach((e) => {
-              e.tabIndex = 0;
-            });
-
-          sendInputs.forEach((e) => {
-            e.disabled = false;
-          });
-
-          enableSocket && resetHearbeatInterval();
-          enableSocket &&
-            socket.emit("unblock", { username: myUsername, lastActive });
-          unblock(myUsername, true);
+          unblockMyself();
         }
       }, 1000 * 60 * blockedTime);
     }
   }
 
   function serverBlockMyself(duration) {
-    messages
-      .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
-      .forEach((e) => {
-        e.removeAttribute("tabindex");
-      });
-
-    sendInputs.forEach((e) => {
-      e.disabled = true;
-    });
+    disableInputs();
 
     clearTimeout(serverBlockTimeout);
     document.body.classList.add("server-blocked");
     serverBlockTimeout = setTimeout(() => {
       document.body.classList.remove("server-blocked");
       if (!isBlocked()) {
-        messages
-          .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
-          .forEach((e) => {
-            e.tabIndex = 0;
-          });
-
-        sendInputs.forEach((e) => {
-          e.disabled = false;
-        });
-
-        enableSocket && resetHearbeatInterval();
-        enableSocket &&
-          socket.emit("unblock", { username: myUsername, lastActive });
-        unblock(myUsername, true);
+        unblockMyself();
       }
     }, 1000 * 60 * duration);
   }
