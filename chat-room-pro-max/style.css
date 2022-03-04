@@ -385,6 +385,18 @@ body.server-blocked .message:not(.other) .content {
     display: none;
   }
 
+  body.connecting.show-users #connecting-prompt {
+    display: none;
+  }
+
+  body.connecting:not(.show-users) #show-all-user {
+    display: none;
+  }
+
+  body:not(.connecting) #connecting-prompt {
+    display: none;
+  }
+
   #send-form {
     right: var(--inset-right);
   }

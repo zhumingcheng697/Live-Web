@@ -35,6 +35,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let actionCount = 0;
   let blockedTime = 0.5;
   let heartbeatInterval;
+  let serverBlockTimeout;
 
   const introForm = document.getElementById("intro-form");
   const setupForm = document.getElementById("setup-form");
@@ -43,7 +44,9 @@ window.addEventListener("DOMContentLoaded", () => {
   const messageArea = document.getElementById("message-area");
   const messages = messageArea.querySelector("#messages");
   const usersEl = document.getElementById("users");
-  const showHideUserEl = document.querySelector("#user-header-area > span");
+  const showHideUserEl = document.querySelector(
+    "#user-header-area > span[tabindex]"
+  );
   const showUserEl = showHideUserEl.querySelector("#show-all-user");
   const sendForm = document.getElementById("send-form");
   const sendInputs = sendForm.querySelectorAll("input");
@@ -100,6 +103,12 @@ window.addEventListener("DOMContentLoaded", () => {
     if (shouldBlock && !isBlocked()) {
       blockedTime *= 2;
 
+      messages
+        .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
+        .forEach((e) => {
+          e.removeAttribute("tabindex");
+        });
+
       sendInputs.forEach((e) => {
         e.disabled = true;
       });
@@ -117,6 +126,14 @@ window.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         document.body.classList.remove("blocked");
         if (!isSeverBlocked()) {
+          messages
+            .querySelectorAll(
+              ".message[id][data-sender]:not(.other) > .content"
+            )
+            .forEach((e) => {
+              e.tabIndex = 0;
+            });
+
           sendInputs.forEach((e) => {
             e.disabled = false;
           });
@@ -131,14 +148,27 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function serverBlockMyself(duration) {
+    messages
+      .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
+      .forEach((e) => {
+        e.removeAttribute("tabindex");
+      });
+
     sendInputs.forEach((e) => {
       e.disabled = true;
     });
 
+    clearTimeout(serverBlockTimeout);
     document.body.classList.add("server-blocked");
-    setTimeout(() => {
+    serverBlockTimeout = setTimeout(() => {
       document.body.classList.remove("server-blocked");
       if (!isBlocked()) {
+        messages
+          .querySelectorAll(".message[id][data-sender]:not(.other) > .content")
+          .forEach((e) => {
+            e.tabIndex = 0;
+          });
+
         sendInputs.forEach((e) => {
           e.disabled = false;
         });
@@ -494,6 +524,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   enableSocket &&
     socket.on("disconnect", () => {
+      document.body.classList.add("conntecting");
+      usersEl.innerHTML = "<h3>Conntecting to Server…</h3>";
       if (myUsername && joinedTime) {
         leaveRoom(myUsername);
       }
@@ -501,6 +533,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   enableSocket &&
     socket.on("userlist", (userlist) => {
+      document.body.classList.remove("conntecting");
       updateUserlist(userlist);
     });
 
@@ -512,6 +545,8 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   addClickOrKeyListener(generateBtn, () => {
+    if (generateBtn.classList.contains("disabled")) return;
+
     generateBtn.classList.add("disabled");
 
     fetch("https://random-word-api.herokuapp.com/word?number=2&swear=0")
