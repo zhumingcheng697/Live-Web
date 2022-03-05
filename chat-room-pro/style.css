@@ -397,7 +397,7 @@ body.server-blocked .message:not(.other) .content {
     display: none;
   }
 
-  body.connecting:not(.show-users) #show-all-user {
+  body.connecting:not(.show-users) #user-header-area > span[tabindex] {
     display: none;
   }
 
