@@ -220,7 +220,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const content = document.createElement("span");
     content.className = "content";
-    if (type) content.tabIndex = 0;
+    if (type) {
+      content.tabIndex = 0;
+      if (type === "sent") {
+        content.title = "Double Click to Unsend";
+      } else if (type === "received") {
+        content.title = "Double Click to Report";
+      }
+    }
     if (Array.isArray(message)) {
       message.forEach((e) => {
         content.appendChild(e);
