@@ -129,16 +129,20 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function reconnectMyself() {
     if (isConnecting() && myUsername && joinedTime) {
-      joinRoom(myUsername);
-      enableSocket && resetHearbeatInterval();
-      enableSocket &&
-        socket.emit("join", {
-          username: myUsername,
-          joinedTime,
-          lastActive,
-          isBlocked: isBlocked() || isSeverBlocked(),
-        });
+      joinMyself();
     }
+  }
+
+  function joinMyself() {
+    joinRoom(myUsername);
+    enableSocket && resetHearbeatInterval();
+    enableSocket &&
+      socket.emit("join", {
+        username: myUsername,
+        joinedTime,
+        lastActive,
+        isBlocked: isBlocked() || isSeverBlocked(),
+      });
   }
 
   function unblockMyself() {
@@ -584,17 +588,9 @@ window.addEventListener("DOMContentLoaded", () => {
     if (name) {
       myUsername = `${name}^${randomNumber(3)}`;
       joinedTime = Date.now();
-      joinRoom(myUsername);
       document.body.classList.remove("setting-up");
       document.body.classList.add("chatting");
-      enableSocket && resetHearbeatInterval();
-      enableSocket &&
-        socket.emit("join", {
-          username: myUsername,
-          joinedTime,
-          lastActive,
-          isBlocked: isBlocked() || isSeverBlocked(),
-        });
+      joinMyself();
       setupForm.parentNode.remove();
     }
   });
