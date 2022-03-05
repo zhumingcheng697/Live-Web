@@ -129,14 +129,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function reconnectMyself() {
     if (isConnecting() && myUsername && joinedTime) {
-      joinMyself();
+      joinMyself(false);
     }
   }
 
-  function joinMyself() {
+  function joinMyself(firstJoin) {
     enableSocket && resetHearbeatInterval();
     enableSocket &&
-      socket.emit(socket.disconnected ? "join" : "back", {
+      socket.emit(firstJoin || socket.disconnected ? "join" : "back", {
         username: myUsername,
         joinedTime,
         lastActive,
@@ -593,7 +593,7 @@ window.addEventListener("DOMContentLoaded", () => {
       joinedTime = Date.now();
       document.body.classList.remove("setting-up");
       document.body.classList.add("chatting");
-      joinMyself();
+      joinMyself(true);
       setupForm.parentNode.remove();
     }
   });
