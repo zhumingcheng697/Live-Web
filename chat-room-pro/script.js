@@ -127,16 +127,16 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function reconnectMyself(sendToServer = true) {
+  function reconnectMyself() {
     if (isConnecting() && myUsername && joinedTime) {
-      joinMyself(sendToServer);
+      joinMyself();
     }
   }
 
-  function joinMyself(sendToServer = true) {
+  function joinMyself() {
     enableSocket && resetHearbeatInterval();
     enableSocket &&
-      socket.emit(sendToServer ? "join" : "back", {
+      socket.emit(socket.disconnected ? "join" : "back", {
         username: myUsername,
         joinedTime,
         lastActive,
@@ -537,19 +537,13 @@ window.addEventListener("DOMContentLoaded", () => {
       updateUserlist(userlist);
     });
 
-  enableSocket &&
-    socket.on("pong", () => {
-      reconnectMyself(false);
-    });
-
-  enableSocket &&
-    socket.on("reconnect", () => {
-      reconnectMyself(true);
-    });
+  enableSocket && socket.on("reconnect", reconnectMyself);
 
   enableSocket && socket.on("disconnect", quitMyself);
 
   window.addEventListener("offline", quitMyself);
+
+  window.addEventListener("online", reconnectMyself);
 
   window.addEventListener("focus", () => {
     if (Date.now() - lastActive > 30 * 1000 && myUsername && joinedTime) {
