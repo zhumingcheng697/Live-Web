@@ -119,11 +119,11 @@ io.sockets.on("connection", function (socket) {
     }
   });
 
-  socket.on("back", function ({ username, joinedTime, isBlocked }) {
+  socket.on("back", function ({ username, joinedTime, lastActive, isBlocked }) {
     users.set(socket.id, {
       username,
       joinedTime,
-      lastActive: Date.now(),
+      lastActive: lastActive || Date.now(),
       isBlocked,
     });
 

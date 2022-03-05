@@ -127,17 +127,17 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function reconnectMyself() {
+  function reconnectMyself(sendToServer = true) {
     if (isConnecting() && myUsername && joinedTime) {
-      joinMyself();
+      joinMyself(sendToServer);
     }
   }
 
-  function joinMyself() {
+  function joinMyself(sendToServer = true) {
     joinRoom(myUsername);
     enableSocket && resetHearbeatInterval();
     enableSocket &&
-      socket.emit("join", {
+      socket.emit(sendToServer ? "join" : "back", {
         username: myUsername,
         joinedTime,
         lastActive,
@@ -391,6 +391,10 @@ window.addEventListener("DOMContentLoaded", () => {
   function updateUserlist(userlist) {
     if (!userlist) return;
 
+    if (isConnecting() && myUsername && joinedTime) {
+      joinRoom(myUsername);
+    }
+
     document.body.classList.remove("connecting");
 
     const activeUsers = [];
@@ -534,9 +538,15 @@ window.addEventListener("DOMContentLoaded", () => {
       updateUserlist(userlist);
     });
 
-  enableSocket && socket.on("pong", reconnectMyself);
+  enableSocket &&
+    socket.on("pong", () => {
+      reconnectMyself(false);
+    });
 
-  enableSocket && socket.on("reconnect", reconnectMyself);
+  enableSocket &&
+    socket.on("reconnect", () => {
+      reconnectMyself(true);
+    });
 
   enableSocket && socket.on("disconnect", quitMyself);
 
@@ -618,6 +628,7 @@ window.addEventListener("DOMContentLoaded", () => {
       activeEl.tagName === "INPUT" &&
       activeEl.type === "text"
     ) {
+      console.log("Click", activeEl, e);
       activeEl.blur();
     }
   });
