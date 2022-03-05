@@ -388,13 +388,12 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateUserlist(userlist) {
-    if (!userlist) return;
+    if (!userlist || !myUsername || !joinedTime) return;
 
-    if (isConnecting() && myUsername && joinedTime) {
+    if (isConnecting()) {
       joinRoom(myUsername);
+      document.body.classList.remove("connecting");
     }
-
-    document.body.classList.remove("connecting");
 
     const activeUsers = [];
     const inactiveUsers = [];
@@ -480,11 +479,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
   enableSocket &&
     socket.on("post", ({ message, sender, id, socketId }) => {
+      if (!myUsername || !joinedTime) return;
+
       receiveMessage(message, sender, id, socketId);
     });
 
   enableSocket &&
     socket.on("unsend", ({ sender, id }) => {
+      if (!myUsername || !joinedTime) return;
+
       if (removePost(id)) {
         unsendMessage(sender);
       }
@@ -492,6 +495,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   enableSocket &&
     socket.on("remove", ({ sender, id }) => {
+      if (!myUsername || !joinedTime) return;
+
       if (removePost(id)) {
         removeMessage(sender);
       }
@@ -499,30 +504,40 @@ window.addEventListener("DOMContentLoaded", () => {
 
   enableSocket &&
     socket.on("join", (username, userlist) => {
+      if (!myUsername || !joinedTime) return;
+
       joinRoom(username);
       updateUserlist(userlist);
     });
 
   enableSocket &&
     socket.on("leave", (username, userlist) => {
+      if (!myUsername || !joinedTime) return;
+
       leaveRoom(username);
       updateUserlist(userlist);
     });
 
   enableSocket &&
     socket.on("block", ({ username, duration }, userlist) => {
+      if (!myUsername || !joinedTime) return;
+
       block(username, duration);
       updateUserlist(userlist);
     });
 
   enableSocket &&
     socket.on("unblock", ({ username }, userlist) => {
+      if (!myUsername || !joinedTime) return;
+
       unblock(username);
       updateUserlist(userlist);
     });
 
   enableSocket &&
     socket.on("server-block", ({ username, duration }, userlist) => {
+      if (!myUsername || !joinedTime) return;
+
       serverBlock(username, duration);
       removeAllPost(username);
       updateUserlist(userlist);
