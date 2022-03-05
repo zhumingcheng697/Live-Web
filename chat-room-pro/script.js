@@ -69,6 +69,10 @@ window.addEventListener("DOMContentLoaded", () => {
     }, 30 * 1000);
   }
 
+  function isConnecting() {
+    return document.body.classList.contains("connecting");
+  }
+
   function isBlocked() {
     return document.body.classList.contains("blocked");
   }
@@ -111,6 +115,30 @@ window.addEventListener("DOMContentLoaded", () => {
     sendInputs.forEach((e) => {
       e.disabled = !enable;
     });
+  }
+
+  function quitMyself() {
+    if (!isConnecting()) {
+      document.body.classList.add("connecting");
+      usersEl.innerHTML = "<h3>Connecting to Server…</h3>";
+      if (myUsername && joinedTime) {
+        leaveRoom(myUsername);
+      }
+    }
+  }
+
+  function reconnectMyself() {
+    if (isConnecting() && myUsername && joinedTime) {
+      joinRoom(myUsername);
+      enableSocket && resetHearbeatInterval();
+      enableSocket &&
+        socket.emit("join", {
+          username: myUsername,
+          joinedTime,
+          lastActive,
+          isBlocked: isBlocked() || isSeverBlocked(),
+        });
+    }
   }
 
   function unblockMyself() {
@@ -498,33 +526,34 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
   enableSocket &&
-    socket.on("reconnect", () => {
-      if (myUsername && joinedTime) {
-        joinRoom(myUsername);
-        enableSocket && resetHearbeatInterval();
-        enableSocket &&
-          socket.emit("join", {
-            username: myUsername,
-            joinedTime,
-            lastActive,
-            isBlocked: isBlocked() || isSeverBlocked(),
-          });
-      }
-    });
-
-  enableSocket &&
-    socket.on("disconnect", () => {
-      document.body.classList.add("connecting");
-      usersEl.innerHTML = "<h3>Connecting to Server…</h3>";
-      if (myUsername && joinedTime) {
-        leaveRoom(myUsername);
-      }
-    });
-
-  enableSocket &&
     socket.on("userlist", (userlist) => {
       updateUserlist(userlist);
     });
+
+  enableSocket && socket.on("pong", reconnectMyself);
+
+  enableSocket && socket.on("reconnect", reconnectMyself);
+
+  enableSocket && socket.on("disconnect", quitMyself);
+
+  window.addEventListener("offline", quitMyself);
+
+  window.addEventListener("focus", () => {
+    if (Date.now() - lastActive > 30 * 1000 && myUsername && joinedTime) {
+      enableSocket && resetHearbeatInterval();
+      enableSocket &&
+        socket.emit("back", {
+          username: myUsername,
+          joinedTime,
+          isBlocked: isBlocked() || isSeverBlocked(),
+        });
+    }
+    lastActive = null;
+  });
+
+  window.addEventListener("blur", () => {
+    lastActive = Date.now();
+  });
 
   introForm.addEventListener("submit", (e) => {
     e.preventDefault();
@@ -626,22 +655,5 @@ window.addEventListener("DOMContentLoaded", () => {
         }
       }
     }
-  });
-
-  window.addEventListener("focus", () => {
-    if (Date.now() - lastActive > 30 * 1000 && myUsername && joinedTime) {
-      enableSocket && resetHearbeatInterval();
-      enableSocket &&
-        socket.emit("back", {
-          username: myUsername,
-          joinedTime,
-          isBlocked: isBlocked() || isSeverBlocked(),
-        });
-    }
-    lastActive = null;
-  });
-
-  window.addEventListener("blur", () => {
-    lastActive = Date.now();
   });
 });
