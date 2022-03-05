@@ -589,13 +589,26 @@ window.addEventListener("DOMContentLoaded", () => {
 
     generateBtn.classList.add("disabled");
 
-    fetch("https://random-word-api.herokuapp.com/word?number=2&swear=0")
-      .then((res) => res.json())
-      .then((txt) => {
-        usernameInput.value = txt.join("-");
-      })
-      .finally(() => {
+    Promise.all(
+      ["adjective", "noun"].map((e) =>
+        fetch(`https://random-word-form.herokuapp.com/random/${e}`)
+          .then((res) => res.json())
+          .then(([word]) => word)
+      )
+    )
+      .then((words) => {
+        usernameInput.value = words.join("-");
         generateBtn.classList.remove("disabled");
+      })
+      .catch(() => {
+        fetch("https://random-word-api.herokuapp.com/word?number=2&swear=0")
+          .then((res) => res.json())
+          .then((words) => {
+            usernameInput.value = words.join("-");
+          })
+          .finally(() => {
+            generateBtn.classList.remove("disabled");
+          });
       });
   });
 
