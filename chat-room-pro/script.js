@@ -1,4 +1,4 @@
-const enableSocket = false;
+const enableSocket = true;
 const socket =
   enableSocket && io.connect("https://mccoy-zhu-chat-room-pro.glitch.me/");
 
@@ -134,7 +134,6 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function joinMyself(sendToServer = true) {
-    joinRoom(myUsername);
     enableSocket && resetHearbeatInterval();
     enableSocket &&
       socket.emit(sendToServer ? "join" : "back", {
