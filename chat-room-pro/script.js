@@ -514,8 +514,6 @@ window.addEventListener("DOMContentLoaded", () => {
           captureVideoEl.onloadedmetadata = () => {
             captureVideoEl.play();
             preferredDeviceLabel = stream.getVideoTracks()[0].label;
-            canvasEl.width = captureVideoEl.videoWidth;
-            canvasEl.height = captureVideoEl.videoHeight;
           };
 
           navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -795,10 +793,17 @@ window.addEventListener("DOMContentLoaded", () => {
   captureForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
+    canvasEl.width = Math.floor(
+      captureVideoEl.videoWidth * window.devicePixelRatio
+    );
+    canvasEl.height = Math.floor(
+      captureVideoEl.videoHeight * window.devicePixelRatio
+    );
+
     const context = canvasEl.getContext("2d");
-    context.clearRect(0, 0, canvasEl.width, canvasEl.height);
     context.drawImage(captureVideoEl, 0, 0, canvasEl.width, canvasEl.height);
     captureImageEl.src = canvasEl.toDataURL("image/png");
+    context.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
     stopVideoCapture();
 
