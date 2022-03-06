@@ -565,7 +565,10 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateLayout() {
-    if (!captureVideoEl.videoHeight || !captureVideoEl.videoWidth) {
+    const w = captureVideoEl.videoWidth || captureImageEl.naturalWidth;
+    const h = captureVideoEl.videoHeight || captureImageEl.naturalHeight;
+
+    if (!w || !h) {
       document.body.classList.remove("layout-b");
       return;
     }
@@ -587,14 +590,8 @@ window.addEventListener("DOMContentLoaded", () => {
     const fullWidth = window.innerWidth - insetLeft - insetRight;
     const fullHeight = window.innerHeight - insetTop - insetBottom;
 
-    const scaleA = Math.min(
-      fullWidth / captureVideoEl.videoWidth,
-      (fullHeight - toolHeight) / captureVideoEl.videoHeight
-    );
-    const scaleB = Math.min(
-      (fullWidth - toolWidth) / captureVideoEl.videoWidth,
-      fullHeight / captureVideoEl.videoHeight
-    );
+    const scaleA = Math.min(fullWidth / w, (fullHeight - toolHeight) / h);
+    const scaleB = Math.min((fullWidth - toolWidth) / w, fullHeight / h);
 
     if (scaleA < scaleB) {
       document.body.classList.add("layout-b");
