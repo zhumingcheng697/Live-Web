@@ -514,6 +514,7 @@ window.addEventListener("DOMContentLoaded", () => {
           captureVideoEl.onloadedmetadata = () => {
             captureVideoEl.play();
             preferredDeviceLabel = stream.getVideoTracks()[0].label;
+            updateLayout();
           };
 
           navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -558,15 +559,24 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateLayout() {
-    if (!captureVideoEl.srcObject) return;
+    if (!captureVideoEl.videoHeight || !captureVideoEl.videoWidth) {
+      document.body.classList.remove("layout-b");
+      return;
+    }
 
     const computedStyle = window.getComputedStyle(document.documentElement);
-    const insetLeft = +computedStyle.getPropertyValue("--inset-left");
-    const insetRight = +computedStyle.getPropertyValue("--inset-right");
-    const insetTop = +computedStyle.getPropertyValue("--inset-top");
-    const insetBottom = +computedStyle.getPropertyValue("--inset-bottom");
-    const toolWidth = +computedStyle.getPropertyValue("--tool-width");
-    const toolHeight = +computedStyle.getPropertyValue("--bottom-tool-height");
+    const insetLeft = parseInt(computedStyle.getPropertyValue("--inset-left"));
+    const insetRight = parseInt(
+      computedStyle.getPropertyValue("--inset-right")
+    );
+    const insetTop = parseInt(computedStyle.getPropertyValue("--inset-top"));
+    const insetBottom = parseInt(
+      computedStyle.getPropertyValue("--inset-bottom")
+    );
+    const toolWidth = parseInt(computedStyle.getPropertyValue("--tool-width"));
+    const toolHeight = parseInt(
+      computedStyle.getPropertyValue("--bottom-tool-height")
+    );
 
     const fullWidth = window.innerWidth - insetLeft - insetRight;
     const fullHeight = window.innerHeight - insetTop - insetBottom;

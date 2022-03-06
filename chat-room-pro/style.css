@@ -8,7 +8,7 @@
   --bottom-tool-height: 56px;
   --user-header-height: 40px;
   --user-list-width: 250px;
-  --tool-width: 120px;
+  --tool-width: 150px;
   --secondary-bg: #e5e5ea;
   --secondary-txt: #555;
 }
@@ -142,13 +142,18 @@ img {
   padding-right: var(--inset-right);
 }
 
-#capture-video,
-#capture-image {
-  display: fixed;
+.capture-container {
+  position: fixed;
   top: var(--inset-top);
   bottom: calc(var(--inset-bottom) + var(--bottom-tool-height));
   left: var(--inset-left);
   right: var(--inset-right);
+}
+
+#capture-video,
+#capture-image {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
 }
 
@@ -417,34 +422,39 @@ body.server-blocked .message:not(.other) .content {
   opacity: 0.5;
 }
 
-@media (max-height: 500px) {
-  body.layout-b #capture-video,
-  body.layout-b #capture-image {
+@media (max-height: 480px) {
+  body.layout-b .capture-container {
     top: var(--inset-top);
     bottom: var(--inset-bottom);
     left: var(--inset-left);
     right: calc(var(--tool-width) + var(--inset-right));
   }
 
-  body.layout-b.home-button-left #capture-video,
-  body.layout-b.home-button-left #capture-image {
+  body.layout-b.home-button-left .capture-container {
     left: calc(var(--tool-width) + var(--inset-left));
     right: var(--inset-right);
   }
 
+  body.layout-b #capture-form > *,
+  body.layout-b #transmit-form > * {
+    max-width: calc(var(--tool-width) - 16px);
+  }
+
   body.layout-b #capture-form,
   body.layout-b #transmit-form {
+    /* padding: 4px 10px; */
+    height: auto;
     flex-direction: column;
     top: var(--inset-top);
     bottom: var(--inset-bottom);
-    left: var(--inset-left);
     width: var(--tool-width);
-    right: auto;
+    left: auto;
+    right: var(--inset-right);
   }
 
   body.layout-b.home-button-left #capture-form,
   body.layout-b.home-button-left #transmit-form {
-    right: var(--inset-right);
+    left: var(--inset-left);
     right: auto;
   }
 }
