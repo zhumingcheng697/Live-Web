@@ -59,6 +59,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const canvasEl = document.getElementById("capture-canvas");
   const retakeEl = document.getElementById("retake");
   const captureImageEl = document.getElementById("capture-image");
+  const captureButton = document.getElementById("capture-button");
 
   function resetHearbeatInterval() {
     clearInterval(heartbeatInterval);
@@ -512,6 +513,7 @@ window.addEventListener("DOMContentLoaded", () => {
         .then((stream) => {
           captureVideoEl.srcObject = stream;
           captureVideoEl.onloadedmetadata = () => {
+            captureButton.disabled = false;
             captureVideoEl.play();
             preferredDeviceLabel = stream.getVideoTracks()[0].label;
             updateLayout();
@@ -542,6 +544,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function stopVideoCapture() {
+    captureButton.disabled = true;
+
     if (captureVideoEl.srcObject) {
       captureVideoEl.srcObject.getTracks().forEach((e) => {
         e.stop();

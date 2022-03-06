@@ -250,6 +250,11 @@ input[type="submit"]:not(:disabled) {
   cursor: pointer;
 }
 
+input[type="submit"]:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 #send-form input[type="text"] {
   width: 100%;
 }
