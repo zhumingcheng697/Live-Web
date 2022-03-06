@@ -538,6 +538,8 @@ window.addEventListener("DOMContentLoaded", () => {
           });
         })
         .catch((e) => {
+          document.body.classList.remove("capturing");
+          document.body.classList.add("chatting");
           console.error(e);
         });
     });
