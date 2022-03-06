@@ -36,6 +36,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let blockedTime = 0.5;
   let heartbeatInterval;
   let serverBlockTimeout;
+  let preferredDeviceId;
 
   const introForm = document.getElementById("intro-form");
   const setupForm = document.getElementById("setup-form");
@@ -55,6 +56,9 @@ window.addEventListener("DOMContentLoaded", () => {
   const captureVideoEl = document.getElementById("capture-video");
   const selectCameraEl = document.getElementById("select-camera");
   const captureForm = document.getElementById("capture-form");
+  const canvasEl = document.getElementById("capture-canvas");
+  const retakeEl = document.getElementById("retake");
+  const captureImageEl = document.getElementById("capture-image");
 
   function resetHearbeatInterval() {
     clearInterval(heartbeatInterval);
@@ -475,13 +479,19 @@ window.addEventListener("DOMContentLoaded", () => {
     usersEl.innerHTML = resultHtml;
   }
 
-  function startVideoCapture(option) {
+  function startVideoCapture() {
     navigator.mediaDevices
-      .getUserMedia(option)
+      .getUserMedia({
+        audio: false,
+        video: preferredDeviceId ? { deviceId: preferredDeviceId } : true,
+      })
       .then((stream) => {
         captureVideoEl.srcObject = stream;
         captureVideoEl.onloadedmetadata = () => {
           captureVideoEl.play();
+          preferredDeviceId = stream.getVideoTracks()[0].deviceId;
+          canvasEl.width = captureVideoEl.videoWidth;
+          canvasEl.height = captureVideoEl.videoHeight;
         };
 
         navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -737,7 +747,7 @@ window.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove("chatting");
     document.body.classList.add("capturing");
 
-    startVideoCapture({ audio: false, video: true });
+    startVideoCapture();
   });
 
   addClickOrKeyListener(stopCaptureEl, (e) => {
@@ -751,13 +761,33 @@ window.addEventListener("DOMContentLoaded", () => {
   selectCameraEl.addEventListener("change", (e) => {
     e.preventDefault();
 
-    const deviceId = selectCameraEl.options[selectCameraEl.selectedIndex].value;
+    preferredDeviceId =
+      selectCameraEl.options[selectCameraEl.selectedIndex].value;
     stopVideoCapture();
-    startVideoCapture({ audio: false, video: { deviceId } });
+    startVideoCapture();
   });
 
   captureForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    console.log(e);
+
+    const context = canvasEl.getContext("2d");
+    context.clearRect(0, 0, canvasEl.width, canvasEl.height);
+    context.drawImage(captureVideoEl, 0, 0, canvasEl.width, canvasEl.height);
+    captureImageEl.src = canvasEl.toDataURL("image/png");
+
+    stopVideoCapture();
+
+    document.body.classList.remove("capturing");
+    document.body.classList.add("transmitting");
+  });
+
+  addClickOrKeyListener(retakeEl, (e) => {
+    e.preventDefault();
+    captureImageEl.src = "";
+
+    startVideoCapture();
+
+    document.body.classList.remove("transmitting");
+    document.body.classList.add("capturing");
   });
 });

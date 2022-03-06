@@ -29,6 +29,15 @@ body {
   transition: color 0.3s;
 }
 
+video,
+img {
+  display: block;
+}
+
+#capture-canvas {
+  display: none;
+}
+
 .break-word,
 .message span,
 .user span {
@@ -52,7 +61,8 @@ body {
 #generate-random,
 #show-all-user,
 #back-to-chat,
-#stop-capture {
+#stop-capture,
+#retake {
   cursor: pointer;
   color: var(--blue-color);
 }
@@ -60,7 +70,8 @@ body {
 #generate-random:hover,
 #show-all-user:hover,
 #back-to-chat:hover,
-#stop-capture:hover {
+#stop-capture:hover,
+#retake:hover {
   text-decoration: underline;
 }
 
@@ -117,7 +128,8 @@ body {
   box-sizing: border-box;
 }
 
-#capture-area {
+#capture-area,
+#transmit-area {
   position: fixed;
   top: 0;
   padding-top: var(--inset-top);
@@ -127,10 +139,10 @@ body {
   padding-left: var(--inset-left);
   right: 0;
   padding-right: var(--inset-right);
-  background-color: #000;
 }
 
-#capture-video {
+#capture-video,
+#capture-image {
   object-fit: contain;
   width: 100%;
   height: calc(100% - var(--bottom-tool-height));
@@ -156,7 +168,8 @@ body {
 }
 
 #send-form,
-#capture-form {
+#capture-form,
+#transmit-form {
   margin: 0;
   position: fixed;
   bottom: var(--inset-bottom);
@@ -169,7 +182,8 @@ body {
   right: calc(var(--inset-right) + var(--user-list-width));
 }
 
-#capture-form {
+#capture-form,
+#transmit-form {
   right: var(--inset-right);
 }
 
@@ -370,6 +384,10 @@ body:not(.chatting) #user-header-area {
 }
 
 body:not(.capturing) #capture-area {
+  display: none;
+}
+
+body:not(.transmitting) #transmit-area {
   display: none;
 }
 
