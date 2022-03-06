@@ -413,12 +413,16 @@ body.server-blocked button:disabled {
   opacity: 0.5;
 }
 
-body.setting-up,
-body.intro {
+#body-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  min-height: 100%;
+  padding-left: var(--inset-left);
+  padding-right: var(--inset-right);
+  padding-top: var(--inset-top);
+  padding-bottom: var(--inset-bottom);
 }
 
 body.blocked .message:not(.other) .content,

@@ -10,40 +10,42 @@
     <script type="text/javascript" src="./script.js"></script>
   </head>
   <body class="intro connecting">
-    <div id="intro-area">
-      <h1>Hello and Welcome!</h1>
-      <p>
-        This is a safe and anonymous space for you to meet and chat with people
-        from all over the world.
-      </p>
-      <p>Please be nice and don&rsquo;t spam.</p>
-      <p>
-        Double click your own message to unsend them and double click
-        others&rsquo; messsage to report them.
-      </p>
-      <form id="intro-form">
-        <input type="submit" value="Continue" />
-      </form>
-    </div>
+    <div id="body-container">
+      <div id="intro-area">
+        <h1>Hello and Welcome!</h1>
+        <p>
+          This is a safe and anonymous space for you to meet and chat with
+          people from all over the world.
+        </p>
+        <p>Please be nice and don&rsquo;t spam.</p>
+        <p>
+          Double click your own message to unsend them and double click
+          others&rsquo; messsage to report them.
+        </p>
+        <form id="intro-form">
+          <input type="submit" value="Continue" />
+        </form>
+      </div>
 
-    <div id="setup-area">
-      <h2>Please pick a username:</h2>
-      <form id="setup-form">
-        <input
-          enterkeyhint="go"
-          type="text"
-          id="username"
-          name="username"
-          placeholder="Username"
-          maxlength="40"
-          required
-        />
-        <input type="submit" value="Confirm" />
-      </form>
-      <p>- or -</p>
-      <p>
-        <span tabindex="0" id="generate-random">Generate a Random One</span>
-      </p>
+      <div id="setup-area">
+        <h2>Please pick a username:</h2>
+        <form id="setup-form">
+          <input
+            enterkeyhint="go"
+            type="text"
+            id="username"
+            name="username"
+            placeholder="Username"
+            maxlength="40"
+            required
+          />
+          <input type="submit" value="Confirm" />
+        </form>
+        <p>- or -</p>
+        <p>
+          <span tabindex="0" id="generate-random">Generate a Random One</span>
+        </p>
+      </div>
     </div>
 
     <div id="user-header-area">
