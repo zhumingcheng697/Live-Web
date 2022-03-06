@@ -36,7 +36,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let blockedTime = 0.5;
   let heartbeatInterval;
   let serverBlockTimeout;
-  let preferredDeviceId;
+  let preferredDeviceLabel;
 
   const introForm = document.getElementById("intro-form");
   const setupForm = document.getElementById("setup-form");
@@ -480,41 +480,66 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function startVideoCapture() {
-    navigator.mediaDevices
-      .getUserMedia({
-        audio: false,
-        video: preferredDeviceId ? { deviceId: preferredDeviceId } : true,
-      })
-      .then((stream) => {
-        captureVideoEl.srcObject = stream;
-        captureVideoEl.onloadedmetadata = () => {
-          captureVideoEl.play();
-          preferredDeviceId = stream.getVideoTracks()[0].deviceId;
-          canvasEl.width = captureVideoEl.videoWidth;
-          canvasEl.height = captureVideoEl.videoHeight;
-        };
+    const getConstraint = new Promise((resolve) => {
+      if (preferredDeviceLabel) {
+        navigator.mediaDevices
+          .enumerateDevices()
+          .then((devices) => {
+            const videoDevices = devices.find(
+              (e) => e.kind === "videoinput" && e.label === preferredDeviceLabel
+            );
 
-        navigator.mediaDevices.enumerateDevices().then((devices) => {
-          const videoDevices = devices.filter((e) => e.kind === "videoinput");
-
-          if (!videoDevices.length) return;
-
-          selectCameraEl.innerHTML = "";
-
-          videoDevices.forEach((e) => {
-            const option = document.createElement("option");
-            option.text = e.label;
-            option.value = e.deviceId.toUpperCase();
-            option.selected = stream.getVideoTracks()[0].label === e.label;
-            selectCameraEl.appendChild(option);
+            if (videoDevices && videoDevices.deviceId) {
+              resolve({
+                audio: false,
+                video: { deviceId: videoDevices.deviceId },
+              });
+            } else {
+              resolve({ audio: false, video: true });
+            }
+          })
+          .catch((e) => {
+            resolve({ audio: false, video: true });
           });
+      } else {
+        resolve({ audio: false, video: true });
+      }
+    });
 
-          selectCameraEl.disabled = false;
+    getConstraint.then((constraint) => {
+      navigator.mediaDevices
+        .getUserMedia(constraint)
+        .then((stream) => {
+          captureVideoEl.srcObject = stream;
+          captureVideoEl.onloadedmetadata = () => {
+            captureVideoEl.play();
+            preferredDeviceLabel = stream.getVideoTracks()[0].label;
+            canvasEl.width = captureVideoEl.videoWidth;
+            canvasEl.height = captureVideoEl.videoHeight;
+          };
+
+          navigator.mediaDevices.enumerateDevices().then((devices) => {
+            const videoDevices = devices.filter((e) => e.kind === "videoinput");
+
+            if (!videoDevices.length) return;
+
+            selectCameraEl.innerHTML = "";
+
+            videoDevices.forEach((e) => {
+              const option = document.createElement("option");
+              option.text = e.label;
+              option.value = e.deviceId.toUpperCase();
+              option.selected = stream.getVideoTracks()[0].label === e.label;
+              selectCameraEl.appendChild(option);
+            });
+
+            selectCameraEl.disabled = false;
+          });
+        })
+        .catch((e) => {
+          console.error(e);
         });
-      })
-      .catch((e) => {
-        console.error(e);
-      });
+    });
   }
 
   function stopVideoCapture() {
@@ -761,8 +786,8 @@ window.addEventListener("DOMContentLoaded", () => {
   selectCameraEl.addEventListener("change", (e) => {
     e.preventDefault();
 
-    preferredDeviceId =
-      selectCameraEl.options[selectCameraEl.selectedIndex].value;
+    preferredDeviceLabel =
+      selectCameraEl.options[selectCameraEl.selectedIndex].text;
     stopVideoCapture();
     startVideoCapture();
   });
