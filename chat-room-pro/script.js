@@ -85,13 +85,6 @@ window.addEventListener("DOMContentLoaded", () => {
     return document.createTextNode(text);
   }
 
-  function strongNode(text) {
-    const node = document.createElement("strong");
-    node.appendChild(textNode(text));
-
-    return node;
-  }
-
   function didNewAction() {
     ++actionCount;
     handleActionCount();
@@ -240,7 +233,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const metadata = document.createElement("span");
     metadata.className = `metadata${shouldHideMetadata ? " hidden" : ""}`;
     if (sender) {
-      metadata.appendChild(strongNode(sender));
+      metadata.appendChild(textNode(sender));
       metadata.appendChild(textNode(" at "));
       messageDiv.dataset.sender = sender;
     }
@@ -295,7 +288,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function unsendMessage(user) {
     appendMessage(
-      messageElement([strongNode(user), textNode(" unsent a message.")])
+      messageElement([textNode(user), textNode(" unsent a message.")])
     );
   }
 
@@ -303,7 +296,7 @@ window.addEventListener("DOMContentLoaded", () => {
     appendMessage(
       messageElement([
         textNode("An inappropriate message from "),
-        strongNode(user),
+        textNode(user),
         textNode(" has been removed."),
       ])
     );
@@ -312,7 +305,7 @@ window.addEventListener("DOMContentLoaded", () => {
   function reportMessage() {
     appendMessage(
       messageElement([
-        strongNode(myUsername),
+        textNode(myUsername),
         textNode(" reported a message."),
         document.createElement("br"),
         textNode("(This notification is only visible to you)"),
@@ -344,20 +337,20 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function joinRoom(user) {
     appendMessage(
-      messageElement([strongNode(user), textNode(" joined the room.")])
+      messageElement([textNode(user), textNode(" joined the room.")])
     );
   }
 
   function leaveRoom(user) {
     appendMessage(
-      messageElement([strongNode(user), textNode(" left the room.")])
+      messageElement([textNode(user), textNode(" left the room.")])
     );
   }
 
   function block(user, duration, forceScroll = false) {
     appendMessage(
       messageElement([
-        strongNode(user),
+        textNode(user),
         textNode(
           ` is blocked for ${duration} min for sending or unsending too many messages.`
         ),
@@ -368,7 +361,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function unblock(user, forceScroll = false) {
     appendMessage(
-      messageElement([strongNode(user), textNode(" is now unblocked.")]),
+      messageElement([textNode(user), textNode(" is now unblocked.")]),
       forceScroll
     );
   }
@@ -376,7 +369,7 @@ window.addEventListener("DOMContentLoaded", () => {
   function serverBlock(user, duration, forceScroll = false) {
     appendMessage(
       messageElement([
-        strongNode(user),
+        textNode(user),
         textNode(
           ` is blocked for ${duration} min for sending inappropriate messages.`
         ),
