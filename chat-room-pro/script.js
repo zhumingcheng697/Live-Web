@@ -489,9 +489,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
           if (!videoDevices.length) return;
 
-          for (let option of selectCameraEl.options) {
-            option.remove();
-          }
+          selectCameraEl.innerHTML = "";
 
           videoDevices.forEach((e) => {
             const option = document.createElement("option");
@@ -516,9 +514,7 @@ window.addEventListener("DOMContentLoaded", () => {
         captureVideoEl.srcObject.removeTrack(e);
       });
 
-      for (let option of selectCameraEl.options) {
-        option.remove();
-      }
+      selectCameraEl.innerHTML = "";
 
       const option = document.createElement("option");
       option.text = "- Please select a camera -";
