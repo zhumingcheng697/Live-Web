@@ -64,6 +64,7 @@
     </div>
 
     <form id="send-form">
+      <button id="start-capture"><span>+</span></button>
       <input
         enterkeyhint="send"
         type="text"
@@ -74,5 +75,16 @@
       />
       <input type="submit" value="Send" />
     </form>
+
+    <div id="capture-area">
+      <video id="capture-video" playsinline muted autoplay></video>
+      <form id="capture-form">
+        <span tabindex="0" id="stop-capture">&lsaquo; Back</span>
+        <select name="capture-camera" id="select-camera" disabled>
+          <option value="default">- Please select a camera -</option>
+        </select>
+        <input type="submit" value="Capture" />
+      </form>
+    </div>
   </body>
 </html>

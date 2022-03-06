@@ -5,9 +5,9 @@
   --inset-bottom: env(safe-area-inset-bottom, 0);
   -webkit-text-size-adjust: none;
   --blue-color: #027aff;
-  --user-list-width: 250px;
-  --send-form-height: 56px;
+  --bottom-tool-height: 56px;
   --user-header-height: 40px;
+  --user-list-width: 250px;
   --secondary-bg: #e5e5ea;
   --secondary-txt: #555;
 }
@@ -51,14 +51,16 @@ body {
 
 #generate-random,
 #show-all-user,
-#back-to-chat {
+#back-to-chat,
+#stop-capture {
   cursor: pointer;
   color: var(--blue-color);
 }
 
 #generate-random:hover,
 #show-all-user:hover,
-#back-to-chat:hover {
+#back-to-chat:hover,
+#stop-capture:hover {
   text-decoration: underline;
 }
 
@@ -101,7 +103,7 @@ body {
 #message-area {
   left: var(--inset-left);
   right: calc(var(--inset-right) + var(--user-list-width));
-  bottom: calc(var(--send-form-height) + var(--inset-bottom));
+  bottom: calc(var(--bottom-tool-height) + var(--inset-bottom));
 }
 
 #user-area {
@@ -113,6 +115,25 @@ body {
   padding-bottom: var(--inset-bottom);
   transition: background-color 0.3s;
   box-sizing: border-box;
+}
+
+#capture-area {
+  position: fixed;
+  top: 0;
+  padding-top: var(--inset-top);
+  bottom: 0;
+  padding-bottom: var(--inset-bottom);
+  left: 0;
+  padding-left: var(--inset-left);
+  right: 0;
+  padding-right: var(--inset-right);
+  background-color: #000;
+}
+
+#capture-video {
+  object-fit: contain;
+  width: 100%;
+  height: calc(100% - var(--bottom-tool-height));
 }
 
 #messages,
@@ -134,14 +155,22 @@ body {
   text-align: start;
 }
 
-#send-form {
+#send-form,
+#capture-form {
   margin: 0;
   position: fixed;
   bottom: var(--inset-bottom);
   left: var(--inset-left);
-  right: calc(var(--inset-right) + var(--user-list-width));
-  height: var(--send-form-height);
+  height: var(--bottom-tool-height);
   box-sizing: border-box;
+}
+
+#send-form {
+  right: calc(var(--inset-right) + var(--user-list-width));
+}
+
+#capture-form {
+  right: var(--inset-right);
 }
 
 form {
@@ -149,10 +178,28 @@ form {
   justify-content: space-between;
   padding: 8px;
   margin: 0 auto;
+  align-content: center;
+  align-items: center;
 }
 
-form * {
+form > * {
   margin: 4px;
+}
+
+#start-capture {
+  cursor: pointer;
+  border: none;
+  border-radius: 6px;
+  background: none;
+  color: var(--blue-color);
+  font-size: 20px;
+  transition: background-color 0.3s, color 0.3s;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  padding: 2px 4px;
+  font-weight: 500;
 }
 
 form input[type="text"] {
@@ -322,8 +369,14 @@ body:not(.chatting) #user-header-area {
   display: none;
 }
 
+body:not(.capturing) #capture-area {
+  display: none;
+}
+
 body.blocked input:disabled,
-body.server-blocked input:disabled {
+body.blocked button:disabled,
+body.server-blocked input:disabled,
+body.server-blocked button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -420,10 +473,7 @@ body.server-blocked .message:not(.other) .content {
     background-color: #1c1c1e;
   }
 
-  body {
-    color: #fff;
-  }
-
+  body,
   form input[type="text"] {
     color: #fff;
   }

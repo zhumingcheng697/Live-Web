@@ -1,4 +1,4 @@
-const enableSocket = true;
+const enableSocket = false;
 const socket =
   enableSocket && io.connect("https://mccoy-zhu-chat-room-pro.glitch.me/");
 
@@ -49,7 +49,12 @@ window.addEventListener("DOMContentLoaded", () => {
   );
   const showUserEl = showHideUserEl.querySelector("#show-all-user");
   const sendForm = document.getElementById("send-form");
-  const sendInputs = sendForm.querySelectorAll("input");
+  const sendInputs = sendForm.querySelectorAll("input, button");
+  const startCaptureEl = document.getElementById("start-capture");
+  const stopCaptureEl = document.getElementById("stop-capture");
+  const captureVideoEl = document.getElementById("capture-video");
+  const selectCameraEl = document.getElementById("select-camera");
+  const captureForm = document.getElementById("capture-form");
 
   function resetHearbeatInterval() {
     clearInterval(heartbeatInterval);
@@ -470,6 +475,59 @@ window.addEventListener("DOMContentLoaded", () => {
     usersEl.innerHTML = resultHtml;
   }
 
+  function startVideoCapture(option) {
+    navigator.mediaDevices
+      .getUserMedia(option)
+      .then((stream) => {
+        captureVideoEl.srcObject = stream;
+        captureVideoEl.onloadedmetadata = () => {
+          captureVideoEl.play();
+        };
+
+        navigator.mediaDevices.enumerateDevices().then((devices) => {
+          const videoDevices = devices.filter((e) => e.kind === "videoinput");
+
+          if (!videoDevices.length) return;
+
+          for (let option of selectCameraEl.options) {
+            option.remove();
+          }
+
+          videoDevices.forEach((e) => {
+            const option = document.createElement("option");
+            option.text = e.label;
+            option.value = e.deviceId.toUpperCase();
+            option.selected = stream.getVideoTracks()[0].label === e.label;
+            selectCameraEl.appendChild(option);
+          });
+
+          selectCameraEl.disabled = false;
+        });
+      })
+      .catch((e) => {
+        console.error(e);
+      });
+  }
+
+  function stopVideoCapture() {
+    if (captureVideoEl.srcObject) {
+      captureVideoEl.srcObject.getTracks().forEach((e) => {
+        e.stop();
+        captureVideoEl.srcObject.removeTrack(e);
+      });
+
+      for (let option of selectCameraEl.options) {
+        option.remove();
+      }
+
+      const option = document.createElement("option");
+      option.text = "- Please select a camera -";
+      option.value = "default";
+      selectCameraEl.appendChild(option);
+      selectCameraEl.disabled = true;
+    }
+  }
+
   enableSocket &&
     socket.on("post", ({ message, sender, id, socketId }) => {
       if (!myUsername || !joinedTime) return;
@@ -676,5 +734,34 @@ window.addEventListener("DOMContentLoaded", () => {
         }
       }
     }
+  });
+
+  startCaptureEl.addEventListener("click", (e) => {
+    e.preventDefault();
+    document.body.classList.remove("chatting");
+    document.body.classList.add("capturing");
+
+    startVideoCapture({ audio: false, video: true });
+  });
+
+  addClickOrKeyListener(stopCaptureEl, (e) => {
+    e.preventDefault();
+    document.body.classList.remove("capturing");
+    document.body.classList.add("chatting");
+
+    stopVideoCapture();
+  });
+
+  selectCameraEl.addEventListener("change", (e) => {
+    e.preventDefault();
+
+    const deviceId = selectCameraEl.options[selectCameraEl.selectedIndex].value;
+    stopVideoCapture();
+    startVideoCapture({ audio: false, video: { deviceId } });
+  });
+
+  captureForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    console.log(e);
   });
 });
