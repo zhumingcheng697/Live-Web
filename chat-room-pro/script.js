@@ -557,12 +557,44 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function updateLayout() {
+    if (!captureVideoEl.srcObject) return;
+
+    const computedStyle = window.getComputedStyle(document.documentElement);
+    const insetLeft = +computedStyle.getPropertyValue("--inset-left");
+    const insetRight = +computedStyle.getPropertyValue("--inset-right");
+    const insetTop = +computedStyle.getPropertyValue("--inset-top");
+    const insetBottom = +computedStyle.getPropertyValue("--inset-bottom");
+    const toolWidth = +computedStyle.getPropertyValue("--tool-width");
+    const toolHeight = +computedStyle.getPropertyValue("--bottom-tool-height");
+
+    const fullWidth = window.innerWidth - insetLeft - insetRight;
+    const fullHeight = window.innerHeight - insetTop - insetBottom;
+
+    const scaleA = Math.min(
+      fullWidth / captureVideoEl.videoWidth,
+      (fullHeight - toolHeight) / captureVideoEl.videoHeight
+    );
+    const scaleB = Math.min(
+      (fullWidth - toolWidth) / captureVideoEl.videoWidth,
+      fullHeight / captureVideoEl.videoHeight
+    );
+
+    if (scaleA < scaleB) {
+      document.body.classList.add("layout-b");
+    } else {
+      document.body.classList.remove("layout-b");
+    }
+  }
+
   function updateOrientation(angle) {
     if (angle == -90) {
       document.body.classList.add("home-button-left");
     } else {
       document.body.classList.remove("home-button-left");
     }
+
+    updateLayout();
   }
 
   enableSocket &&
@@ -674,6 +706,8 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("orientationchange", () => {
     updateOrientation(window.orientation);
   });
+
+  window.addEventListener("resize", updateLayout);
 
   updateOrientation(window.orientation);
   screen && screen.orientation && updateOrientation(screen.orientation.angle);

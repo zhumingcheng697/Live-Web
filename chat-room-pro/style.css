@@ -8,6 +8,7 @@
   --bottom-tool-height: 56px;
   --user-header-height: 40px;
   --user-list-width: 250px;
+  --tool-width: 120px;
   --secondary-bg: #e5e5ea;
   --secondary-txt: #555;
 }
@@ -143,9 +144,12 @@ img {
 
 #capture-video,
 #capture-image {
+  display: fixed;
+  top: var(--inset-top);
+  bottom: calc(var(--inset-bottom) + var(--bottom-tool-height));
+  left: var(--inset-left);
+  right: var(--inset-right);
   object-fit: contain;
-  width: 100%;
-  height: calc(100% - var(--bottom-tool-height));
 }
 
 #messages,
@@ -411,6 +415,38 @@ body.blocked .message:not(.other) .content,
 body.server-blocked .message:not(.other) .content {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+@media (max-height: 350px) {
+  body.layout-b #capture-video,
+  body.layout-b #capture-image {
+    top: var(--inset-top);
+    bottom: var(--inset-bottom);
+    left: var(--inset-left);
+    right: calc(var(--tool-width) + var(--inset-right));
+  }
+
+  body.layout-b.home-button-left #capture-video,
+  body.layout-b.home-button-left #capture-image {
+    left: calc(var(--tool-width) + var(--inset-left));
+    right: var(--inset-right);
+  }
+
+  body.layout-b #capture-form,
+  body.layout-b #transmit-form {
+    flex-direction: column;
+    top: var(--inset-top);
+    bottom: var(--inset-bottom);
+    left: var(--inset-left);
+    width: var(--tool-width);
+    right: auto;
+  }
+
+  body.layout-b.home-button-left #capture-form,
+  body.layout-b.home-button-left #transmit-form {
+    right: var(--inset-right);
+    right: auto;
+  }
 }
 
 @media (max-width: 600px) {
