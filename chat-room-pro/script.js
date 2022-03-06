@@ -60,6 +60,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const retakeEl = document.getElementById("retake");
   const captureImageEl = document.getElementById("capture-image");
   const captureButton = document.getElementById("capture-button");
+  const transmitForm = document.getElementById("transmit-form");
+  const transmitButton = document.getElementById("transmit-button");
 
   function resetHearbeatInterval() {
     clearInterval(heartbeatInterval);
@@ -118,6 +120,8 @@ window.addEventListener("DOMContentLoaded", () => {
     sendInputs.forEach((e) => {
       e.disabled = !enable;
     });
+
+    transmitButton.disabled = !enable;
   }
 
   function quitMyself() {
@@ -710,6 +714,35 @@ window.addEventListener("DOMContentLoaded", () => {
     lastActive = Date.now();
   });
 
+  document.addEventListener("click", (e) => {
+    const activeEl = document.activeElement;
+    if (
+      [document.body, messageArea, messages].includes(e.target) &&
+      activeEl.tagName === "INPUT" &&
+      activeEl.type === "text"
+    ) {
+      console.log("Click", activeEl, e);
+      activeEl.blur();
+    }
+  });
+
+  document.addEventListener("keypress", (e) => {
+    if (e.key === "Escape") {
+      if (document.body.classList.contains("capturing")) {
+        document.body.classList.remove("capturing");
+        document.body.classList.add("chatting");
+        stopVideoCapture();
+      } else if (document.body.classList.contains("transmitting")) {
+        captureImageEl.src = "";
+        startVideoCapture();
+        document.body.classList.remove("transmitting");
+        document.body.classList.add("capturing");
+      } else if (document.body.classList.contains("show-users")) {
+        document.body.classList.remove("show-users");
+      }
+    }
+  });
+
   screen &&
     screen.orientation &&
     screen.orientation.addEventListener("change", () => {
@@ -790,18 +823,6 @@ window.addEventListener("DOMContentLoaded", () => {
     document.body.classList.toggle("show-users");
   });
 
-  document.addEventListener("click", (e) => {
-    const activeEl = document.activeElement;
-    if (
-      [document.body, messageArea, messages].includes(e.target) &&
-      activeEl.tagName === "INPUT" &&
-      activeEl.type === "text"
-    ) {
-      console.log("Click", activeEl, e);
-      activeEl.blur();
-    }
-  });
-
   addDoubleClickOrKeyListener(messages, (e) => {
     if (
       document.body.classList.contains("blocked") ||
@@ -835,9 +856,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   startCaptureEl.addEventListener("click", (e) => {
     e.preventDefault();
+    document.body.classList.remove("show-users");
     document.body.classList.remove("chatting");
     document.body.classList.add("capturing");
-
     startVideoCapture();
   });
 
@@ -845,7 +866,6 @@ window.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     document.body.classList.remove("capturing");
     document.body.classList.add("chatting");
-
     stopVideoCapture();
   });
 
@@ -887,5 +907,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
     document.body.classList.remove("transmitting");
     document.body.classList.add("capturing");
+  });
+
+  transmitForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    document.body.classList.remove("transmitting");
+    document.body.classList.add("chatting");
   });
 });
