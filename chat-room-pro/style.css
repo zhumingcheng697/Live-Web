@@ -417,7 +417,7 @@ body.server-blocked .message:not(.other) .content {
   opacity: 0.5;
 }
 
-@media (max-height: 350px) {
+@media (max-height: 500px) {
   body.layout-b #capture-video,
   body.layout-b #capture-image {
     top: var(--inset-top);
