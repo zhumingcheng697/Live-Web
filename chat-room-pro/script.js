@@ -526,7 +526,7 @@ window.addEventListener("DOMContentLoaded", () => {
             videoDevices.forEach((e) => {
               const option = document.createElement("option");
               option.text = e.label;
-              option.value = e.deviceId.toUpperCase();
+              option.value = e.label;
               option.selected = stream.getVideoTracks()[0].label === e.label;
               selectCameraEl.appendChild(option);
             });
@@ -554,6 +554,14 @@ window.addEventListener("DOMContentLoaded", () => {
       option.value = "default";
       selectCameraEl.appendChild(option);
       selectCameraEl.disabled = true;
+    }
+  }
+
+  function updateOrientation(angle) {
+    if (angle == -90) {
+      document.body.classList.add("home-button-left");
+    } else {
+      document.body.classList.remove("home-button-left");
     }
   }
 
@@ -656,6 +664,19 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("blur", () => {
     lastActive = Date.now();
   });
+
+  screen &&
+    screen.orientation &&
+    screen.orientation.addEventListener("change", () => {
+      updateOrientation(screen.orientation.angle);
+    });
+
+  window.addEventListener("orientationchange", () => {
+    updateOrientation(window.orientation);
+  });
+
+  updateOrientation(window.orientation);
+  screen && screen.orientation && updateOrientation(screen.orientation.angle);
 
   introForm.addEventListener("submit", (e) => {
     e.preventDefault();
