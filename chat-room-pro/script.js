@@ -625,9 +625,17 @@ window.addEventListener("DOMContentLoaded", () => {
     const toolHeight = parseInt(
       computedStyle.getPropertyValue("--bottom-tool-height")
     );
+    const userListWidth = parseInt(
+      computedStyle.getPropertyValue("--user-list-width")
+    );
+    const userHeaderHeight = parseInt(
+      computedStyle.getPropertyValue("--user-header-height")
+    );
 
-    const fullWidth = window.innerWidth - insetLeft - insetRight;
-    const fullHeight = window.innerHeight - insetTop - insetBottom;
+    const fullWidth =
+      window.innerWidth - insetLeft - insetRight - userListWidth;
+    const fullHeight =
+      window.innerHeight - insetTop - insetBottom - userHeaderHeight;
 
     const scaleA = Math.min(fullWidth / w, (fullHeight - toolHeight) / h);
     const scaleB = Math.min((fullWidth - toolWidth) / w, fullHeight / h);
@@ -770,7 +778,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
-      if (document.body.classList.contains("capturing")) {
+      if (
+        window.innerWidth <= 600 &&
+        document.body.classList.contains("show-users")
+      ) {
+        document.body.classList.remove("show-users");
+      } else if (document.body.classList.contains("capturing")) {
         document.body.classList.remove("capturing");
         document.body.classList.add("chatting");
         stopVideoCapture();
@@ -779,8 +792,6 @@ window.addEventListener("DOMContentLoaded", () => {
         document.body.classList.remove("transmitting");
         document.body.classList.add("capturing");
         captureImageEl.src = "";
-      } else if (document.body.classList.contains("show-users")) {
-        document.body.classList.remove("show-users");
       }
     }
   });
@@ -898,7 +909,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   startCaptureEl.addEventListener("click", (e) => {
     e.preventDefault();
-    document.body.classList.remove("show-users");
     document.body.classList.remove("chatting");
     document.body.classList.add("capturing");
     startVideoCapture();

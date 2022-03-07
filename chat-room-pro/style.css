@@ -6,7 +6,7 @@
   -webkit-text-size-adjust: none;
   --blue-color: #027aff;
   --bottom-tool-height: 56px;
-  --user-header-height: 40px;
+  --user-header-height: 0px;
   --user-list-width: 250px;
   --tool-width: 150px;
   --secondary-bg: #e5e5ea;
@@ -107,7 +107,7 @@ img {
 #message-area,
 #user-area {
   position: fixed;
-  top: var(--inset-top);
+  top: calc(var(--inset-top) + var(--user-header-height));
   overflow-x: hidden;
   overflow-y: auto;
 }
@@ -132,22 +132,20 @@ img {
 #capture-area,
 #transmit-area {
   position: fixed;
-  top: 0;
-  padding-top: var(--inset-top);
+  top: calc(var(--inset-top) + var(--user-header-height));
   bottom: 0;
   padding-bottom: var(--inset-bottom);
   left: 0;
   padding-left: var(--inset-left);
-  right: 0;
-  padding-right: var(--inset-right);
+  right: calc(var(--inset-right) + var(--user-list-width));
 }
 
 .capture-container {
   position: fixed;
-  top: var(--inset-top);
+  top: calc(var(--inset-top) + var(--user-header-height));
   bottom: calc(var(--inset-bottom) + var(--bottom-tool-height));
   left: var(--inset-left);
-  right: var(--inset-right);
+  right: calc(var(--inset-right) + var(--user-list-width));
 }
 
 #capture-video,
@@ -183,17 +181,9 @@ img {
   position: fixed;
   bottom: var(--inset-bottom);
   left: var(--inset-left);
+  right: calc(var(--inset-right) + var(--user-list-width));
   height: var(--bottom-tool-height);
   box-sizing: border-box;
-}
-
-#send-form {
-  right: calc(var(--inset-right) + var(--user-list-width));
-}
-
-#capture-form,
-#transmit-form {
-  right: var(--inset-right);
 }
 
 form {
@@ -412,7 +402,8 @@ body:not(.chatting) #message-area {
   display: none;
 }
 
-body:not(.chatting) #user-area {
+body.intro #user-area,
+body.setting-up #user-area {
   display: none;
 }
 
@@ -420,7 +411,8 @@ body:not(.chatting) #send-form {
   display: none;
 }
 
-body:not(.chatting) #user-header-area {
+body.intro #user-header-area,
+body.setting-up #user-header-area {
   display: none;
 }
 
@@ -460,15 +452,17 @@ body.server-blocked .message:not(.other) .content {
 
 @media (max-height: 480px) {
   body.layout-b .capture-container {
-    top: var(--inset-top);
-    bottom: var(--inset-bottom);
+    top: calc(var(--inset-top) + var(--user-header-height));
     left: var(--inset-left);
-    right: calc(var(--tool-width) + var(--inset-right));
+    bottom: var(--inset-bottom);
+    right: calc(
+      calc(var(--inset-right) + var(--user-list-width)) + var(--tool-width)
+    );
   }
 
   body.layout-b.home-button-left .capture-container {
-    left: calc(var(--tool-width) + var(--inset-left));
-    right: var(--inset-right);
+    left: calc(var(--inset-left) + var(--tool-width));
+    right: calc(var(--inset-right) + var(--user-list-width));
   }
 
   body.layout-b #capture-form > *,
@@ -478,14 +472,13 @@ body.server-blocked .message:not(.other) .content {
 
   body.layout-b #capture-form,
   body.layout-b #transmit-form {
-    /* padding: 4px 10px; */
     height: auto;
     flex-direction: column;
-    top: var(--inset-top);
+    top: calc(var(--inset-top) + var(--user-header-height));
     bottom: var(--inset-bottom);
     width: var(--tool-width);
     left: auto;
-    right: var(--inset-right);
+    right: calc(var(--inset-right) + var(--user-list-width));
   }
 
   body.layout-b.home-button-left #capture-form,
@@ -496,6 +489,11 @@ body.server-blocked .message:not(.other) .content {
 }
 
 @media (max-width: 640px) {
+  :root {
+    --user-list-width: 0px;
+    --user-header-height: 40px;
+  }
+
   #user-header-area {
     display: flex;
     justify-content: center;
@@ -504,13 +502,7 @@ body.server-blocked .message:not(.other) .content {
     position: fixed;
   }
 
-  #message-area {
-    top: calc(var(--inset-top) + var(--user-header-height));
-    right: var(--inset-right);
-  }
-
   #user-area {
-    top: calc(var(--inset-top) + var(--user-header-height));
     left: 0;
     padding-left: var(--inset-left);
     width: auto;
