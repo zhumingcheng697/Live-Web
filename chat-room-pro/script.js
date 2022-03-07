@@ -314,7 +314,7 @@ window.addEventListener("DOMContentLoaded", () => {
   function sendImage(src) {
     const id = randomNumber(16, 16);
     enableSocket && resetHearbeatInterval();
-    enableSocket && socket.emit("post-image", { src, sender: myUsername, id });
+    enableSocket && socket.emit("image", { src, sender: myUsername, id });
     appendMessage(messageElement(src, "image sent", myUsername, id), true);
   }
 
@@ -645,6 +645,13 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
   enableSocket &&
+    socket.on("image", ({ src, sender, id, socketId }) => {
+      if (!myUsername || !joinedTime) return;
+
+      receiveImage(src, sender, id, socketId);
+    });
+
+  enableSocket &&
     socket.on("unsend", ({ sender, id }) => {
       if (!myUsername || !joinedTime) return;
 
@@ -930,6 +937,7 @@ window.addEventListener("DOMContentLoaded", () => {
     document.body.classList.remove("transmitting");
     document.body.classList.add("chatting");
     sendImage(captureImageEl.src);
+    didNewAction();
     captureImageEl.src = "";
   });
 });
