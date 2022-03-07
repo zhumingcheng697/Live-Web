@@ -27,14 +27,14 @@ const resetUserlistInterval = () => {
 };
 
 io.sockets.on("connection", function (socket) {
-  ["post", "unsend"].forEach((e) => {
+  ["post", "image", "unsend"].forEach((e) => {
     socket.on(e, function (data) {
       const user = users.get(socket.id);
       if (user) {
         user.lastActive = Date.now();
       }
 
-      if (e === "post") data.socketId = socket.id;
+      if (e !== "unsend") data.socketId = socket.id;
 
       socket.broadcast.emit(e, data);
     });
