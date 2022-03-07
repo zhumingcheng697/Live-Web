@@ -295,8 +295,20 @@ window.addEventListener("DOMContentLoaded", () => {
     const pScrollBottom = scrollBottom(messageArea);
     messages.appendChild(messageEl);
 
+    function scrollMessages(e) {
+      console.log(e.target);
+      if (e.target.tagName === "IMG") {
+        messages.scrollIntoView(false);
+      }
+      messageEl.removeEventListener("load", scrollMessages, true);
+    }
+
     if (pScrollBottom <= 25 || forceScroll) {
-      messages.scrollIntoView(false);
+      if (messageEl.classList.contains("image")) {
+        messageEl.addEventListener("load", scrollMessages, true);
+      } else {
+        messages.scrollIntoView(false);
+      }
     }
   }
 
