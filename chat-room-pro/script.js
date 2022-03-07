@@ -610,6 +610,10 @@ window.addEventListener("DOMContentLoaded", () => {
     const w = captureVideoEl.videoWidth || captureImageEl.naturalWidth;
     const h = captureVideoEl.videoHeight || captureImageEl.naturalHeight;
 
+    if (window.innerWidth > 600) {
+      document.body.classList.remove("show-users");
+    }
+
     if (!w || !h) {
       document.body.classList.remove("layout-b");
       return;
