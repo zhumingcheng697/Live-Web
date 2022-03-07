@@ -916,7 +916,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const context = canvasEl.getContext("2d");
     context.drawImage(captureVideoEl, 0, 0, canvasEl.width, canvasEl.height);
-    captureImageEl.src = canvasEl.toDataURL("image/png");
+    captureImageEl.src = canvasEl.toDataURL("image/jpg");
     context.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
     document.body.classList.remove("capturing");
