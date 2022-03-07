@@ -4,7 +4,7 @@ const socket =
 
 const addClickOrKeyListener = (target, listener) => {
   target.addEventListener("click", listener);
-  target.addEventListener("keypress", (e) => {
+  target.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       listener(e);
     }
@@ -15,7 +15,7 @@ const addDoubleClickOrKeyListener = (target, listener) => {
   let lastTime = null;
   let lastTarget = null;
   target.addEventListener("dblclick", listener);
-  target.addEventListener("keypress", (e) => {
+  target.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
       if (lastTime && Date.now() - lastTime < 500 && lastTarget == e.target) {
         listener(e);
@@ -768,7 +768,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  document.addEventListener("keypress", (e) => {
+  document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       if (document.body.classList.contains("capturing")) {
         document.body.classList.remove("capturing");
