@@ -8,7 +8,7 @@
 
 Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/self-portrait) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-self-portrait)
 
-Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/self-portrait/index.html) & [Glitch](https://mccoy-zhu-self-portrait.glitch.me/)
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/self-portrait) & [Glitch](https://mccoy-zhu-self-portrait.glitch.me/)
 
 ## Chat Room
 
@@ -16,7 +16,7 @@ Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/self-portr
 
 Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-room) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-room)
 
-Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-room/index.html) & [Glitch](https://mccoy-zhu-chat-room.glitch.me/)
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-room) & [Glitch](https://mccoy-zhu-chat-room.glitch.me/)
 
 ## Drawing Board
 
@@ -24,7 +24,7 @@ Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-room/
 
 Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-drawing-board)
 
-Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-board/index.html) & [Glitch](https://mccoy-zhu-drawing-board.glitch.me/)
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-board) & [Glitch](https://mccoy-zhu-drawing-board.glitch.me/)
 
 ## Drawing Board v2
 
@@ -32,4 +32,12 @@ Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-bo
 
 Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board-v2) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-drawing-board-v2)
 
-Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-board-v2/index.html) & [Glitch](https://mccoy-zhu-drawing-board-v2.glitch.me/)
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-board-v2) & [Glitch](https://mccoy-zhu-drawing-board-v2.glitch.me/)
+
+## Chat Room Pro
+
+**Midterm Project**
+
+Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-room-pro) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-room-pro)
+
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-room-pro) & [Glitch](https://mccoy-zhu-chat-room-pro.glitch.me/)
