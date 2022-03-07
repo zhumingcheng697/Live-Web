@@ -239,6 +239,9 @@ form input[type="text"] {
 
 form input[type="submit"],
 select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-weight: normal;
   border: none;
   border-radius: 6px;
   padding: 8px 12px;
@@ -247,8 +250,6 @@ select {
 }
 
 select {
-  appearance: none;
-  -webkit-appearance: none;
   background-color: var(--secondary-bg);
   transition: background-color 0.3s, color 0.3s;
   color: var(--blue-color);
