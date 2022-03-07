@@ -398,8 +398,15 @@ body:not(.setting-up) #setup-area {
   display: none;
 }
 
-body:not(.chatting) #message-area {
+body.intro #message-area,
+body.setting-up #message-area {
   display: none;
+}
+
+body.capturing #message-area,
+body.transmitting #message-area {
+  visibility: hidden;
+  pointer-events: none;
 }
 
 body.intro #user-area,
@@ -519,7 +526,8 @@ body.server-blocked .message:not(.other) .content {
   }
 
   body.show-users #message-area {
-    display: none;
+    visibility: hidden;
+    pointer-events: none;
   }
 
   body.show-users #send-form {
