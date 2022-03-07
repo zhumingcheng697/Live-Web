@@ -882,12 +882,8 @@ window.addEventListener("DOMContentLoaded", () => {
   captureForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    canvasEl.width = Math.floor(
-      captureVideoEl.videoWidth * window.devicePixelRatio
-    );
-    canvasEl.height = Math.floor(
-      captureVideoEl.videoHeight * window.devicePixelRatio
-    );
+    canvasEl.width = captureVideoEl.videoWidth;
+    canvasEl.height = captureVideoEl.videoHeight;
 
     const context = canvasEl.getContext("2d");
     context.drawImage(captureVideoEl, 0, 0, canvasEl.width, canvasEl.height);
