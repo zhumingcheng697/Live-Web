@@ -2,7 +2,9 @@
 
 **Live Web Week 2 Session 2 Assignment**
 
-[Source code](https://glitch.com/edit/#!/mccoy-zhu-chat-room) and [deployment](https://mccoy-zhu-chat-room.glitch.me/) available on Glitch.
+Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-room) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-room)
+
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-room) & [Glitch](https://mccoy-zhu-chat-room.glitch.me/)
 
 In this chat room, users can choose their usernames and chat with others.
 

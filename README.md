@@ -14,7 +14,7 @@ Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/self-portr
 
 **Week 2 Session 2 Assignment**
 
-Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-room) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-room)
+Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-room) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-room)
 
 Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-room) & [Glitch](https://mccoy-zhu-chat-room.glitch.me/)
 
@@ -22,7 +22,7 @@ Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-room)
 
 **Week 3 Session 2 Assignment**
 
-Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-drawing-board)
+Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-drawing-board)
 
 Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-board) & [Glitch](https://mccoy-zhu-drawing-board.glitch.me/)
 
@@ -30,7 +30,7 @@ Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-bo
 
 **Week 4 Session 2 Assignment**
 
-Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board-v2) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-drawing-board-v2)
+Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board-v2) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-drawing-board-v2)
 
 Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-board-v2) & [Glitch](https://mccoy-zhu-drawing-board-v2.glitch.me/)
 
@@ -38,6 +38,6 @@ Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-bo
 
 **Midterm Project**
 
-Source code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-room-pro-max) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-room-pro-max)
+Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-room-pro-max) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-room-pro-max)
 
 Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-room-pro-max) & [Glitch](https://mccoy-zhu-chat-room-pro-max.glitch.me/)

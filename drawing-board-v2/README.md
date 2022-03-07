@@ -2,7 +2,9 @@
 
 **Live Web Week 4 Session 2 Assignment**
 
-[Source code](https://glitch.com/edit/#!/mccoy-zhu-drawing-board-v2) and [deployment](https://mccoy-zhu-drawing-board-v2.glitch.me/) available on Glitch.
+Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board-v2) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-drawing-board-v2)
+
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/drawing-board-v2) & [Glitch](https://mccoy-zhu-drawing-board-v2.glitch.me/)
 
 Now the website will take a picture every time the user draws something on the board and send it to every other users.
 

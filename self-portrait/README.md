@@ -2,7 +2,9 @@
 
 **Live Web Week 1 Session 2 Assignment**
 
-Source code available on [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/self-portrait) and [Glitch](https://glitch.com/edit/#!/mccoy-zhu-self-portrait), deployment available on [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/self-portrait) and [Glitch](https://mccoy-zhu-self-portrait.glitch.me/).
+Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/self-portrait) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-self-portrait)
+
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/self-portrait) & [Glitch](https://mccoy-zhu-self-portrait.glitch.me/)
 
 I am not exactly someone who likes to write a lot about oneself nor do I draw or illustrate very well, so I decided to make something simple that can demonstrate some of my skills, beliefs, design choices, etc.
 
