@@ -91,7 +91,7 @@ img {
   padding-top: var(--inset-top);
   height: calc(var(--user-header-height) + var(--inset-top));
   left: 0;
-  padding-left: (--inset-left);
+  padding-left: var(--inset-left);
   right: 0;
   padding-right: var(--inset-right);
   background-color: var(--secondary-bg);
@@ -339,7 +339,7 @@ select:disabled {
 }
 
 .message:not(.other) .content {
-  cursor: pointer;
+  cursor: help;
 }
 
 .message.received .content {
@@ -352,7 +352,7 @@ select:disabled {
   background: none;
   padding: 0;
   max-width: 100%;
-  max-height: 40vh;
+  max-height: max(35vh, 200px);
 }
 
 .user span {
@@ -404,7 +404,8 @@ body.setting-up #message-area {
 }
 
 body.capturing #message-area,
-body.transmitting #message-area {
+body.transmitting #message-area,
+body.fullscreen-image #message-area {
   visibility: hidden;
   pointer-events: none;
 }
@@ -431,6 +432,15 @@ body:not(.transmitting) #transmit-area {
   display: none;
 }
 
+body:not(.fullscreen-image) #fullscreen-area {
+  display: none;
+}
+
+body.fullscreen-image > :not(#fullscreen-area) {
+  visibility: hidden;
+  pointer-events: none;
+}
+
 body.blocked input:disabled,
 body.blocked button:disabled,
 body.server-blocked input:disabled,
@@ -449,6 +459,25 @@ body.server-blocked button:disabled {
   padding-right: var(--inset-right);
   padding-top: var(--inset-top);
   padding-bottom: var(--inset-bottom);
+}
+
+#fullscreen-area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  padding-top: var(--inset-top);
+  padding-left: var(--inset-left);
+  padding-bottom: var(--inset-bottom);
+  padding-right: var(--inset-right);
+  background: #333e;
+}
+
+#fullscreen-image {
+  width: 100%;
+  height: 100%;
+  object-fit: scale-down;
 }
 
 body.blocked .message:not(.other) .content,

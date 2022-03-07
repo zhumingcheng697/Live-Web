@@ -11,18 +11,46 @@ const addClickOrKeyListener = (target, listener) => {
   });
 };
 
-const addDoubleClickOrKeyListener = (target, listener) => {
-  let lastTime = null;
-  let lastTarget = null;
-  target.addEventListener("dblclick", listener);
+const addDoubleClickOrKeyListener = (
+  target,
+  doubleListner = () => {},
+  singleListener = () => {},
+  timeout = 300
+) => {
+  let lastMouseTime = null;
+  let lastMouseTarget = null;
+  let lastMouseTimeoutId;
+  target.addEventListener("mousedown", (e) => {
+    clearTimeout(lastMouseTimeoutId);
+
+    if (lastMouseTarget == e.target && Date.now() - lastMouseTime < timeout) {
+      doubleListner(e);
+    } else {
+      lastMouseTimeoutId = setTimeout(() => {
+        singleListener(e);
+      }, timeout);
+    }
+
+    lastMouseTime = Date.now();
+    lastMouseTarget = e.target;
+  });
+
+  let lastKeyTime = null;
+  let lastKeyTarget = null;
+  let lastKeyTimeoutId;
   target.addEventListener("keydown", (e) => {
     if (e.key === "Enter" || e.key === " ") {
-      if (lastTime && Date.now() - lastTime < 500 && lastTarget == e.target) {
-        listener(e);
+      clearTimeout(lastKeyTimeoutId);
+      if (lastKeyTarget == e.target && Date.now() - lastKeyTime < timeout) {
+        doubleListner(e);
+      } else {
+        lastKeyTimeoutId = setTimeout(() => {
+          singleListener(e);
+        }, timeout);
       }
     }
-    lastTime = Date.now();
-    lastTarget = e.target;
+    lastKeyTime = Date.now();
+    lastKeyTarget = e.target;
   });
 };
 
@@ -62,6 +90,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const captureButton = document.getElementById("capture-button");
   const transmitForm = document.getElementById("transmit-form");
   const transmitButton = document.getElementById("transmit-button");
+  const fullscreenImage = document.getElementById("fullscreen-image");
 
   function resetHearbeatInterval() {
     clearInterval(heartbeatInterval);
@@ -263,6 +292,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (types.includes("image")) {
       content = document.createElement("img");
       content.src = message;
+      content.title = "Click to Enlarge\n";
     } else {
       content = document.createElement("span");
 
@@ -279,9 +309,9 @@ window.addEventListener("DOMContentLoaded", () => {
     if (type) {
       content.tabIndex = 0;
       if (types.includes("sent")) {
-        content.title = "Double Click to Unsend";
+        content.title += "Double Click to Unsend";
       } else if (types.includes("received")) {
-        content.title = "Double Click to Report";
+        content.title += "Double Click to Report";
       }
     }
 
@@ -789,6 +819,8 @@ window.addEventListener("DOMContentLoaded", () => {
         document.body.classList.contains("show-users")
       ) {
         document.body.classList.remove("show-users");
+      } else if (document.body.classList.contains("fullscreen-image")) {
+        document.body.classList.remove("fullscreen-image");
       } else if (document.body.classList.contains("capturing")) {
         document.body.classList.remove("capturing");
         document.body.classList.add("chatting");
@@ -798,7 +830,11 @@ window.addEventListener("DOMContentLoaded", () => {
         document.body.classList.remove("transmitting");
         document.body.classList.add("capturing");
         captureImageEl.src = "";
+      } else {
+        return;
       }
+
+      e.preventDefault();
     }
   });
 
@@ -882,36 +918,54 @@ window.addEventListener("DOMContentLoaded", () => {
     document.body.classList.toggle("show-users");
   });
 
-  addDoubleClickOrKeyListener(messages, (e) => {
-    if (
-      document.body.classList.contains("blocked") ||
-      document.body.classList.contains("server-blocked")
-    ) {
-      return;
-    }
+  addDoubleClickOrKeyListener(
+    messages,
+    (e) => {
+      if (
+        document.body.classList.contains("blocked") ||
+        document.body.classList.contains("server-blocked")
+      ) {
+        return;
+      }
 
-    const target = e.target;
-    if (target.classList.contains("content")) {
-      const parent = target.parentElement;
-      const id = parent.id;
-      const sender = parent.dataset.sender;
+      const target = e.target;
+      if (target.classList.contains("content")) {
+        const parent = target.parentElement;
+        const id = parent.id;
+        const sender = parent.dataset.sender;
 
-      if (id && sender && !parent.classList.contains("other")) {
-        removePost(id);
-        enableSocket && resetHearbeatInterval();
+        if (id && sender && !parent.classList.contains("other")) {
+          removePost(id);
+          enableSocket && resetHearbeatInterval();
 
-        if (parent.classList.contains("sent")) {
-          enableSocket && socket.emit("unsend", { sender: myUsername, id });
-          unsendMessage(myUsername);
-          didNewAction();
-        } else {
-          const socketId = parent.dataset.socketId;
-          enableSocket && socket.emit("report", { sender, id, socketId });
-          reportMessage(sender);
+          if (parent.classList.contains("sent")) {
+            enableSocket && socket.emit("unsend", { sender: myUsername, id });
+            unsendMessage(myUsername);
+            didNewAction();
+          } else {
+            const socketId = parent.dataset.socketId;
+            enableSocket && socket.emit("report", { sender, id, socketId });
+            reportMessage(sender);
+          }
         }
       }
+    },
+    (e) => {
+      if (e.button > 1) return;
+
+      const target = e.target;
+
+      if (
+        target.tagName === "IMG" &&
+        target.src &&
+        target.classList.contains("content")
+      ) {
+        fullscreenImage.src = target.src;
+        document.body.classList.add("fullscreen-image");
+        document.activeElement.blur();
+      }
     }
-  });
+  );
 
   startCaptureEl.addEventListener("click", (e) => {
     e.preventDefault();
@@ -967,5 +1021,12 @@ window.addEventListener("DOMContentLoaded", () => {
     sendImage(captureImageEl.src);
     didNewAction();
     captureImageEl.src = "";
+  });
+
+  fullscreenImage.addEventListener("click", (e) => {
+    if (e.button > 1) return;
+
+    document.body.classList.remove("fullscreen-image");
+    fullscreenImage.src = "";
   });
 });
