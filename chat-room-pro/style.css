@@ -253,7 +253,10 @@ select {
   background-color: var(--secondary-bg);
   transition: background-color 0.3s, color 0.3s;
   color: var(--blue-color);
+  min-width: 100px;
   text-overflow: ellipsis;
+  box-sizing: border-box;
+  flex-shrink: 1;
 }
 
 form input[type="submit"] {
