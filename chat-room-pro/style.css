@@ -355,6 +355,13 @@ select:disabled {
   margin-right: auto;
 }
 
+.message.image img.content {
+  background: none;
+  padding: 0;
+  max-width: 100%;
+  max-height: 40vh;
+}
+
 .user span {
   display: inline-block;
   margin: 2px 0;
@@ -485,7 +492,7 @@ body.server-blocked .message:not(.other) .content {
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   #user-header-area {
     display: flex;
     justify-content: center;

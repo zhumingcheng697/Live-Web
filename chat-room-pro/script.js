@@ -256,22 +256,33 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     metadata.appendChild(textNode(dateToString(new Date())));
 
-    const content = document.createElement("span");
-    content.className = "content";
-    if (type) {
-      content.tabIndex = 0;
-      if (type === "sent") {
-        content.title = "Double Click to Unsend";
-      } else if (type === "received") {
-        content.title = "Double Click to Report";
+    const types = (type && type.split(" ")) || [];
+
+    let content;
+
+    if (types.includes("image")) {
+      content = document.createElement("img");
+      content.src = message;
+    } else {
+      content = document.createElement("span");
+
+      if (Array.isArray(message)) {
+        message.forEach((e) => {
+          content.appendChild(e);
+        });
+      } else {
+        content.appendChild(textNode(message));
       }
     }
-    if (Array.isArray(message)) {
-      message.forEach((e) => {
-        content.appendChild(e);
-      });
-    } else {
-      content.appendChild(textNode(message));
+    content.className = "content";
+
+    if (type) {
+      content.tabIndex = 0;
+      if (types.includes("sent")) {
+        content.title = "Double Click to Unsend";
+      } else if (types.includes("received")) {
+        content.title = "Double Click to Report";
+      }
     }
 
     messageDiv.appendChild(metadata);
@@ -298,6 +309,17 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function receiveMessage(message, sender, id, socketId) {
     appendMessage(messageElement(message, "received", sender, id, socketId));
+  }
+
+  function sendImage(src) {
+    const id = randomNumber(16, 16);
+    enableSocket && resetHearbeatInterval();
+    enableSocket && socket.emit("post-image", { src, sender: myUsername, id });
+    appendMessage(messageElement(src, "image sent", myUsername, id), true);
+  }
+
+  function receiveImage(src, sender, id, socketId) {
+    appendMessage(messageElement(src, "image received", sender, id, socketId));
   }
 
   function unsendMessage(user) {
@@ -907,5 +929,7 @@ window.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     document.body.classList.remove("transmitting");
     document.body.classList.add("chatting");
+    sendImage(captureImageEl.src);
+    captureImageEl.src = "";
   });
 });
