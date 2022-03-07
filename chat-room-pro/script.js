@@ -91,6 +91,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const transmitForm = document.getElementById("transmit-form");
   const transmitButton = document.getElementById("transmit-button");
   const fullscreenImage = document.getElementById("fullscreen-image");
+  const cancelFullscreenEl = document.getElementById("cancel-fullscreen");
 
   function resetHearbeatInterval() {
     clearInterval(heartbeatInterval);
@@ -1024,6 +1025,13 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   fullscreenImage.addEventListener("click", (e) => {
+    if (e.button > 1) return;
+
+    document.body.classList.remove("fullscreen-image");
+    fullscreenImage.src = "";
+  });
+
+  addClickOrKeyListener(cancelFullscreenEl, (e) => {
     if (e.button > 1) return;
 
     document.body.classList.remove("fullscreen-image");
