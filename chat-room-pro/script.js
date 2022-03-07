@@ -296,7 +296,6 @@ window.addEventListener("DOMContentLoaded", () => {
     messages.appendChild(messageEl);
 
     function scrollMessages(e) {
-      console.log(e.target);
       if (e.target.tagName === "IMG") {
         messages.scrollIntoView(false);
       }
@@ -610,7 +609,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const w = captureVideoEl.videoWidth || captureImageEl.naturalWidth;
     const h = captureVideoEl.videoHeight || captureImageEl.naturalHeight;
 
-    if (window.innerWidth > 600) {
+    if (window.innerWidth > 640) {
       document.body.classList.remove("show-users");
     }
 
@@ -786,7 +785,7 @@ window.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("keydown", (e) => {
     if (e.key === "Escape") {
       if (
-        window.innerWidth <= 600 &&
+        window.innerWidth <= 640 &&
         document.body.classList.contains("show-users")
       ) {
         document.body.classList.remove("show-users");
