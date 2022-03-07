@@ -1,6 +1,6 @@
 const enableSocket = true;
 const socket =
-  enableSocket && io.connect("https://mccoy-zhu-chat-room-pro-max.glitch.me/");
+  enableSocket && io.connect("https://mccoy-zhu-chat-room-pro.glitch.me/");
 
 const addClickOrKeyListener = (target, listener) => {
   target.addEventListener("click", listener);

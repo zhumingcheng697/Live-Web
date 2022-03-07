@@ -18,6 +18,6 @@
 
   Week 4 Session 2 Assignment
 
-- ## [Chat Room Pro Max](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-room-pro-max)
+- ## [Chat Room Pro](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-room-pro)
 
   Midterm Project
