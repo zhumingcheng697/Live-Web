@@ -340,21 +340,24 @@ window.addEventListener("DOMContentLoaded", () => {
     );
   }
 
-  function removeMessage(user) {
+  function removeMessage(user, forceScroll) {
     appendMessage(
       messageElement([
         textNode("An inappropriate message from "),
         textNode(user),
         textNode(" has been removed."),
-      ])
+      ]),
+      forceScroll
     );
   }
 
-  function reportMessage() {
+  function reportMessage(sender) {
     appendMessage(
       messageElement([
         textNode(myUsername),
-        textNode(" reported a message."),
+        textNode(" reported a message from "),
+        textNode(sender),
+        textNode("."),
         document.createElement("br"),
         textNode("(This notification is only visible to you)"),
       ])
@@ -685,7 +688,7 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!myUsername || !joinedTime) return;
 
       if (removePost(id)) {
-        removeMessage(sender);
+        removeMessage(sender, sender === myUsername);
       }
     });
 
@@ -725,7 +728,7 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.on("server-block", ({ username, duration }, userlist) => {
       if (!myUsername || !joinedTime) return;
 
-      serverBlock(username, duration);
+      serverBlock(username, duration, username === myUsername);
       removeAllPost(username);
       updateUserlist(userlist);
 
@@ -901,7 +904,7 @@ window.addEventListener("DOMContentLoaded", () => {
         } else {
           const socketId = parent.dataset.socketId;
           enableSocket && socket.emit("report", { sender, id, socketId });
-          reportMessage();
+          reportMessage(sender);
         }
       }
     }
