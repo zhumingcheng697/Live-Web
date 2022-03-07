@@ -565,6 +565,7 @@ window.addEventListener("DOMContentLoaded", () => {
       option.value = "default";
       selectCameraEl.appendChild(option);
       selectCameraEl.disabled = true;
+      captureVideoEl.srcObject = undefined;
     }
   }
 
@@ -733,10 +734,10 @@ window.addEventListener("DOMContentLoaded", () => {
         document.body.classList.add("chatting");
         stopVideoCapture();
       } else if (document.body.classList.contains("transmitting")) {
-        captureImageEl.src = "";
         startVideoCapture();
         document.body.classList.remove("transmitting");
         document.body.classList.add("capturing");
+        captureImageEl.src = "";
       } else if (document.body.classList.contains("show-users")) {
         document.body.classList.remove("show-users");
       }
@@ -893,25 +894,21 @@ window.addEventListener("DOMContentLoaded", () => {
     captureImageEl.src = canvasEl.toDataURL("image/png");
     context.clearRect(0, 0, canvasEl.width, canvasEl.height);
 
-    stopVideoCapture();
-
     document.body.classList.remove("capturing");
     document.body.classList.add("transmitting");
+    stopVideoCapture();
   });
 
   addClickOrKeyListener(retakeEl, (e) => {
     e.preventDefault();
-    captureImageEl.src = "";
-
     startVideoCapture();
-
     document.body.classList.remove("transmitting");
     document.body.classList.add("capturing");
+    captureImageEl.src = "";
   });
 
   transmitForm.addEventListener("submit", (e) => {
     e.preventDefault();
-
     document.body.classList.remove("transmitting");
     document.body.classList.add("chatting");
   });
