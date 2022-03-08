@@ -67,7 +67,7 @@ At least every minute, the server will broadcast all the data it has obtained to
 // server side
 
 setInterval(() => {
-  socket.emit("userlist", [...users.values()]);
+  io.emit("userlist", [...users.values()]);
 }, 60 * 1000);
 ```
 
@@ -126,6 +126,12 @@ socket.on("disconnect", () => {
 
 Reporting and blocking is achieved similarly to how user list is achieved.
 
+```javascript
+// server side
+
+const reports = new Map();
+```
+
 A nested Map is created on the server side to store the number of times each message from each user has been report.
 
 ```javascript
@@ -150,7 +156,57 @@ If a message has been reported 3 times or more or if more than 50% of all active
 
 Everytime a user has had their message removed, this Map will also be updated. If a user has had more than 5 messages removed in the past 5 minutes, a `"server-block"` event will be emitted by the server and the client who has a matching username will be restrained from sending messages for an exponentially growing number of minutes (ie. 1, 2, 4, 8, etc.) each time they become blocked.
 
+```javascript
+// server side
+
+socket.on("report", ({ sender, id }) => {
+  // Update `reports` Map and do some computation
+
+  if (THIS_MESSAGE_HAS_BEEN_REPORTED_A_LOT) {
+    if (THIS_SENDER_HAS_HAD_MANY_MESSAGES_REMOVED) {
+      io.emit("server-block", {
+        username: sender,
+        duration: TIME_TO_BLOCK,
+      });
+    } else {
+      io.emit("remove", { sender, id });
+    }
+  }
+});
+```
+
 To prevent disconnected users from being blocked indefinitely, clients actually keep a timer themselves and unblock themselves by emitting an `"unblock"` event to the server when the time comes instead of listening for such event from the server.
+
+```javascript
+// Client side
+
+socket.on("server-block", ({ username, duration }) => {
+  if (username === MY_USER_NAME) {
+    // Block myself for `duration` minutes
+
+    setTimeout(() => {
+      socket.emit("unblock", { username: MY_USER_NAME });
+    }, duration * 60 * 1000);
+  }
+
+  // Updates HTML, remove all messages from `username`
+});
+```
+
+> As explained earlier in the [User List section](#user-list), the user list and user status are actually contained in the payload of some of these events as well, but they are removed here for the sake of simplicity. Furthermore, users might be blocked again before getting unblocked so in reality we have to do a `clearTimeout` to reset timers as well.
+>
+> ```javascript
+> // client side
+>
+> let serverBlockTimeout;
+>
+> function resetServerUnblock(duration) {
+>   clearTimeout(serverBlockTimeout);
+>   serverBlockTimeout = setTimeout(() => {
+>     socket.emit("unblock", { username: MY_USER_NAME });
+>   }, duration * 60 * 1000);
+> }
+> ```
 
 ## Camera Selection
 
@@ -173,10 +229,14 @@ navigator.mediaDevices.enumerateDevices().then((devices) => {
 When the user select a video stream, the `deviceId` of that stream will be used in the `getUserMedia` call to start that specific stream. The name of the stream will also be cached so that the next time the user start the stream, the system will try to use the same camera.
 
 ```javascript
-navigator.mediaDevices.getUserMedia({
-  audio: false,
-  video: { deviceId: PREFERRED_DEVICE_ID },
-});
+navigator.mediaDevices
+  .getUserMedia({
+    audio: false,
+    video: { deviceId: PREFERRED_DEVICE_ID },
+  })
+  .then((stream) => {
+    captureVideoEl.srcObject = stream;
+  });
 ```
 
 > In reality, things are, again, a bit more complicated. `deviceId`s returned by `enumerateDevices` seem to be only valid before the next `getUserMedia` call in some browsers, and after a new video stream starts, previously returned `deviceId`s seem to be all invalidated. To circumvent this, I actually keep track of the `label` of the preferred device (eg. `"Front Camera"`), and, when the user want to start the video capture, I call `enumerateDevices` first, find the device whose `label` matches, and call `getUserMedia` with the `deviceId` of that device. Another limitation is that Safari does not give any useful result with `enumerateDevices` until you have called `getUserMedia` once and gained the user’s permission, so you have to start the capture with a random camera first before allowing users to choose which camera they prefer.
