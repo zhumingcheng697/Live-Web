@@ -200,7 +200,6 @@ form > * {
 }
 
 #start-capture {
-  cursor: pointer;
   border: none;
   border-radius: 6px;
   background: none;
@@ -255,7 +254,8 @@ form input[type="submit"] {
 }
 
 input[type="submit"]:not(:disabled),
-select:not(:disabled) {
+select:not(:disabled),
+button:not(:disabled) {
   cursor: pointer;
 }
 
