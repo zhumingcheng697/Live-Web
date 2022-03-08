@@ -89,7 +89,7 @@ socket.on("disconnect", () => {
 
 > The actual logic is a bit more complicated in reality, especially with the scheduling of the `"heartbeat"` and `"userlist"` event. For example, when a user who has been inactive for a long time becomes active again, a heartbeat is immediately sent to the server and the server immediately broadcasts the updated user list to every connected client. Similarly, when a user joins, quits, or become blocked, the server immediately broadcast a new list to all connected clients. After each “forced” update, a timer is reset through `clearInterval` so that the client and/or server do not have to emit another event within, say, 10 more seconds, and can wait another full 30 or 60 seconds, respectively. Furthermore, instead of having to always emit seperate `"heartbeat"` or `"userlist"` events, the client and the server can also send the status data in the payload of other events to lower the total number of events to emit (if there are any).
 
-## Report and Blocking
+## Reporting and Blocking
 
 Reporting and blocking is achieved similarly to how user list is achieved.
 
@@ -130,6 +130,13 @@ navigator.mediaDevices.enumerateDevices().then((devices) => {
 });
 ```
 
+```html
+<select>
+  <option value="Front Camera">Front Camera</option>
+  <option value="Back Camera">Back Camera</option>
+</select>
+```
+
 When the user select a video stream, the `deviceId` of that stream will be used in the `getUserMedia` call to start that specific stream. The name of the stream will also be cached so that the next time the user start the stream, the system will try to use the same camera.
 
 ```javascript
@@ -139,11 +146,11 @@ navigator.mediaDevices.getUserMedia({
 });
 ```
 
-> In reality, things are, again, a bit more complicated. `deviceId`s returned by `enumerateDevices` seem to be only valid before the next `getUserMedia` call, and after a new video stream starts, previously returned `deviceId`s seem to be all invalidated. To circumvent this, I actually keep track of the `label` of the preferred device, and, when the user want to start the video capture, I call `enumerateDevices` first, find the device whose `label` matches, and call `getUserMedia` with the `deviceId` of that device. Another limitation is that Safari does not give any useful result with `enumerateDevices` until you have called `getUserMedia` once and gained the user’s permission, so you have to start the capture with a random camera first before allowing users to choose which camera they prefer.
+> In reality, things are, again, a bit more complicated. `deviceId`s returned by `enumerateDevices` seem to be only valid before the next `getUserMedia` call in some browsers, and after a new video stream starts, previously returned `deviceId`s seem to be all invalidated. To circumvent this, I actually keep track of the `label` of the preferred device, and, when the user want to start the video capture, I call `enumerateDevices` first, find the device whose `label` matches, and call `getUserMedia` with the `deviceId` of that device. Another limitation is that Safari does not give any useful result with `enumerateDevices` until you have called `getUserMedia` once and gained the user’s permission, so you have to start the capture with a random camera first before allowing users to choose which camera they prefer.
 
 ## Turning Camera Off
 
-Turning camera capture off is actually pretty straightforward. You can just iterate through the `MediaStreamTrack`s in the `srcObject` of the `<video>` element by calling the `MediaStream.getTracks()` API, stop each track, and remove the track from the video stream. Once all tracks have been removed (there should actually only be one if we have video-only stream), the capture will stop and the green camera-indicator will also shut down.
+Turning camera capture off is actually pretty straightforward. You can just iterate through the `MediaStreamTrack`s in the `srcObject` of the `<video>` element by calling the `MediaStream.getTracks()` API, stop each track, and remove the track from the video stream. Once all tracks have been removed (there should actually only be one if we have video-only stream), the capture will stop and the green camera-indicator on Macs will also shut down.
 
 ```javascript
 captureVideoEl.srcObject.getTracks().forEach((e) => {
@@ -166,7 +173,7 @@ fetch("https://random-word-api.herokuapp.com/word?number=2&swear=0")
   });
 ```
 
-However, words returned by this API is completely random and what show up are often words I don’t know. Later on, I switch to another API [random-word-form.herokuapp.com](https://random-word-form.herokuapp.com/random) that allows you to choose adjectives or nouns and I start to use this one by default and only use the one mentioned earlier as a fail-safe.
+However, words returned by this API is completely random and what show up are often words I don’t know. Later on, I switch to another API [random-word-form.herokuapp.com](https://random-word-form.herokuapp.com/random) that allows you to choose adjectives or nouns and I start to use this one by default and only use the other one mentioned earlier as a fail-safe.
 
 ```javascript
 Promise.all(
