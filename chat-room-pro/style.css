@@ -484,8 +484,8 @@ body.server-blocked button:disabled {
   background: #000e;
   color: #fff;
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 15px;
+  left: 15px;
   font-size: 20px;
   width: 35px;
   height: 35px;
