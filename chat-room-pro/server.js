@@ -87,6 +87,7 @@ io.sockets.on("connection", function (socket) {
     ) {
       total += 1;
       userReport.set("total_removal", total);
+      userReport.delete(id);
 
       if (total >= 5) {
         blockTime *= 2;
