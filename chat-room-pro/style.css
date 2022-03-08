@@ -495,6 +495,7 @@ body.server-blocked button:disabled {
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
+  box-shadow: #444 0 0 7px;
 }
 
 #new-message-label {
