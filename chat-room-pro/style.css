@@ -497,8 +497,25 @@ body.server-blocked button:disabled {
   -webkit-user-select: none;
 }
 
+#new-message-label {
+  position: fixed;
+  left: var(--inset-left);
+  right: var(--inset-right);
+  bottom: calc(calc(var(--inset-bottom) + var(--bottom-tool-height)) + 20px);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+#new-message-text {
+  cursor: pointer;
+  padding: 8px 16px;
+  background-color: var(--secondary-bg);
+  transition: background 0.3s, color 0.3s;
+  border-radius: 16px;
+}
+
 button > *,
-span[tabindex] {
+span[tabindex]:not(.content) {
   user-select: none;
   -webkit-user-select: none;
 }
@@ -507,6 +524,10 @@ body.blocked .message:not(.other) .content,
 body.server-blocked .message:not(.other) .content {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+body:not(.has-new-message) #new-message-label {
+  display: none;
 }
 
 @media (max-height: 480px) {
