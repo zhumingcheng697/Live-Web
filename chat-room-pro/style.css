@@ -509,9 +509,11 @@ body.server-blocked button:disabled {
 #new-message-text {
   cursor: pointer;
   padding: 8px 16px;
+  color: var(--blue-color);
   background-color: var(--secondary-bg);
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
   border-radius: 16px;
+  box-shadow: #888 0 0 7px;
 }
 
 button > *,
@@ -649,5 +651,9 @@ body:not(.has-new-message) #new-message-label {
   body,
   form input[type="text"] {
     color: #fff;
+  }
+
+  #new-message-text {
+    box-shadow: #000 0 0 7px;
   }
 }
