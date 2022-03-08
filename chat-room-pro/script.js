@@ -999,8 +999,12 @@ window.addEventListener("DOMContentLoaded", () => {
   selectCameraEl.addEventListener("change", (e) => {
     e.preventDefault();
 
-    preferredDeviceLabel =
-      selectCameraEl.options[selectCameraEl.selectedIndex].text;
+    const label = selectCameraEl.options[selectCameraEl.selectedIndex].text;
+
+    if (label !== "- Please select a camera -") {
+      preferredDeviceLabel = label;
+    }
+
     stopVideoCapture();
     startVideoCapture();
   });
