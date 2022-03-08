@@ -20,7 +20,7 @@ I also added anothter two useful feature where users can click on an image to en
 
 Like I said in my midterm proposal, I want this chat room to be a safe and anonymous place for people from all over the world to meet. You just join, chat, and leave. No need to worry about creating accounts or being cyber stalked. There is also a robust system to prevent users from spamming or sending inappropriate messages.
 
-I am more familiar with plain HTML/CSS/JavaScript and I am interested in how WebSocket can add to traditional web-based interaction and web development and how some of the practical real-world features we have seen in chat apps could be implemented through WebSockets, so I did that instead doing something more visual with p5 or canvas.
+I am more familiar with plain HTML/CSS/JavaScript and I am interested in how WebSocket can add to traditional web-based interaction and how some of the practical real-world features we have seen in chat apps could be implemented through WebSockets, so I did that instead doing something more visual with p5 or canvas.
 
 I also spent a lot of time on CSS and responsive design because it really bugs me if I can’t get the layout right on mobile devices.
 
@@ -33,12 +33,14 @@ Each user keeps track of their own status like what is their username and when t
 ```javascript
 // client side
 
-socket.emit("heartbeat", {
-  username: MY_USER_NAME,
-  joinedTime: WHEN_I_JOINED,
-  lastActive: WHEN_I_WAS_LAST_ACTIVE,
-  isBlocked: AM_I_BLOCKED,
-});
+setInterval(() => {
+  socket.emit("heartbeat", {
+    username: MY_USER_NAME,
+    joinedTime: WHEN_I_JOINED,
+    lastActive: WHEN_I_WAS_LAST_ACTIVE,
+    isBlocked: AM_I_BLOCKED,
+  });
+}, 30 * 1000);
 ```
 
 On the server side, an ES6 Map is used to keep track of the status of all users.
@@ -64,7 +66,9 @@ At least every minute, the server will broadcast all the data it has obtained to
 ```javascript
 // server side
 
-socket.emit("userlist", [...users.values()]);
+setInterval(() => {
+  socket.emit("userlist", [...users.values()]);
+}, 60 * 1000);
 ```
 
 When the clients obtain this list, they will use it to update the visual list on the front end.
@@ -73,7 +77,7 @@ When the clients obtain this list, they will use it to update the visual list on
 // client side
 
 socket.on("userlist", (userlist) => {
-  updateUserlistElement(userlist);
+  // Update HTML based on `userlist`
 });
 ```
 
@@ -87,7 +91,36 @@ socket.on("disconnect", () => {
 });
 ```
 
-> The actual logic is a bit more complicated in reality, especially with the scheduling of the `"heartbeat"` and `"userlist"` event. For example, when a user who has been inactive for a long time becomes active again, a heartbeat is immediately sent to the server and the server immediately broadcasts the updated user list to every connected client. Similarly, when a user joins, quits, or become blocked, the server immediately broadcast a new list to all connected clients. After each “forced” update, a timer is reset through `clearInterval` so that the client and/or server do not have to emit another event within, say, 10 more seconds, and can wait another full 30 or 60 seconds, respectively. Furthermore, instead of having to always emit seperate `"heartbeat"` or `"userlist"` events, the client and the server can also send the status data in the payload of other events to lower the total number of events to emit (if there are any).
+> The actual logic is a bit more complicated in reality, especially with the scheduling of the `"heartbeat"` and `"userlist"` event. For example, when a user who has been inactive for a long time becomes active again, an event is immediately emitted and the server immediately broadcasts the updated user list to every connected client. Similarly, when a user joins, quits, or become blocked, the server immediately broadcast a new list to all connected clients. After each “forced” update, a timer is reset through `clearInterval` so that the client and/or server do not have to emit another event within, say, 10 more seconds, and can wait another full 30 or 60 seconds, respectively.
+>
+> ```javascript
+> // client side
+>
+> let heartbeatInterval;
+>
+> function resetHearbeatInterval() {
+>   clearInterval(heartbeatInterval);
+>   heartbeatInterval = setInterval(() => {
+>     // Send heartbeat
+>   }, 30 * 1000);
+> }
+> ```
+>
+> Furthermore, instead of having to always emit seperate `"heartbeat"` or `"userlist"` events, the client and the server can also send the status data in the payload of other events like `"join"` or `"block"` to lower the total number of events to emit.
+>
+> ```javascript
+> // server side
+>
+> socket.on("block", (data) => {
+>   // Update `users` Map with `data`
+>
+>   // Reset user list broadcasting interval
+>
+>   const userlist = [...users.values()];
+>   socket.emit("userlist", userlist);
+>   socket.broadcast.emit("block", data, userlist);
+> });
+> ```
 
 ## Reporting and Blocking
 
@@ -126,7 +159,7 @@ With the `MediaDevices.enumerateDevices()` API, a list of all available inputs i
 ```javascript
 navigator.mediaDevices.enumerateDevices().then((devices) => {
   const videoDevices = devices.filter((e) => e.kind === "videoinput");
-  updateCameraSelectorElement(videoDevices);
+  // Update `<select>` HTML with `videoDevices`
 });
 ```
 
@@ -146,7 +179,7 @@ navigator.mediaDevices.getUserMedia({
 });
 ```
 
-> In reality, things are, again, a bit more complicated. `deviceId`s returned by `enumerateDevices` seem to be only valid before the next `getUserMedia` call in some browsers, and after a new video stream starts, previously returned `deviceId`s seem to be all invalidated. To circumvent this, I actually keep track of the `label` of the preferred device, and, when the user want to start the video capture, I call `enumerateDevices` first, find the device whose `label` matches, and call `getUserMedia` with the `deviceId` of that device. Another limitation is that Safari does not give any useful result with `enumerateDevices` until you have called `getUserMedia` once and gained the user’s permission, so you have to start the capture with a random camera first before allowing users to choose which camera they prefer.
+> In reality, things are, again, a bit more complicated. `deviceId`s returned by `enumerateDevices` seem to be only valid before the next `getUserMedia` call in some browsers, and after a new video stream starts, previously returned `deviceId`s seem to be all invalidated. To circumvent this, I actually keep track of the `label` of the preferred device (eg. `"Front Camera"`), and, when the user want to start the video capture, I call `enumerateDevices` first, find the device whose `label` matches, and call `getUserMedia` with the `deviceId` of that device. Another limitation is that Safari does not give any useful result with `enumerateDevices` until you have called `getUserMedia` once and gained the user’s permission, so you have to start the capture with a random camera first before allowing users to choose which camera they prefer.
 
 ## Turning Camera Off
 
@@ -173,7 +206,7 @@ fetch("https://random-word-api.herokuapp.com/word?number=2&swear=0")
   });
 ```
 
-However, words returned by this API is completely random and what show up are often words I don’t know. Later on, I switch to another API [random-word-form.herokuapp.com](https://random-word-form.herokuapp.com/random) that allows you to choose adjectives or nouns and I start to use this one by default and only use the other one mentioned earlier as a fail-safe.
+However, words returned by this API is completely random and what show up are often words I don’t know. Later on, I switch to another API [random-word-form.herokuapp.com](https://random-word-form.herokuapp.com/random) that allows you to choose adjectives or nouns and I start to use this one by default and only use the other one mentioned earlier as a fail-safe if this one does not work.
 
 ```javascript
 Promise.all(
@@ -182,9 +215,13 @@ Promise.all(
       .then((res) => res.json())
       .then(([word]) => word)
   )
-).then((words) => {
-  usernameInput.value = words.join("-");
-});
+)
+  .then((words) => {
+    usernameInput.value = words.join("-");
+  })
+  .catch(() => {
+    // Call the fail-safe API
+  });
 ```
 
 The only limitation with this API is that adjectives and nouns cannot be generated with a single API call so I had to do a `Promise.all` to wait for both API calls to resolve.
@@ -238,7 +275,7 @@ I added a new listner each time an image is added because not all images would �
 
 ---
 
-In the future, it would seem natural to me if I can add more advanced chat app features like sending voice messages, recording videos, sending images and videos from users’ device/hard drive, and maybe even making voice calls and video calls with SFUs.
+In the future, it would seem natural to me if I can add more advanced chat app features like sending voice messages, recording videos, sending images and videos stored on users’ device/photo library, and maybe even making voice calls and video calls with SFUs.
 
 I orignally thought about adding DM/PM, replying, @ing, #ing, and message searching. However, most of these features seem to have not a lot to do with sockets and will be a nightmare for me to structure, design, and layout, so I’ll probably skip them for now. DM/PM is nice to have but may require too much changes on the front-end and may complicate the navigation too much especially for the mobile side.
 
