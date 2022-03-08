@@ -106,7 +106,7 @@ socket.on("disconnect", () => {
 > }
 > ```
 >
-> Furthermore, instead of having to always emit seperate `"heartbeat"` or `"userlist"` events, the client and the server can also send the status data in the payload of other events like `"join"` or `"block"` to lower the total number of events to emit.
+> Furthermore, instead of having to always emit separate `"heartbeat"` or `"userlist"` events, the client and the server can also send the status data in the payload of other events like `"join"` or `"block"` to lower the total number of events to emit.
 >
 > ```javascript
 > // server side
