@@ -513,7 +513,7 @@ body.server-blocked button:disabled {
   background-color: var(--secondary-bg);
   transition: background 0.3s, color 0.3s, box-shadow 0.3s;
   border-radius: 16px;
-  box-shadow: #888 0 0 7px;
+  box-shadow: #999 0 0 7px;
 }
 
 button > *,
