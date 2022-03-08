@@ -1056,7 +1056,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (scrollBottom(messageArea) <= 25) {
       unreadCount = 0;
       document.body.classList.remove("has-new-message");
-      newMessageEl.innerHTML = "&darr; No Unread Messages";
+      newMessageEl.innerHTML = "No Unread Messages";
     }
   });
 
