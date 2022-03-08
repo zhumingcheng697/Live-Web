@@ -324,11 +324,7 @@ window.addEventListener("DOMContentLoaded", () => {
     return messageDiv;
   }
 
-  function appendMessage(
-    messageEl,
-    forceScroll = false,
-    incrementCount = true
-  ) {
+  function appendMessage(messageEl, forceScroll = false) {
     const pScrollBottom = scrollBottom(messageArea);
     messages.appendChild(messageEl);
 
@@ -345,7 +341,7 @@ window.addEventListener("DOMContentLoaded", () => {
       } else {
         messages.scrollIntoView(false);
       }
-    } else if (incrementCount) {
+    } else {
       unreadCount++;
       document.body.classList.add("has-new-message");
       newMessageEl.innerHTML = `&darr; ${unreadCount} New Message${
@@ -379,8 +375,7 @@ window.addEventListener("DOMContentLoaded", () => {
   function unsendMessage(user) {
     appendMessage(
       messageElement([textNode(user), textNode(" unsent a message.")]),
-      false,
-      user !== myUsername
+      false
     );
   }
 
@@ -405,7 +400,6 @@ window.addEventListener("DOMContentLoaded", () => {
         document.createElement("br"),
         textNode("(This notification is only visible to you)"),
       ]),
-      false,
       false
     );
   }
