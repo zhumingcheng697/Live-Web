@@ -55,6 +55,7 @@ const addDoubleClickOrKeyListener = (
 };
 
 window.addEventListener("DOMContentLoaded", () => {
+  let unreadCount = 0;
   let joinedTime;
   let lastActive = null;
   let myUsername = "";
@@ -92,6 +93,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const transmitButton = document.getElementById("transmit-button");
   const fullscreenImage = document.getElementById("fullscreen-image");
   const cancelFullscreenEl = document.getElementById("cancel-fullscreen");
+  const newMessageEl = document.getElementById("new-message-text");
 
   function resetHearbeatInterval() {
     clearInterval(heartbeatInterval);
@@ -322,7 +324,11 @@ window.addEventListener("DOMContentLoaded", () => {
     return messageDiv;
   }
 
-  function appendMessage(messageEl, forceScroll = false) {
+  function appendMessage(
+    messageEl,
+    forceScroll = false,
+    incrementCount = true
+  ) {
     const pScrollBottom = scrollBottom(messageArea);
     messages.appendChild(messageEl);
 
@@ -339,6 +345,12 @@ window.addEventListener("DOMContentLoaded", () => {
       } else {
         messages.scrollIntoView(false);
       }
+    } else if (incrementCount) {
+      unreadCount++;
+      document.body.classList.add("has-new-message");
+      newMessageEl.innerHTML = `&darr; ${unreadCount} New Message${
+        unreadCount === 1 ? "" : "s"
+      }`;
     }
   }
 
@@ -366,7 +378,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function unsendMessage(user) {
     appendMessage(
-      messageElement([textNode(user), textNode(" unsent a message.")])
+      messageElement([textNode(user), textNode(" unsent a message.")]),
+      false,
+      user !== myUsername
     );
   }
 
@@ -390,7 +404,9 @@ window.addEventListener("DOMContentLoaded", () => {
         textNode("."),
         document.createElement("br"),
         textNode("(This notification is only visible to you)"),
-      ])
+      ]),
+      false,
+      false
     );
   }
 
@@ -948,6 +964,8 @@ window.addEventListener("DOMContentLoaded", () => {
             enableSocket && socket.emit("report", { sender, id, socketId });
             reportMessage(sender);
           }
+
+          e.preventDefault();
         }
       }
     },
@@ -964,6 +982,8 @@ window.addEventListener("DOMContentLoaded", () => {
         fullscreenImage.src = target.src;
         document.body.classList.add("fullscreen-image");
         document.activeElement.blur();
+
+        e.preventDefault();
       }
     }
   );
@@ -1036,5 +1056,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
     document.body.classList.remove("fullscreen-image");
     fullscreenImage.src = "";
+  });
+
+  messageArea.addEventListener("scroll", (e) => {
+    if (scrollBottom(messageArea) <= 25) {
+      unreadCount = 0;
+      document.body.classList.remove("has-new-message");
+      newMessageEl.innerHTML = "&darr; No Unread Messages";
+    }
+  });
+
+  addClickOrKeyListener(newMessageEl, (e) => {
+    e.preventDefault();
+    messages.scrollIntoView(false);
   });
 });
