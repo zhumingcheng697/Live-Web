@@ -574,20 +574,20 @@ window.addEventListener("DOMContentLoaded", () => {
     usersEl.innerHTML = resultHtml;
   }
 
-  function startVideoCapture() {
+  function startVideoCapture(retry = true) {
     const getConstraint = new Promise((resolve) => {
       if (preferredDeviceLabel) {
         navigator.mediaDevices
           .enumerateDevices()
           .then((devices) => {
-            const videoDevices = devices.find(
+            const device = devices.find(
               (e) => e.kind === "videoinput" && e.label === preferredDeviceLabel
             );
 
-            if (videoDevices && videoDevices.deviceId) {
+            if (device && device.deviceId) {
               resolve({
                 audio: false,
-                video: { deviceId: videoDevices.deviceId },
+                video: { deviceId: device.deviceId },
               });
             } else {
               resolve({ audio: false, video: true });
@@ -609,9 +609,6 @@ window.addEventListener("DOMContentLoaded", () => {
           captureVideoEl.onloadedmetadata = () => {
             captureButton.disabled = false;
             captureVideoEl.play();
-            if (!preferredDeviceLabel || !constraint.video.deviceId) {
-              preferredDeviceLabel = stream.getVideoTracks()[0].label;
-            }
             updateLayout();
           };
 
@@ -619,6 +616,24 @@ window.addEventListener("DOMContentLoaded", () => {
             const videoDevices = devices.filter((e) => e.kind === "videoinput");
 
             if (!videoDevices.length) return;
+
+            if (preferredDeviceLabel && retry) {
+              const device = videoDevices.find(
+                (e) =>
+                  e.kind === "videoinput" && e.label === preferredDeviceLabel
+              );
+
+              if (
+                device &&
+                stream.getVideoTracks()[0].label !== preferredDeviceLabel
+              ) {
+                stopCaptureEl();
+                startCaptureEl(false);
+                return;
+              }
+            }
+
+            preferredDeviceLabel = stream.getVideoTracks()[0].label;
 
             selectCameraEl.innerHTML = "";
 
