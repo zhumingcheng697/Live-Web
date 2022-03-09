@@ -335,7 +335,10 @@ window.addEventListener("DOMContentLoaded", () => {
       messageEl.removeEventListener("load", scrollMessages, true);
     }
 
-    if (pScrollBottom <= 25 || forceScroll) {
+    if (
+      (pScrollBottom <= 25 && messageArea.style.visibility !== "hidden") ||
+      forceScroll
+    ) {
       if (messageEl.classList.contains("image")) {
         messageEl.addEventListener("load", scrollMessages, true);
       } else {
