@@ -307,7 +307,7 @@ function scrollBottom(el) {
   return el.scrollHeight - el.clientHeight - el.scrollTop;
 }
 
-if (scrollBottom(messageArea) <= 25 || forceScroll) {
+if (scrollBottom(messageArea) <= 25 || IMPORTANT_EVENT_OCCURRED) {
   messages.scrollIntoView(false);
 }
 ```
@@ -322,7 +322,7 @@ function scrollMessages(e) {
   messageEl.removeEventListener("load", scrollMessages, true);
 }
 
-if (messageEl.classList.contains("image")) {
+if (MESSAGE_CONTAINS_IMAGE) {
   messageEl.addEventListener("load", scrollMessages, true);
 } else {
   messages.scrollIntoView(false);
