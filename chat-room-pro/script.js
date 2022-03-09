@@ -324,6 +324,14 @@ window.addEventListener("DOMContentLoaded", () => {
     return messageDiv;
   }
 
+  function updateNewMessageEl() {
+    if (scrollBottom(messageArea) <= 25) {
+      unreadCount = 0;
+      document.body.classList.remove("has-new-message");
+      newMessageEl.innerHTML = "No Unread Messages";
+    }
+  }
+
   function appendMessage(messageEl, forceScroll = false) {
     const pScrollBottom = scrollBottom(messageArea);
     messages.appendChild(messageEl);
@@ -336,7 +344,8 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     if (
-      (pScrollBottom <= 25 && messageArea.style.visibility !== "hidden") ||
+      (pScrollBottom <= 25 &&
+        window.getComputedStyle(messageArea).visibility !== "hidden") ||
       forceScroll
     ) {
       if (messageEl.classList.contains("image")) {
@@ -350,6 +359,7 @@ window.addEventListener("DOMContentLoaded", () => {
       newMessageEl.innerHTML = `&darr; ${unreadCount} New Message${
         unreadCount === 1 ? "" : "s"
       }`;
+      updateNewMessageEl();
     }
   }
 
@@ -1059,13 +1069,7 @@ window.addEventListener("DOMContentLoaded", () => {
     fullscreenImage.src = "";
   });
 
-  messageArea.addEventListener("scroll", (e) => {
-    if (scrollBottom(messageArea) <= 25) {
-      unreadCount = 0;
-      document.body.classList.remove("has-new-message");
-      newMessageEl.innerHTML = "No Unread Messages";
-    }
-  });
+  messageArea.addEventListener("scroll", updateNewMessageEl);
 
   addClickOrKeyListener(newMessageEl, (e) => {
     e.preventDefault();
