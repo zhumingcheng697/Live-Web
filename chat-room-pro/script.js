@@ -609,7 +609,9 @@ window.addEventListener("DOMContentLoaded", () => {
           captureVideoEl.onloadedmetadata = () => {
             captureButton.disabled = false;
             captureVideoEl.play();
-            preferredDeviceLabel = stream.getVideoTracks()[0].label;
+            if (!preferredDeviceLabel || !constraint.video.deviceId) {
+              preferredDeviceLabel = stream.getVideoTracks()[0].label;
+            }
             updateLayout();
           };
 
