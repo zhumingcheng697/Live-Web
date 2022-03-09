@@ -627,8 +627,8 @@ window.addEventListener("DOMContentLoaded", () => {
                 device &&
                 stream.getVideoTracks()[0].label !== preferredDeviceLabel
               ) {
-                stopCaptureEl();
-                startCaptureEl(false);
+                stopVideoCapture();
+                startVideoCapture(false);
                 return;
               }
             }
