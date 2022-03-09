@@ -605,6 +605,9 @@ window.addEventListener("DOMContentLoaded", () => {
       navigator.mediaDevices
         .getUserMedia(constraint)
         .then((stream) => {
+          let labelMatch =
+            stream.getVideoTracks()[0].label === preferredDeviceLabel;
+
           captureVideoEl.srcObject = stream;
           captureVideoEl.onloadedmetadata = () => {
             captureButton.disabled = false;
@@ -612,28 +615,32 @@ window.addEventListener("DOMContentLoaded", () => {
             updateLayout();
           };
 
+          if (!preferredDeviceLabel || labelMatch) {
+            document.body.classList.add("stream-ready");
+          }
+
           navigator.mediaDevices.enumerateDevices().then((devices) => {
             const videoDevices = devices.filter((e) => e.kind === "videoinput");
 
-            if (!videoDevices.length) return;
-
-            if (preferredDeviceLabel && retry) {
-              const device = videoDevices.find(
+            if (
+              retry &&
+              preferredDeviceLabel &&
+              !labelMatch &&
+              videoDevices.find(
                 (e) =>
                   e.kind === "videoinput" && e.label === preferredDeviceLabel
-              );
-
-              if (
-                device &&
-                stream.getVideoTracks()[0].label !== preferredDeviceLabel
-              ) {
-                stopVideoCapture();
-                startVideoCapture(false);
-                return;
-              }
+              )
+            ) {
+              stopVideoCapture();
+              startVideoCapture(false);
+              return;
             }
 
+            document.body.classList.add("stream-ready");
+
             preferredDeviceLabel = stream.getVideoTracks()[0].label;
+
+            if (!videoDevices.length) return;
 
             selectCameraEl.innerHTML = "";
 
@@ -658,6 +665,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function stopVideoCapture() {
     captureButton.disabled = true;
+
+    document.body.classList.remove("stream-ready");
 
     if (captureVideoEl.srcObject) {
       captureVideoEl.srcObject.getTracks().forEach((e) => {
@@ -1031,7 +1040,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const label = selectCameraEl.options[selectCameraEl.selectedIndex].text;
 
-    if (label !== "- Please select a camera -") {
+    if (label && label !== "- Please select a camera -") {
       preferredDeviceLabel = label;
     }
 

@@ -449,6 +449,10 @@ body.server-blocked button:disabled {
   opacity: 0.5;
 }
 
+body:not(.stream-ready) video {
+  display: none;
+}
+
 #body-container {
   display: flex;
   flex-direction: column;
