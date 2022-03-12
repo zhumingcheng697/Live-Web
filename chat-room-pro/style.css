@@ -537,6 +537,21 @@ body:not(.has-new-message) #new-message-label {
   display: none;
 }
 
+body.upside-down .capture-container {
+  top: calc(
+    calc(var(--inset-top) + var(--user-header-height)) +
+      var(--bottom-tool-height)
+  );
+  bottom: var(--inset-bottom);
+}
+
+body.upside-down #capture-form,
+body.upside-down #transmit-form {
+  bottom: auto;
+  top: calc(var(--inset-top) + var(--user-header-height));
+  height: var(--bottom-tool-height);
+}
+
 @media (max-height: 480px) {
   body.layout-b .capture-container {
     top: calc(var(--inset-top) + var(--user-header-height));

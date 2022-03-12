@@ -734,10 +734,16 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateOrientation(angle) {
-    if (angle == -90) {
+    if (angle == -90 || angle == 270) {
       document.body.classList.add("home-button-left");
     } else {
       document.body.classList.remove("home-button-left");
+    }
+
+    if (angle == 180) {
+      document.body.classList.add("upside-down");
+    } else {
+      document.body.classList.remove("upside-down");
     }
 
     updateLayout();
