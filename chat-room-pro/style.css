@@ -214,7 +214,7 @@ form > * {
   font-weight: 500;
 }
 
-form input[type="text"] {
+input[type="text"] {
   border: none;
   border-radius: 6px;
   padding: 8px 10px;
@@ -226,7 +226,7 @@ form input[type="text"] {
   transition: background-color 0.3s, color 0.3s;
 }
 
-form input[type="submit"],
+input[type="submit"],
 select {
   appearance: none;
   -webkit-appearance: none;
@@ -248,7 +248,7 @@ select {
   flex-shrink: 1;
 }
 
-form input[type="submit"] {
+input[type="submit"] {
   background-color: var(--blue-color);
   color: #fff;
 }
@@ -260,6 +260,7 @@ button:not(:disabled) {
 }
 
 input[type="submit"]:disabled,
+select:not(:disabled),
 select:disabled {
   cursor: not-allowed;
   opacity: 0.5;
@@ -275,44 +276,15 @@ select:disabled {
   display: inline-flex;
 }
 
-.message {
-  max-width: 90%;
-  flex-direction: column;
-}
-
-.user {
-  text-align: start;
-  align-items: center;
-  align-content: center;
-}
-
-.message.other {
-  text-align: center;
-  margin: 5px auto;
-}
-
-.message.sent {
-  text-align: end;
-  margin-left: auto;
-}
-
-.message.received {
-  text-align: start;
-  margin-right: auto;
-}
-
 .metadata {
   display: inline-block;
   color: var(--secondary-txt);
   transition: color 0.3s;
 }
 
-.message .metadata {
-  margin: 8px;
-}
-
-.message .metadata.hidden {
-  display: none;
+.message {
+  max-width: 90%;
+  flex-direction: column;
 }
 
 .message .content {
@@ -326,10 +298,24 @@ select:disabled {
   white-space: break-spaces;
 }
 
+.message.other {
+  text-align: center;
+  margin: 5px auto;
+}
+
 .message.other .content {
   padding: 0;
   margin: auto;
   text-align: center;
+}
+
+.message:not(.other) .content {
+  cursor: help;
+}
+
+.message.sent {
+  text-align: end;
+  margin-left: auto;
 }
 
 .message.sent .content {
@@ -338,8 +324,9 @@ select:disabled {
   margin-left: auto;
 }
 
-.message:not(.other) .content {
-  cursor: help;
+.message.received {
+  text-align: start;
+  margin-right: auto;
 }
 
 .message.received .content {
@@ -348,11 +335,30 @@ select:disabled {
   margin-right: auto;
 }
 
+.message .metadata {
+  margin: 8px;
+}
+
+.message .metadata.hidden {
+  display: none;
+}
+
 .message.image img.content {
   background: none;
   padding: 0;
   max-width: 100%;
   max-height: max(35vh, 200px);
+}
+
+.user {
+  text-align: start;
+  align-items: center;
+  align-content: center;
+}
+
+.user > div {
+  display: inline-flex;
+  flex-direction: column;
 }
 
 .user span {
@@ -385,11 +391,6 @@ select:disabled {
   background: #f43;
 }
 
-.user > div {
-  display: inline-flex;
-  flex-direction: column;
-}
-
 body:not(.intro) #intro-area {
   display: none;
 }
@@ -399,7 +400,11 @@ body:not(.setting-up) #setup-area {
 }
 
 body.intro #message-area,
-body.setting-up #message-area {
+body.setting-up #message-area,
+body.intro #user-area,
+body.setting-up #user-area,
+body.intro #user-header-area,
+body.setting-up #user-header-area {
   display: none;
 }
 
@@ -410,17 +415,7 @@ body.fullscreen-image #message-area {
   pointer-events: none;
 }
 
-body.intro #user-area,
-body.setting-up #user-area {
-  display: none;
-}
-
 body:not(.chatting) #send-form {
-  display: none;
-}
-
-body.intro #user-header-area,
-body.setting-up #user-header-area {
   display: none;
 }
 
@@ -444,7 +439,9 @@ body.fullscreen-image > :not(#fullscreen-area) {
 body.blocked input:disabled,
 body.blocked button:disabled,
 body.server-blocked input:disabled,
-body.server-blocked button:disabled {
+body.server-blocked button:disabled,
+body.blocked .message:not(.other) .content,
+body.server-blocked .message:not(.other) .content {
   cursor: not-allowed;
   opacity: 0.5;
 }
@@ -527,12 +524,6 @@ span[tabindex]:not(.content) {
   -webkit-user-select: none;
 }
 
-body.blocked .message:not(.other) .content,
-body.server-blocked .message:not(.other) .content {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
 body:not(.has-new-message) #new-message-label {
   display: none;
 }
@@ -553,6 +544,17 @@ body.upside-down #transmit-form {
 }
 
 @media (max-height: 480px) {
+  body.layout-b.home-button-left .capture-container {
+    left: calc(var(--inset-left) + var(--tool-width));
+    right: calc(var(--inset-right) + var(--user-list-width));
+  }
+
+  body.layout-b.home-button-left #capture-form,
+  body.layout-b.home-button-left #transmit-form {
+    left: var(--inset-left);
+    right: auto;
+  }
+
   body.layout-b .capture-container {
     top: calc(var(--inset-top) + var(--user-header-height));
     left: var(--inset-left);
@@ -560,16 +562,6 @@ body.upside-down #transmit-form {
     right: calc(
       calc(var(--inset-right) + var(--user-list-width)) + var(--tool-width)
     );
-  }
-
-  body.layout-b.home-button-left .capture-container {
-    left: calc(var(--inset-left) + var(--tool-width));
-    right: calc(var(--inset-right) + var(--user-list-width));
-  }
-
-  body.layout-b #capture-form > *,
-  body.layout-b #transmit-form > * {
-    max-width: calc(var(--tool-width) - 16px);
   }
 
   body.layout-b #capture-form,
@@ -583,10 +575,9 @@ body.upside-down #transmit-form {
     right: calc(var(--inset-right) + var(--user-list-width));
   }
 
-  body.layout-b.home-button-left #capture-form,
-  body.layout-b.home-button-left #transmit-form {
-    left: var(--inset-left);
-    right: auto;
+  body.layout-b #capture-form > *,
+  body.layout-b #transmit-form > * {
+    max-width: calc(var(--tool-width) - 16px);
   }
 }
 
@@ -625,18 +616,12 @@ body.upside-down #transmit-form {
     pointer-events: none;
   }
 
-  body.show-users #send-form {
-    display: none;
-  }
-
+  body.show-users #send-form,
   body.show-users #show-all-user {
     display: none;
   }
 
-  body:not(.show-users) #back-to-chat {
-    display: none;
-  }
-
+  body:not(.show-users) #back-to-chat,
   body:not(.show-users) #user-area {
     display: none;
   }
