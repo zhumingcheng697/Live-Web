@@ -53,10 +53,10 @@ img {
 #setup-form {
   flex-wrap: wrap;
   justify-content: center;
-}
 
-#setup-form > * {
-  margin: 10px 4px;
+  & > * {
+    margin: 10px 4px;
+  }
 }
 
 #generate-random,
@@ -66,31 +66,19 @@ img {
 #retake {
   cursor: pointer;
   color: var(--blue-color);
-}
 
-#generate-random:hover,
-#show-all-user:hover,
-#back-to-chat:hover,
-#stop-capture:hover,
-#retake:hover {
-  text-decoration: underline;
-}
+  &:hover {
+    text-decoration: underline;
+  }
 
-#generate-random.disabled,
-#show-all-user.disabled,
-#back-to-chat.disabled,
-#stop-capture.disabled,
-#retake.disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
+  &.disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
 
-#generate-random.disabled:hover,
-#show-all-user.disabled:hover,
-#back-to-chat.disabled:hover,
-#stop-capture.disabled:hover,
-#retake.disabled:hover {
-  text-decoration: none;
+    &:hover {
+      text-decoration: none;
+    }
+  }
 }
 
 #user-header-area {
@@ -106,10 +94,10 @@ img {
   transition: background-color 0.3s;
   display: none;
   box-sizing: border-box;
-}
 
-#user-header-area > * {
-  margin: 0 10px;
+  & > * {
+    margin: 0 10px;
+  }
 }
 
 #message-area,
@@ -175,11 +163,11 @@ img {
 
 #users {
   padding: 10px 15px;
-}
 
-#users > h3 {
-  margin-bottom: 2px;
-  text-align: start;
+  & > h3 {
+    margin-bottom: 2px;
+    text-align: start;
+  }
 }
 
 #send-form,
@@ -201,10 +189,10 @@ form {
   margin: 0 auto;
   align-content: center;
   align-items: center;
-}
 
-form > * {
-  margin: 4px;
+  & > * {
+    margin: 4px;
+  }
 }
 
 #start-capture {
@@ -265,13 +253,11 @@ input[type="submit"],
 select,
 button {
   cursor: pointer;
-}
 
-input[type="submit"]:disabled,
-select:disabled,
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }
 
 #send-form input[type="text"] {
@@ -293,110 +279,110 @@ button:disabled {
 .message {
   max-width: 90%;
   flex-direction: column;
-}
 
-.message .content {
-  display: inline-block;
-  padding: 10px;
-  border-radius: 8px;
-  text-align: start;
-  font-family: inherit;
-  margin: 0;
-  word-break: break-word;
-  white-space: break-spaces;
-}
+  .content {
+    display: inline-block;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: start;
+    font-family: inherit;
+    margin: 0;
+    word-break: break-word;
+    white-space: break-spaces;
+  }
 
-.message.other {
-  text-align: center;
-  margin: 5px auto;
-}
+  &.other {
+    text-align: center;
+    margin: 5px auto;
 
-.message.other .content {
-  padding: 0;
-  margin: auto;
-  text-align: center;
-}
+    .content {
+      padding: 0;
+      margin: auto;
+      text-align: center;
+    }
+  }
 
-.message:not(.other) .content {
-  cursor: help;
-}
+  &:not(.other) .content {
+    cursor: help;
+  }
 
-.message.sent {
-  text-align: end;
-  margin-left: auto;
-}
+  &.sent {
+    text-align: end;
+    margin-left: auto;
 
-.message.sent .content {
-  background-color: var(--blue-color);
-  color: #fff;
-  margin-left: auto;
-}
+    .content {
+      background-color: var(--blue-color);
+      color: #fff;
+      margin-left: auto;
+    }
+  }
 
-.message.received {
-  text-align: start;
-  margin-right: auto;
-}
+  &.received {
+    text-align: start;
+    margin-right: auto;
 
-.message.received .content {
-  transition: background-color 0.3s;
-  background-color: var(--secondary-bg);
-  margin-right: auto;
-}
+    .content {
+      transition: background-color 0.3s;
+      background-color: var(--secondary-bg);
+      margin-right: auto;
+    }
+  }
 
-.message .metadata {
-  margin: 8px;
-}
+  .metadata {
+    margin: 8px;
 
-.message .metadata.hidden {
-  display: none;
-}
+    &.hidden {
+      display: none;
+    }
+  }
 
-.message.image img.content {
-  background: none;
-  padding: 0;
-  max-width: 100%;
-  max-height: max(35vh, 200px);
+  &.image img.content {
+    background: none;
+    padding: 0;
+    max-width: 100%;
+    max-height: max(35vh, 200px);
+  }
 }
 
 .user {
   text-align: start;
   align-items: center;
   align-content: center;
-}
 
-.user > div {
-  display: inline-flex;
-  flex-direction: column;
-}
+  & > div {
+    display: inline-flex;
+    flex-direction: column;
+  }
 
-.user span {
-  display: inline-block;
-  margin: 2px 0;
-}
+  span {
+    display: inline-block;
+    margin: 2px 0;
+  }
 
-.user .metadata {
-  margin: 1px 0;
-}
+  .metadata {
+    margin: 1px 0;
+  }
 
-.user .status {
-  height: 12px;
-  width: 12px;
-  margin-right: 9px;
-  flex-shrink: 0;
-  border-radius: 6px;
-  box-sizing: border-box;
-}
+  .status {
+    height: 12px;
+    width: 12px;
+    margin-right: 9px;
+    flex-shrink: 0;
+    border-radius: 6px;
+    box-sizing: border-box;
 
-.user .status.active {
-  background: #3c5;
-}
+    &.active {
+      background: #3c5;
+    }
 
-.user .status.inactive {
-  border: solid 2px #999;
-}
+    &.inactive {
+      border: solid 2px #999;
+    }
 
-.user .status.blocked {
-  background: #f43;
+    &.blocked {
+      background: #f43;
+    }
+  }
 }
 
 body:not(.intro) #intro-area {
@@ -407,20 +393,22 @@ body:not(.setting-up) #setup-area {
   display: none;
 }
 
-body.intro #message-area,
-body.intro #user-area,
-body.intro #user-header-area,
-body.setting-up #message-area,
-body.setting-up #user-area,
-body.setting-up #user-header-area {
-  display: none;
+body.intro,
+body.setting-up {
+  #message-area,
+  #user-area,
+  #user-header-area {
+    display: none;
+  }
 }
 
-body.capturing #message-area,
-body.transmitting #message-area,
-body.fullscreen-image #message-area {
-  visibility: hidden;
-  pointer-events: none;
+body.capturing,
+body.transmitting,
+body.fullscreen-image {
+  #message-area {
+    visibility: hidden;
+    pointer-events: none;
+  }
 }
 
 body:not(.chatting) #send-form {
@@ -444,14 +432,14 @@ body.fullscreen-image > :not(#fullscreen-area) {
   pointer-events: none;
 }
 
-body.blocked input:disabled,
-body.blocked button:disabled,
-body.blocked .message:not(.other) .content,
-body.server-blocked input:disabled,
-body.server-blocked button:disabled,
-body.server-blocked .message:not(.other) .content {
-  cursor: not-allowed;
-  opacity: 0.5;
+body.blocked,
+body.server-blocked {
+  input:disabled,
+  button:disabled,
+  .message:not(.other) .content {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 }
 
 body:not(.stream-ready) video {
@@ -536,55 +524,60 @@ body:not(.has-new-message) #new-message-label {
   display: none;
 }
 
-body.upside-down .capture-container {
-  top: calc(
-    var(--inset-top) + var(--user-header-height) + var(--bottom-tool-height)
-  );
-  bottom: var(--inset-bottom);
-}
+body.upside-down {
+  .capture-container {
+    top: calc(
+      var(--inset-top) + var(--user-header-height) + var(--bottom-tool-height)
+    );
+    bottom: var(--inset-bottom);
+  }
 
-body.upside-down #capture-form,
-body.upside-down #transmit-form {
-  bottom: auto;
-  top: calc(var(--inset-top) + var(--user-header-height));
-  height: var(--bottom-tool-height);
+  #capture-form,
+  #transmit-form {
+    bottom: auto;
+    top: calc(var(--inset-top) + var(--user-header-height));
+    height: var(--bottom-tool-height);
+  }
 }
 
 @media (max-height: 480px) {
-  body.layout-b.home-button-left .capture-container {
-    left: calc(var(--inset-left) + var(--tool-width));
-    right: calc(var(--inset-right) + var(--user-list-width));
-  }
+  body.layout-b {
+    &.home-button-left {
+      .capture-container {
+        left: calc(var(--inset-left) + var(--tool-width));
+        right: calc(var(--inset-right) + var(--user-list-width));
+      }
 
-  body.layout-b.home-button-left #capture-form,
-  body.layout-b.home-button-left #transmit-form {
-    left: var(--inset-left);
-    right: auto;
-  }
+      #capture-form,
+      #transmit-form {
+        left: var(--inset-left);
+        right: auto;
+      }
+    }
 
-  body.layout-b .capture-container {
-    top: calc(var(--inset-top) + var(--user-header-height));
-    left: var(--inset-left);
-    bottom: var(--inset-bottom);
-    right: calc(
-      var(--inset-right) + var(--user-list-width) + var(--tool-width)
-    );
-  }
+    .capture-container {
+      top: calc(var(--inset-top) + var(--user-header-height));
+      left: var(--inset-left);
+      bottom: var(--inset-bottom);
+      right: calc(
+        var(--inset-right) + var(--user-list-width) + var(--tool-width)
+      );
+    }
 
-  body.layout-b #capture-form,
-  body.layout-b #transmit-form {
-    height: auto;
-    flex-direction: column;
-    top: calc(var(--inset-top) + var(--user-header-height));
-    bottom: var(--inset-bottom);
-    width: var(--tool-width);
-    left: auto;
-    right: calc(var(--inset-right) + var(--user-list-width));
-  }
+    #capture-form,
+    #transmit-form {
+      height: auto;
+      flex-direction: column;
+      top: calc(var(--inset-top) + var(--user-header-height));
+      bottom: var(--inset-bottom);
+      width: var(--tool-width);
+      left: auto;
+      right: calc(var(--inset-right) + var(--user-list-width));
 
-  body.layout-b #capture-form > *,
-  body.layout-b #transmit-form > * {
-    max-width: calc(var(--tool-width) - 16px);
+      & > * {
+        max-width: calc(var(--tool-width) - 16px);
+      }
+    }
   }
 }
 
@@ -612,33 +605,39 @@ body.upside-down #transmit-form {
 
   #users {
     padding: 10px 20px;
+
+    & > h3:first-of-type {
+      margin-top: 0;
+    }
   }
 
-  #users > h3:first-of-type {
-    margin-top: 0;
+  body.show-users {
+    #message-area {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    #send-form,
+    #show-all-user {
+      display: none;
+    }
   }
 
-  body.show-users #message-area {
-    visibility: hidden;
-    pointer-events: none;
+  body:not(.show-users) {
+    #back-to-chat,
+    #user-area {
+      display: none;
+    }
   }
 
-  body.show-users #send-form,
-  body.show-users #show-all-user {
-    display: none;
-  }
+  body.connecting {
+    &.show-users #connecting-prompt {
+      display: none;
+    }
 
-  body:not(.show-users) #back-to-chat,
-  body:not(.show-users) #user-area {
-    display: none;
-  }
-
-  body.connecting.show-users #connecting-prompt {
-    display: none;
-  }
-
-  body.connecting:not(.show-users) #user-header-area > span[tabindex] {
-    display: none;
+    &:not(.show-users) #user-header-area > span[tabindex] {
+      display: none;
+    }
   }
 
   body:not(.connecting) #connecting-prompt {
