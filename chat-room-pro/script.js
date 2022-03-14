@@ -659,6 +659,7 @@ window.addEventListener("DOMContentLoaded", () => {
           document.body.classList.remove("capturing");
           document.body.classList.add("chatting");
           console.error(e);
+          alert(`Unable to start the camera: ${e}`);
         });
     });
   }
