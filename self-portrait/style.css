@@ -13,8 +13,11 @@ body {
   padding: 0;
   background: #d9d9d9;
   overflow: hidden;
-  max-height: 100vh;
-  max-width: 100vw;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
 }
 
 video {
