@@ -14,7 +14,14 @@ httpServer.listen(process.env.PORT);
 
 // WebSocket Portion
 // WebSockets work with the HTTP server
-var io = require("socket.io")(httpServer);
+const { Server } = require("socket.io");
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: true,
+    methods: ["GET", "POST"],
+  },
+});
 
 let userlistIntervalId;
 const reports = new Map();
