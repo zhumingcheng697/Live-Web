@@ -104,7 +104,7 @@ window.addEventListener("DOMContentLoaded", () => {
         joinedTime
       ) {
         enableSocket &&
-          socket.emit("heartbeat", {
+          socket.volatile.emit("heartbeat", {
             username: myUsername,
             joinedTime,
             isBlocked: isBlocked() || isSeverBlocked(),
