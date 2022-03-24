@@ -225,6 +225,20 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     imagesDiv.insertBefore(divEl, imagesDiv.childNodes[2]);
+
+    p5lm &&
+      p5lm.send(
+        JSON.stringify({
+          type: "curve",
+          payload: {
+            coords: [],
+            weight: size_,
+            color: colorWithOpacity(),
+            imgData: takeSnapshot(),
+            id: p5lm.socket.id,
+          },
+        })
+      );
   }
 
   function addBg(coords, weight, color, imgData, id = "myself") {
@@ -323,6 +337,21 @@ window.addEventListener("DOMContentLoaded", () => {
         "mccoy-zhu-drawing-board-remaster"
       );
 
+      p5lm.on("connect", () => {
+        p5lm.send(
+          JSON.stringify({
+            type: "curve",
+            payload: {
+              coords: [],
+              weight: size_,
+              color: colorWithOpacity(),
+              imgData: takeSnapshot(),
+              id: p5lm.socket.id,
+            },
+          })
+        );
+      });
+
       p5lm.on("data", (data) => {
         const { type, payload } = JSON.parse(data);
         if (type === "dot") {
@@ -343,20 +372,6 @@ window.addEventListener("DOMContentLoaded", () => {
       captureEl.srcObject = stream;
       captureEl.onloadedmetadata = () => {
         captureEl.play();
-
-        p5lm &&
-          p5lm.send(
-            JSON.stringify({
-              type: "curve",
-              payload: {
-                coords: [],
-                weight: size_,
-                color: colorWithOpacity(),
-                imgData: takeSnapshot(),
-                id: p5lm.socket.id,
-              },
-            })
-          );
       };
     })
     .catch((e) => {
