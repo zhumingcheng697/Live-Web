@@ -210,6 +210,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
     divEl.insertBefore(video, divEl.firstChild);
 
+    video.playsinline = true;
+    video.muted = true;
+    video.autoplay = true;
+
+    video.addEventListener("loadedmetadata", () => {
+      video.play();
+    });
+
     imagesDiv.insertBefore(divEl, imagesDiv.childNodes[2]);
   }
 
