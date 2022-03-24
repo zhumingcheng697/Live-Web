@@ -341,21 +341,22 @@ window.addEventListener("DOMContentLoaded", () => {
         "mccoy-zhu-drawing-board-remaster"
       );
 
-      p5lm.on("connect", () => {
-        captureStarted &&
-          p5lm.send(
-            JSON.stringify({
-              type: "curve",
-              payload: {
-                coords: [],
-                weight: size_,
-                color: colorWithOpacity(),
-                imgData: takeSnapshot(),
-                id: p5lm.socket.id,
-              },
-            })
-          );
-      });
+      p5lm.socket &&
+        p5lm.socket.on("connect", () => {
+          captureStarted &&
+            p5lm.send(
+              JSON.stringify({
+                type: "curve",
+                payload: {
+                  coords: [],
+                  weight: size_,
+                  color: colorWithOpacity(),
+                  imgData: takeSnapshot(),
+                  id: p5lm.socket.id,
+                },
+              })
+            );
+        });
 
       p5lm.on("data", (data) => {
         const { type, payload } = JSON.parse(data);
