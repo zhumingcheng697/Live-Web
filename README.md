@@ -25,3 +25,7 @@
 - ### [Drawing Board v2](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board-v2)
 
   Week 4 Session 2 Assignment
+
+- ### [Drawing Board v3](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board-v3)
+
+  Week 8 Session 1 Assignment
