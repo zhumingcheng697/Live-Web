@@ -203,9 +203,20 @@ window.addEventListener("DOMContentLoaded", () => {
     return bgGraph.elt.toDataURL("image/png");
   }
 
+  function addStream(video, id) {
+    const divEl =
+      document.getElementById(id + "-DIV") || document.createElement("DIV");
+    divEl.id = id + "-DIV";
+
+    divEl.insertBefore(video, divEl.firstChild);
+
+    imagesDiv.insertBefore(divEl, imagesDiv.childNodes[2]);
+  }
+
   function addBg(coords, weight, color, imgData, id = "myself") {
-    const divEl = document.getElementById(id) || document.createElement("DIV");
-    divEl.id = id;
+    const divEl =
+      document.getElementById(id + "-DIV") || document.createElement("DIV");
+    divEl.id = id + "-DIV";
     const bgImg = document.createElement("IMG");
     bgImg.src = getBg(coords, weight, color);
     divEl.append(bgImg);
@@ -225,8 +236,9 @@ window.addEventListener("DOMContentLoaded", () => {
     bgGraph.strokeWeight(toBg(size));
     bgGraph.point(toBg(x), toBg(y));
 
-    const divEl = document.getElementById(id) || document.createElement("DIV");
-    divEl.id = id;
+    const divEl =
+      document.getElementById(id + "-DIV") || document.createElement("DIV");
+    divEl.id = id + "-DIV";
     const bgImg = document.createElement("IMG");
     bgImg.setAttribute("src", bgGraph.elt.toDataURL("image/png"));
     divEl.append(bgImg);
@@ -283,10 +295,17 @@ window.addEventListener("DOMContentLoaded", () => {
       snapshotEl = document.createElement("CANVAS");
       snapshotEl.style.display = "none";
 
+      p5LiveMedia.prototype.callOnStreamCallback = addStream;
+      p5LiveMedia.prototype.removeDomElement = function (ssp) {
+        if (ssp.domElement) {
+          ssp.domElement.remove();
+        }
+      };
+
       p5lm = new p5LiveMedia(
         this,
-        "DATA",
-        null,
+        "CAPTURE",
+        stream,
         "mccoy-zhu-drawing-board-remaster"
       );
 
@@ -521,7 +540,7 @@ window.addEventListener("DOMContentLoaded", () => {
     e.stopPropagation();
     myClear(canvas.elt);
     imagesDiv
-      .querySelectorAll("div:not(#myself), #myself > img")
+      .querySelectorAll("div:not(#myself-DIV), #myself-DIV > img")
       .forEach((e) => e.remove());
   });
 
