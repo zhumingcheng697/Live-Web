@@ -174,15 +174,18 @@ window.addEventListener("DOMContentLoaded", () => {
     stroke(color);
     strokeWeight(toOriginal(weight));
     noFill();
-    beginShape();
-    const [firstX, firstY] = coords[0];
-    curveVertex(toOriginal(firstX), toOriginal(firstY));
-    for (let [x, y] of coords) {
-      curveVertex(toOriginal(x), toOriginal(y));
+
+    if (coords.length > 1) {
+      beginShape();
+      const [firstX, firstY] = coords[0];
+      curveVertex(toOriginal(firstX), toOriginal(firstY));
+      for (let [x, y] of coords) {
+        curveVertex(toOriginal(x), toOriginal(y));
+      }
+      const [lastX, lastY] = coords[coords.length - 1];
+      curveVertex(toOriginal(lastX), toOriginal(lastY));
+      endShape();
     }
-    const [lastX, lastY] = coords[coords.length - 1];
-    curveVertex(toOriginal(lastX), toOriginal(lastY));
-    endShape();
   }
 
   function getBg(coords, weight, color) {
@@ -190,15 +193,18 @@ window.addEventListener("DOMContentLoaded", () => {
     bgGraph.stroke(color);
     bgGraph.strokeWeight(toBg(weight));
     bgGraph.noFill();
-    bgGraph.beginShape();
-    const [firstX, firstY] = coords[0];
-    bgGraph.curveVertex(toBg(firstX), toBg(firstY));
-    for (let [x, y] of coords) {
-      bgGraph.curveVertex(toBg(x), toBg(y));
+
+    if (coords.length > 1) {
+      bgGraph.beginShape();
+      const [firstX, firstY] = coords[0];
+      bgGraph.curveVertex(toBg(firstX), toBg(firstY));
+      for (let [x, y] of coords) {
+        bgGraph.curveVertex(toBg(x), toBg(y));
+      }
+      const [lastX, lastY] = coords[coords.length - 1];
+      bgGraph.curveVertex(toBg(lastX), toBg(lastY));
+      bgGraph.endShape();
     }
-    const [lastX, lastY] = coords[coords.length - 1];
-    bgGraph.curveVertex(toBg(lastX), toBg(lastY));
-    bgGraph.endShape();
 
     return bgGraph.elt.toDataURL("image/png");
   }
@@ -337,6 +343,20 @@ window.addEventListener("DOMContentLoaded", () => {
       captureEl.srcObject = stream;
       captureEl.onloadedmetadata = () => {
         captureEl.play();
+
+        p5lm &&
+          p5lm.send(
+            JSON.stringify({
+              type: "curve",
+              payload: {
+                coords: [],
+                weight: size_,
+                color: colorWithOpacity(),
+                imgData: takeSnapshot(),
+                id: p5lm.socket.id,
+              },
+            })
+          );
       };
     })
     .catch((e) => {
