@@ -89,6 +89,8 @@ function myClear(el) {
 
 window.addEventListener("DOMContentLoaded", () => {
   let p5lm;
+  let captureStarted = false;
+  let connected = false;
 
   const to2DigitHex = (num) => ("00" + Math.floor(num).toString(16)).slice(-2);
 
@@ -226,7 +228,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
     imagesDiv.insertBefore(divEl, imagesDiv.childNodes[2]);
 
-    p5lm &&
+    captureStarted &&
+      connected &&
+      p5lm &&
       p5lm.send(
         JSON.stringify({
           type: "curve",
@@ -338,18 +342,21 @@ window.addEventListener("DOMContentLoaded", () => {
       );
 
       p5lm.on("connect", () => {
-        p5lm.send(
-          JSON.stringify({
-            type: "curve",
-            payload: {
-              coords: [],
-              weight: size_,
-              color: colorWithOpacity(),
-              imgData: takeSnapshot(),
-              id: p5lm.socket.id,
-            },
-          })
-        );
+        connected = true;
+
+        captureStarted &&
+          p5lm.send(
+            JSON.stringify({
+              type: "curve",
+              payload: {
+                coords: [],
+                weight: size_,
+                color: colorWithOpacity(),
+                imgData: takeSnapshot(),
+                id: p5lm.socket.id,
+              },
+            })
+          );
       });
 
       p5lm.on("data", (data) => {
@@ -371,6 +378,22 @@ window.addEventListener("DOMContentLoaded", () => {
 
       captureEl.srcObject = stream;
       captureEl.onloadedmetadata = () => {
+        captureStarted = true;
+
+        connected &&
+          p5lm.send(
+            JSON.stringify({
+              type: "curve",
+              payload: {
+                coords: [],
+                weight: size_,
+                color: colorWithOpacity(),
+                imgData: takeSnapshot(),
+                id: p5lm.socket.id,
+              },
+            })
+          );
+
         captureEl.play();
       };
     })
