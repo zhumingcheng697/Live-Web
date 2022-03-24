@@ -217,7 +217,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     divEl.insertBefore(video, divEl.firstChild);
 
-    video.playsinline = true;
+    video.playsInline = true;
     video.muted = true;
     video.autoplay = true;
 
