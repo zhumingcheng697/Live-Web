@@ -90,7 +90,6 @@ function myClear(el) {
 window.addEventListener("DOMContentLoaded", () => {
   let p5lm;
   let captureStarted = false;
-  let connected = false;
 
   const to2DigitHex = (num) => ("00" + Math.floor(num).toString(16)).slice(-2);
 
@@ -229,8 +228,9 @@ window.addEventListener("DOMContentLoaded", () => {
     imagesDiv.insertBefore(divEl, imagesDiv.childNodes[2]);
 
     captureStarted &&
-      connected &&
       p5lm &&
+      p5lm.socket &&
+      p5lm.socket.id &&
       p5lm.send(
         JSON.stringify({
           type: "curve",
@@ -342,8 +342,6 @@ window.addEventListener("DOMContentLoaded", () => {
       );
 
       p5lm.on("connect", () => {
-        connected = true;
-
         captureStarted &&
           p5lm.send(
             JSON.stringify({
@@ -380,7 +378,9 @@ window.addEventListener("DOMContentLoaded", () => {
       captureEl.onloadedmetadata = () => {
         captureStarted = true;
 
-        connected &&
+        p5lm &&
+          p5lm.socket &&
+          p5lm.socket.id &&
           p5lm.send(
             JSON.stringify({
               type: "curve",
