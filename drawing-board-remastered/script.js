@@ -1,5 +1,3 @@
-const socket = io.connect("https://mccoy-zhu-drawing-board-v2.glitch.me/");
-
 let canvas, graphics, bgGraph;
 let originalScale;
 
@@ -90,6 +88,8 @@ function myClear(el) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  let p5lm;
+
   const to2DigitHex = (num) => ("00" + Math.floor(num).toString(16)).slice(-2);
 
   const colorWithOpacity = () => color_ + to2DigitHex(opacity_);
@@ -251,12 +251,19 @@ window.addEventListener("DOMContentLoaded", () => {
     addCurve(coords, size_, colorWithOpacity());
     addBg(coords, size_, colorWithOpacity());
 
-    socket.emit("curve", {
-      coords,
-      weight: size_,
-      color: colorWithOpacity(),
-      imgData: takeSnapshot(),
-    });
+    p5lm &&
+      p5lm.send(
+        JSON.stringify({
+          type: "curve",
+          payload: {
+            coords,
+            weight: size_,
+            color: colorWithOpacity(),
+            imgData: takeSnapshot(),
+            id: p5lm.socket.id,
+          },
+        })
+      );
 
     coords = [];
   }
@@ -275,6 +282,30 @@ window.addEventListener("DOMContentLoaded", () => {
     .then((stream) => {
       snapshotEl = document.createElement("CANVAS");
       snapshotEl.style.display = "none";
+
+      p5lm = new p5LiveMedia(
+        this,
+        "DATA",
+        null,
+        "mccoy-zhu-drawing-board-remaster"
+      );
+
+      p5lm.on("data", (data) => {
+        const { type, payload } = JSON.parse(data);
+        if (type === "dot") {
+          const { x, y, size, color, imgData, id } = payload;
+          stroke(color);
+          strokeWeight(toOriginal(size));
+          point(toOriginal(x), toOriginal(y));
+
+          addDot(x, y, size, color, imgData, id);
+        } else if (type === "curve") {
+          const { coords, weight, color, imgData, id } = payload;
+
+          addCurve(coords, weight, color);
+          addBg(coords, weight, color, imgData, id);
+        }
+      });
 
       captureEl.srcObject = stream;
       captureEl.onloadedmetadata = () => {
@@ -421,13 +452,20 @@ window.addEventListener("DOMContentLoaded", () => {
         null
       );
 
-      socket.emit("dot", {
-        x: toRelative(mouseX),
-        y: toRelative(mouseY),
-        size: size_,
-        color: colorWithOpacity(),
-        imgData: takeSnapshot(),
-      });
+      p5lm &&
+        p5lm.send(
+          JSON.stringify({
+            type: "dot",
+            payload: {
+              x: toRelative(mouseX),
+              y: toRelative(mouseY),
+              size: size_,
+              color: colorWithOpacity(),
+              imgData: takeSnapshot(),
+              id: p5lm.socket.id,
+            },
+          })
+        );
     }
   });
 
@@ -499,46 +537,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (!isInCanvas()) {
       previewSample();
-    }
-  });
-
-  socket.on("dot", ({ x, y, size, color, imgData, id }) => {
-    stroke(color);
-    strokeWeight(toOriginal(size));
-    point(toOriginal(x), toOriginal(y));
-
-    addDot(x, y, size, color, imgData, id);
-  });
-
-  socket.on("curve", ({ coords, weight, color, imgData, id }) => {
-    addCurve(coords, weight, color);
-    addBg(coords, weight, color, imgData, id);
-  });
-
-  socket.once("history", ({ imgs, curves, dots }) => {
-    for (let curveArr of curves) {
-      for (let { coords, weight, color, id } of curveArr) {
-        addCurve(coords, weight, color);
-        addBg(coords, weight, color, null, id);
-      }
-    }
-
-    for (let dotArr of dots) {
-      for (let { x, y, size, color, id } of dotArr) {
-        stroke(color);
-        strokeWeight(toOriginal(size));
-        point(toOriginal(x), toOriginal(y));
-        addDot(x, y, size, color, null, id);
-      }
-    }
-
-    for (let [id, imgData] of imgs) {
-      const divEl = document.getElementById(id);
-
-      if (divEl) {
-        divEl.style.backgroundImage = `url(${imgData})`;
-        imagesDiv.insertBefore(divEl, imagesDiv.childNodes[2]);
-      }
     }
   });
 });
