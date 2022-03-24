@@ -405,7 +405,10 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener("mousedown", (e) => {
     if (e.button > 1) return;
 
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+    if (
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      navigator.maxTouchPoints
+    )
       return;
 
     isMouseDown = true;
@@ -415,7 +418,10 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener("mouseup", (e) => {
     if (e.button > 1) return;
 
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+    if (
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      navigator.maxTouchPoints
+    )
       return;
 
     drawCurve();
@@ -447,7 +453,10 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener("mousemove", (e) => {
     if (e.button > 1) return;
 
-    if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches)
+    if (
+      !window.matchMedia("(hover: hover) and (pointer: fine)").matches ||
+      navigator.maxTouchPoints
+    )
       return;
 
     if (isInCanvas()) {
