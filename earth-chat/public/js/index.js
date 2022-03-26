@@ -82,7 +82,7 @@ async function getMedia(_mediaConstraints) {
 // establishes socket connection
 function initSocketConnection() {
   console.log("Initializing socket.io...");
-  mySocket = io();
+  mySocket = io.connect("https://mccoy-zhu-earth-chat.glitch.me/");
 
   mySocket.on("connect", () => {
     console.log("My socket ID:", mySocket.id);
