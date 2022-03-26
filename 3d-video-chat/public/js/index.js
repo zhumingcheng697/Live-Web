@@ -29,11 +29,7 @@ let localMediaStream = null;
 // Constraints for our local audio/video stream
 let mediaConstraints = {
   audio: true,
-  video: {
-    width: videoWidth,
-    height: videoHeight,
-    frameRate: videoFrameRate,
-  },
+  video: true,
 };
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -94,7 +90,6 @@ function initSocketConnection() {
 
   //On connection server sends the client his ID and a list of all keys
   mySocket.on("introduction", (otherClientIds) => {
-
     // for each existing user, add them as a client and add tracks to their peer connection
     for (let i = 0; i < otherClientIds.length; i++) {
       if (otherClientIds[i] != mySocket.id) {
@@ -109,7 +104,6 @@ function initSocketConnection() {
         createClientMediaElements(theirId);
 
         myScene.addClient(theirId);
-
       }
     }
   });
@@ -176,10 +170,10 @@ function initSocketConnection() {
 
 // this function sets up a peer connection and corresponding DOM elements for a specific client
 function createPeerConnection(theirSocketId, isInitiator = false) {
-  console.log('Connecting to peer with ID', theirSocketId);
-  console.log('initiating?', isInitiator);
+  console.log("Connecting to peer with ID", theirSocketId);
+  console.log("initiating?", isInitiator);
 
-  let peerConnection = new SimplePeer({ initiator: isInitiator })
+  let peerConnection = new SimplePeer({ initiator: isInitiator });
   // simplepeer generates signals which need to be sent across socket
   peerConnection.on("signal", (data) => {
     // console.log('signal');
@@ -231,7 +225,6 @@ function enableOutgoingStream() {
 
 function onPlayerMove() {
   // console.log('Sending movement update to server.');
-
 }
 
 //////////////////////////////////////////////////////////////////////
@@ -242,16 +235,17 @@ function onPlayerMove() {
 function createLocalVideoElement() {
   const videoElement = document.createElement("video");
   videoElement.id = "local_video";
-  videoElement.autoplay = true;
-  videoElement.width = videoWidth;
-  videoElement.height = videoHeight;
-  // videoElement.style = "visibility: hidden;";
+  videoElement.style.display = "none";
+  videoElement.setAttribute("autoplay", "");
+  videoElement.setAttribute("playsinline", "");
 
   if (localMediaStream) {
     let videoStream = new MediaStream([localMediaStream.getVideoTracks()[0]]);
 
     videoElement.srcObject = videoStream;
   }
+  // videoElement.style.visibility = "hidden";
+  videoElement.style.pointerEvents = "none";
   document.body.appendChild(videoElement);
 }
 
@@ -261,16 +255,20 @@ function createClientMediaElements(_id) {
 
   const videoElement = document.createElement("video");
   videoElement.id = _id + "_video";
-  videoElement.autoplay = true;
-  // videoElement.style = "visibility: hidden;";
+  videoElement.setAttribute("autoplay", "");
+  videoElement.setAttribute("playsinline", "");
+  videoElement.style.display = "none";
+  videoElement.style.pointerEvents = "none";
 
   document.body.appendChild(videoElement);
 
   // create audio element for client
   let audioEl = document.createElement("audio");
   audioEl.setAttribute("id", _id + "_audio");
-  audioEl.controls = "controls";
+  audioEl.setAttribute("autoplay", "");
+  audioEl.setAttribute("playsinline", "");
   audioEl.volume = 1;
+  audioEl.style.display = "none";
   document.body.appendChild(audioEl);
 
   audioEl.addEventListener("loadeddata", () => {
@@ -279,7 +277,6 @@ function createClientMediaElements(_id) {
 }
 
 function updateClientMediaElements(_id, stream) {
-
   let videoStream = new MediaStream([stream.getVideoTracks()[0]]);
   let audioStream = new MediaStream([stream.getAudioTracks()[0]]);
 

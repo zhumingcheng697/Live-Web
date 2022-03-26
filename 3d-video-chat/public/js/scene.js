@@ -6,7 +6,6 @@
  *
  */
 
-
 class Scene {
   constructor() {
     //THREE scene
@@ -14,19 +13,21 @@ class Scene {
 
     //Utility
     this.width = window.innerWidth;
-    this.height = window.innerHeight * 0.9;
+    this.height = window.innerHeight;
 
     // lerp value to be used when interpolating positions and rotations
     this.lerpValue = 0;
 
     //THREE Camera
-    this.camera = new THREE.PerspectiveCamera(
-      50,
-      this.width / this.height,
-      0.1,
-      5000
+    this.camera = new THREE.PerspectiveCamera(50, this.width / this.height);
+
+    const deg = (Math.random() * 2 - 1) * Math.PI;
+
+    this.camera.position.set(
+      Math.sin(deg) * (Math.random() * 30 + 10),
+      0,
+      Math.cos(deg) * (Math.random() * 30 + 10)
     );
-    this.camera.position.set(0, 3, 6);
     this.scene.add(this.camera);
 
     // create an AudioListener and add it to the camera
@@ -37,11 +38,15 @@ class Scene {
     this.renderer = new THREE.WebGLRenderer({
       antialiasing: true,
     });
-    this.renderer.setClearColor(new THREE.Color("lightblue"));
+    this.renderer.setClearColor(new THREE.Color(0x000000));
     this.renderer.setSize(this.width, this.height);
 
     // add controls:
-    this.controls = new FirstPersonControls(this.scene, this.camera, this.renderer);
+    this.controls = new FirstPersonControls(
+      this.scene,
+      this.camera,
+      this.renderer
+    );
 
     //Push the canvas to the DOM
     let domElement = document.getElementById("canvas-container");
@@ -51,11 +56,10 @@ class Scene {
     window.addEventListener("resize", (e) => this.onWindowResize(e), false);
 
     // Helpers
-    this.scene.add(new THREE.GridHelper(500, 500));
-    this.scene.add(new THREE.AxesHelper(10));
+    // this.scene.add(new THREE.GridHelper(500, 500));
 
     this.addLights();
-    createEnvironment(this.scene);
+    createEnvironment(this.scene, this.camera, this.renderer);
 
     // Start the loop
     this.frameCount = 0;
@@ -67,7 +71,7 @@ class Scene {
   // Lighting 💡
 
   addLights() {
-    this.scene.add(new THREE.AmbientLight(0xffffe6, 0.7));
+    this.scene.add(new THREE.AmbientLight());
   }
 
   //////////////////////////////////////////////////////////////////////
@@ -79,7 +83,14 @@ class Scene {
     let videoMaterial = makeVideoMaterial(id);
     let otherMat = new THREE.MeshNormalMaterial();
 
-    let head = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), [otherMat,otherMat,otherMat,otherMat,otherMat,videoMaterial]);
+    let head = new THREE.Mesh(new THREE.BoxGeometry(5, 5, 5), [
+      videoMaterial,
+      videoMaterial,
+      otherMat,
+      otherMat,
+      videoMaterial,
+      videoMaterial,
+    ]);
 
     // set position of head before adding to parent object
     head.position.set(0, 0, 0);
@@ -92,7 +103,7 @@ class Scene {
     this.scene.add(group);
 
     peers[id].group = group;
-    
+
     peers[id].previousPosition = new THREE.Vector3();
     peers[id].previousRotation = new THREE.Quaternion();
     peers[id].desiredPosition = new THREE.Vector3();
@@ -124,8 +135,16 @@ class Scene {
     this.lerpValue += 0.1; // updates are sent roughly every 1/5 second == 10 frames
     for (let id in peers) {
       if (peers[id].group) {
-        peers[id].group.position.lerpVectors(peers[id].previousPosition,peers[id].desiredPosition, this.lerpValue);
-        peers[id].group.quaternion.slerpQuaternions(peers[id].previousRotation,peers[id].desiredRotation, this.lerpValue);
+        peers[id].group.position.lerpVectors(
+          peers[id].previousPosition,
+          peers[id].desiredPosition,
+          this.lerpValue
+        );
+        peers[id].group.quaternion.slerpQuaternions(
+          peers[id].previousRotation,
+          peers[id].desiredRotation,
+          this.lerpValue
+        );
       }
     }
   }
@@ -138,13 +157,9 @@ class Scene {
           peers[id].group.position
         );
 
-        if (distSquared > 500) {
-          audioEl.volume = 0;
-        } else {
-          // from lucasio here: https://discourse.threejs.org/t/positionalaudio-setmediastreamsource-with-webrtc-question-not-hearing-any-sound/14301/29
-          let volume = Math.min(1, 10 / distSquared);
-          audioEl.volume = volume;
-        }
+        // from lucasio here: https://discourse.threejs.org/t/positionalaudio-setmediastreamsource-with-webrtc-question-not-hearing-any-sound/14301/29
+        let volume = Math.min(1, 64 / distSquared);
+        audioEl.volume = volume;
       }
     }
   }
@@ -156,11 +171,7 @@ class Scene {
   getPlayerPosition() {
     // TODO: use quaternion or are euler angles fine here?
     return [
-      [
-        this.camera.position.x,
-        this.camera.position.y,
-        this.camera.position.z,
-      ],
+      [this.camera.position.x, this.camera.position.y, this.camera.position.z],
       [
         this.camera.quaternion._x,
         this.camera.quaternion._y,
@@ -178,7 +189,7 @@ class Scene {
     requestAnimationFrame(() => this.update());
     this.frameCount++;
 
-    updateEnvironment();
+    updateEnvironment(this.scene, this.camera, this.renderer);
 
     if (this.frameCount % 25 === 0) {
       this.updateClientVolumes();
@@ -199,7 +210,7 @@ class Scene {
 
   onWindowResize(e) {
     this.width = window.innerWidth;
-    this.height = Math.floor(window.innerHeight * 0.9);
+    this.height = window.innerHeight;
     this.camera.aspect = this.width / this.height;
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(this.width, this.height);
