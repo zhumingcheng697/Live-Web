@@ -124,6 +124,7 @@ class FirstPersonControls {
     this.renderer.domElement.addEventListener(
       "mousedown",
       (e) => {
+        if (e.button > 0) return;
         this.onDocumentMouseDown(e);
       },
       false
@@ -131,6 +132,7 @@ class FirstPersonControls {
     this.renderer.domElement.addEventListener(
       "mousemove",
       (e) => {
+        if (e.button > 0) return;
         this.onDocumentMouseMove(e);
       },
       false
@@ -146,6 +148,28 @@ class FirstPersonControls {
       "mouseleave",
       (e) => {
         this.onDocumentMouseUp(e);
+      },
+      false
+    );
+
+    this.renderer.domElement.addEventListener(
+      "touchstart",
+      (e) => {
+        this.onDocumentTouchStart(e);
+      },
+      false
+    );
+    this.renderer.domElement.addEventListener(
+      "touchmove",
+      (e) => {
+        this.onDocumentTouchMove(e);
+      },
+      false
+    );
+    this.renderer.domElement.addEventListener(
+      "touchend",
+      (e) => {
+        this.onDocumentTouchEnd(e);
       },
       false
     );
@@ -403,6 +427,12 @@ class FirstPersonControls {
     this.isUserInteracting = true;
   }
 
+  onDocumentTouchStart(event) {
+    if (event.touches.length !== 1) return;
+
+    this.onDocumentMouseDown(event.touches[0]);
+  }
+
   onDocumentMouseMove(event) {
     if (this.isUserInteracting) {
       const r1 = this.getNormalizedOrbit();
@@ -423,7 +453,17 @@ class FirstPersonControls {
     }
   }
 
+  onDocumentTouchMove(event) {
+    if (event.touches.length !== 1) return;
+
+    this.onDocumentMouseMove(event.touches[0]);
+  }
+
   onDocumentMouseUp(event) {
+    this.isUserInteracting = false;
+  }
+
+  onDocumentTouchEnd(event) {
     this.isUserInteracting = false;
   }
 
