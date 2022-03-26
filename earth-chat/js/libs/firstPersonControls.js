@@ -22,7 +22,6 @@ class FirstPersonControls {
     this.velocity.y = 0;
     // variables for drag controls
     this.onPointerDownPointerX = 0;
-    this.onPointerDownPointerY = 0;
     this.isUserInteracting = false;
     this.camera.target = new THREE.Vector3(0, 0, 0);
     this.camera.lookAt(this.camera.target);
@@ -43,7 +42,6 @@ class FirstPersonControls {
     this.moveBackward = false;
     this.moveLeft = false;
     this.moveRight = false;
-    this.canJump = false;
 
     this.prevTime = performance.now();
     this.velocity = new THREE.Vector3();
@@ -181,7 +179,6 @@ class FirstPersonControls {
     this.moveBackward = false;
     this.moveLeft = false;
     this.moveRight = false;
-    this.canJump = false;
     this.velocity.x = 0;
     this.velocity.z = 0;
     this.velocity.y = 0;
@@ -423,7 +420,6 @@ class FirstPersonControls {
 
   onDocumentMouseDown(event) {
     this.onPointerDownPointerX = event.clientX;
-    this.onPointerDownPointerY = event.clientY;
     this.isUserInteracting = true;
   }
 
