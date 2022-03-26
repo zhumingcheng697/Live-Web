@@ -29,3 +29,7 @@
 - ### [Drawing Board v3](https://github.com/zhumingcheng697/Live-Web/tree/main/drawing-board-v3)
 
   Week 8 Session 1 Assignment
+
+- ### [Earth Chat](https://github.com/zhumingcheng697/Live-Web/tree/main/earth-chat)
+
+  Week 8 Session 1 Assignment
