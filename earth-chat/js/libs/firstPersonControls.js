@@ -14,6 +14,9 @@ class FirstPersonControls {
 
     this.raycaster = new THREE.Raycaster();
 
+    this.longPressed = false;
+    this.longPressTimeoutId;
+
     this.setupControls();
     this.setupCollisionDetection();
 
@@ -213,14 +216,16 @@ class FirstPersonControls {
     this.velocity.z -= this.velocity.z * 10.0 * delta;
 
     this.direction.z = Number(this.moveForward) - Number(this.moveBackward);
-    this.direction.x = Number(this.moveRight) - Number(this.moveLeft);
+    this.direction.x =
+      Number(this.moveRight || (this.longPressed && this.v < 0)) -
+      Number(this.moveLeft || (this.longPressed && this.v > 0));
     this.direction.normalize(); // this ensures consistent this.movements in all this.directions
 
     if (this.moveForward || this.moveBackward) {
       this.velocity.z -= this.direction.z * speed * delta;
     }
 
-    if (this.moveLeft || this.moveRight) {
+    if (this.moveLeft || this.moveRight || this.longPressed) {
       this.velocity.x -= this.direction.x * speed * delta;
     }
 
@@ -249,11 +254,11 @@ class FirstPersonControls {
     this.camera.position.x *= r1 / r2;
     this.camera.position.z *= r1 / r2;
 
-    if (r1 === 10) {
+    if (r1 === 15) {
       this.moveForward = false;
     }
 
-    if (r1 === 40) {
+    if (r1 === 45) {
       this.moveBackward = false;
     }
 
@@ -286,7 +291,7 @@ class FirstPersonControls {
   }
 
   getNormalizedOrbit() {
-    return Math.min(40, Math.max(10, this.getOrbitRadius()));
+    return Math.min(45, Math.max(15, this.getOrbitRadius()));
   }
 
   getOrbitRadius() {
@@ -421,6 +426,10 @@ class FirstPersonControls {
   onDocumentMouseDown(event) {
     this.onPointerDownPointerX = event.clientX;
     this.isUserInteracting = true;
+
+    this.longPressTimeoutId = setTimeout(() => {
+      this.longPressed = true;
+    }, 300);
   }
 
   onDocumentTouchStart(event) {
@@ -430,7 +439,9 @@ class FirstPersonControls {
   }
 
   onDocumentMouseMove(event) {
-    if (this.isUserInteracting) {
+    clearTimeout(this.longPressTimeoutId);
+
+    if (this.isUserInteracting && !this.longPressed) {
       const r1 = this.getNormalizedOrbit();
 
       this.computeCameraOrientation();
@@ -450,16 +461,22 @@ class FirstPersonControls {
   }
 
   onDocumentTouchMove(event) {
+    clearTimeout(this.longPressTimeoutId);
+
     if (event.touches.length !== 1) return;
 
     this.onDocumentMouseMove(event.touches[0]);
   }
 
   onDocumentMouseUp(event) {
+    clearTimeout(this.longPressTimeoutId);
+    this.longPressed = false;
     this.isUserInteracting = false;
   }
 
   onDocumentTouchEnd(event) {
+    clearTimeout(this.longPressTimeoutId);
+    this.longPressed = false;
     this.isUserInteracting = false;
   }
 
