@@ -20,6 +20,6 @@ I also changed how user interactions control the scene.
 
 Users can now only drag left or right but not up or down. Instead of panning the camera, dragging on the screen left or right will actually control the speed and direction the user’s video box orbit. Users can do so to quickly see if there’s anyone else with them orbiting.
 
-Users can also use the left and right arrow keys, the space key, or the `A` and `D` key to control the speed and direction the video boxes orbits, and the up and down arrow keys or the `W` or `S` key to control the altitude of the orbit.
+Users can also long press, use the left and right arrow keys, the space key, or the `A` and `D` key to control the speed and direction the video boxes orbits, and the up and down arrow keys or the `W` or `S` key to control the altitude of the orbit.
 
 I tried to make the video box the same aspect ratio as the video source so that it is no longer distorted, but the source code is quite coupled and I couldn’t get it to work without breaking other things.
