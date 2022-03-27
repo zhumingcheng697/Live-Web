@@ -24,9 +24,9 @@ class Scene {
     const deg = (Math.random() * 2 - 1) * Math.PI;
 
     this.camera.position.set(
-      Math.sin(deg) * (Math.random() * 30 + 10),
+      Math.sin(deg) * (Math.random() * 30 + 15),
       0,
-      Math.cos(deg) * (Math.random() * 30 + 10)
+      Math.cos(deg) * (Math.random() * 30 + 15)
     );
     this.scene.add(this.camera);
 

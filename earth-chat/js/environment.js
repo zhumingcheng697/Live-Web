@@ -6,7 +6,7 @@ function createEnvironment(scene, camera, renderer) {
   let texture = new THREE.TextureLoader().load(
     "https://cdn.glitch.global/3c1bb2de-b910-4800-9b53-fba67f5b2e9b/earth.jpg?v=1648264628817"
   );
-  let myGeometry = new THREE.SphereGeometry(3, 40, 20);
+  let myGeometry = new THREE.SphereGeometry(5, 40, 20);
   let myMaterial = new THREE.MeshBasicMaterial({
     map: texture,
   });
