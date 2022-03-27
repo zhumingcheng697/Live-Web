@@ -36,6 +36,6 @@ Another detail is that I would still take a snapshot of the user’s camera feed
 
 I also take a snapshot after the user become connected or when other users send streams through to further ensure that there are at least one snapshot from each user even if they never drew anything.
 
-However, since I don’t have control of the server, persistant drawing cannot be achieved.
+However, since I don’t have control of the server, persistent drawing cannot be achieved.
 
 Also, in second though, I might be better off with the raw `SimplePeer` rather than `p5LiveMedia` for this assignment, but since I already did it with `p5LiveMedia` and don’t want to deal with creating a signaling server, I’ll just stick with `p5LiveMedia` for now.
