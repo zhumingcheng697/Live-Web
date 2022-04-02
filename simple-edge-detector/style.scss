@@ -59,17 +59,23 @@ canvas.eighty-six {
     flex-wrap: wrap;
 
     canvas {
-      box-sizing: border-box;
+      border: solid 5px #3e7;
 
       &.recording {
-        border: solid #f00 5px;
+        border: solid 5px #f00;
       }
+    }
+
+    video.recorded {
+      border: solid 5px #fc0;
     }
 
     & > * {
       width: var(--each-width);
       height: var(--each-height);
       object-fit: cover;
+      box-sizing: border-box;
+      margin: 2.5px;
     }
   }
 }
