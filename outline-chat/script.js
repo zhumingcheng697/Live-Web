@@ -1,5 +1,5 @@
 window.addEventListener("DOMContentLoaded", () => {
-  const videoArea = document.getElementById("video-area");
+  const mainArea = document.getElementById("main-area");
   const videosDiv = document.getElementById("videos");
 
   const baseWidth = 200;
@@ -23,9 +23,9 @@ window.addEventListener("DOMContentLoaded", () => {
   checkToolsHeight();
 
   function checkVideoSize() {
-    const totalWidth = videoArea.clientWidth;
+    const totalWidth = mainArea.clientWidth;
     const totalHeight =
-      videoArea.clientHeight -
+      mainArea.clientHeight -
       document.documentElement.style.getPropertyValue("--inset-top");
 
     let col = Math.floor(totalWidth / baseWidth);
