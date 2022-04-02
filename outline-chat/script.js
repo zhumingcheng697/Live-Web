@@ -100,7 +100,7 @@ window.addEventListener("load", () => {
   let video = document.createElement("video");
 
   // Constraints - what do we want?
-  let constraints = { audio: true, video: true };
+  let constraints = { audio: false, video: true };
 
   // Prompt the user for permission, get the stream
   navigator.mediaDevices
@@ -160,11 +160,6 @@ window.addEventListener("load", () => {
         draw();
 
         const canvasStream = canvas.captureStream(frameRate);
-        const audioTracks = video.srcObject.getAudioTracks();
-
-        if (audioTracks.length > 0) {
-          canvasStream.addTrack(audioTracks[0]);
-        }
 
         new MultiPeerConnection({
           stream: canvasStream,
@@ -182,8 +177,6 @@ window.addEventListener("load", () => {
         const recorder = new MediaRecorder(canvasStream);
 
         recorder.addEventListener("stop", () => {
-          console.log("stopped", chunks);
-
           // Create a new video element on the page
           const recording = document.createElement("video");
 
