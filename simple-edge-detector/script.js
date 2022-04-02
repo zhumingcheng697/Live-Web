@@ -57,8 +57,8 @@ window.addEventListener("load", () => {
       eachMaxWidth / baseWidth
     );
 
-    const eachWidth = Math.floor(baseWidth * eachRatio);
-    const eachHeight = Math.floor(baseHeight * eachRatio);
+    const eachWidth = Math.floor(baseWidth * eachRatio) - 5;
+    const eachHeight = Math.floor(baseHeight * eachRatio) - 5;
 
     document.documentElement.style.setProperty(
       "--each-width",
@@ -121,25 +121,9 @@ window.addEventListener("load", () => {
       video.onloadedmetadata = () => {
         video.play();
 
-        recordEl.disabled = false;
-
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
-
-        recordEl.addEventListener("click", () => {
-          if (recordEl.classList.contains("recording")) {
-            canvas.classList.remove("recording");
-            recordEl.classList.remove("recording");
-            recordEl.value = "●";
-            recordEl.nextElementSibling.innerHTML = "Start Recording";
-          } else {
-            canvas.classList.add("recording");
-            recordEl.classList.add("recording");
-            recordEl.value = "■";
-            recordEl.nextElementSibling.innerHTML = "Stop Recording";
-          }
-        });
 
         const context = canvas.getContext("2d");
 
@@ -182,13 +166,70 @@ window.addEventListener("load", () => {
           canvasStream.addTrack(audioTracks[0]);
         }
 
-        const multiPeerConnection = new MultiPeerConnection({
+        new MultiPeerConnection({
           stream: canvasStream,
           host: "localhost:8080",
           onStream: receivedStream,
           onPeerDisconnect: peerDisconnected,
           videoBitrate,
           audioBitrate,
+        });
+
+        recordEl.disabled = false;
+
+        let chunks = [];
+
+        const recorder = new MediaRecorder(canvasStream);
+
+        recorder.addEventListener("stop", () => {
+          console.log("stopped");
+
+          // Create a new video element on the page
+          const recording = document.createElement("video");
+
+          // Create a blob - Binary Large Object of type video/webm
+          const blob = new Blob(chunks, { type: recorder.mimeType });
+          // Generate a URL for the blob
+          const videoURL = URL.createObjectURL(blob);
+          // Make the video element source point to that URL
+          recording.className = "recorded";
+          recording.src = videoURL;
+          recording.autoplay = true;
+          recording.playsInline = true;
+          recording.loop = true;
+          recording.setAttribute("autoplay", "");
+          recording.setAttribute("playsinline", "");
+
+          recording.addEventListener("loadedmetadata", () => {
+            recording.play();
+          });
+
+          chunks = [];
+
+          // Put the video element on the page
+          videosDiv.appendChild(recording);
+          checkVideoSize();
+        });
+
+        recorder.addEventListener("dataavailable", (e) => {
+          console.log(e);
+          chunks.push(e.data);
+        });
+
+        recordEl.addEventListener("click", () => {
+          if (recordEl.classList.contains("recording")) {
+            canvas.classList.remove("recording");
+            recordEl.classList.remove("recording");
+            recordEl.value = "●";
+            recordEl.nextElementSibling.innerHTML = "Start Recording";
+            recorder.stop();
+          } else {
+            canvas.classList.add("recording");
+            recordEl.classList.add("recording");
+            recordEl.value = "■";
+            recordEl.nextElementSibling.innerHTML = "Stop Recording";
+            recorder.start();
+          }
         });
       };
     })
