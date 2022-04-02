@@ -129,6 +129,8 @@ input[type="range"]::-webkit-slider-thumb {
     calc(10px + var(--inset-left));
   box-sizing: border-box;
   flex-wrap: wrap;
+  background-color: #e5e5ea;
+  transition: background-color 0.3s;
 }
 
 #tools > div {
@@ -169,7 +171,7 @@ span {
 
 @media (prefers-color-scheme: dark) {
   html {
-    background-color: #1c1c1e;
+    background-color: #000;
   }
 
   body {
@@ -177,7 +179,7 @@ span {
   }
 
   input[type="range"] {
-    background: #333;
+    background: #48484a;
   }
 
   input[type="range"]::-webkit-slider-thumb {
@@ -187,7 +189,11 @@ span {
 
   input[type="reset"],
   input[type="button"] {
-    background: #333;
-    color: #aaa;
+    background: #48484a;
+    color: #ebebf5bb;
+  }
+
+  #tools {
+    background-color: #1c1c1e;
   }
 }
