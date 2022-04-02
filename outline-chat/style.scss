@@ -199,6 +199,12 @@ body.eighty-six {
     object-fit: contain;
     width: 50%;
     cursor: pointer;
+    padding: 5px;
+    box-sizing: border-box;
+
+    &.selected {
+      background-color: #fc0;
+    }
   }
 
   &.no-canvas-selected {

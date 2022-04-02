@@ -1,6 +1,7 @@
 window.addEventListener("DOMContentLoaded", () => {
   const tools = document.getElementById("tools");
   const canvasArea = document.getElementById("canvas-area");
+  const allCanvas = canvasArea.getElementsByTagName("canvas");
   const inputs = tools.getElementsByTagName("input");
   const spans = tools.getElementsByTagName("span");
 
@@ -22,6 +23,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
     for (let span of spans) {
       span.classList.add("disabled");
+    }
+
+    for (let canvas of allCanvas) {
+      canvas.classList.remove("selected");
     }
   }
 
@@ -77,6 +82,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
       function showTools() {
         selected = image.src;
+        for (let canvas of allCanvas) {
+          canvas.classList.remove("selected");
+        }
+        canvas.classList.add("selected");
         document.body.classList.remove("no-canvas-selected");
         for (let input of inputs) {
           input.disabled = false;
