@@ -11,6 +11,7 @@ window.addEventListener("load", () => {
   const thresholdEl = document.getElementById("threshold-el");
   const areaEl = document.getElementById("area-el");
   const modeEl = document.getElementById("mode-el");
+  const recordEl = document.getElementById("record-el");
 
   function checkToolsHeight() {
     document.documentElement.style.setProperty(
@@ -120,9 +121,25 @@ window.addEventListener("load", () => {
       video.onloadedmetadata = () => {
         video.play();
 
+        recordEl.disabled = false;
+
         const canvas = document.createElement("canvas");
         canvas.width = video.videoWidth;
         canvas.height = video.videoHeight;
+
+        recordEl.addEventListener("click", () => {
+          if (recordEl.classList.contains("recording")) {
+            canvas.classList.remove("recording");
+            recordEl.classList.remove("recording");
+            recordEl.value = "●";
+            recordEl.nextElementSibling.innerHTML = "Start Recording";
+          } else {
+            canvas.classList.add("recording");
+            recordEl.classList.add("recording");
+            recordEl.value = "■";
+            recordEl.nextElementSibling.innerHTML = "Stop Recording";
+          }
+        });
 
         const context = canvas.getContext("2d");
 
