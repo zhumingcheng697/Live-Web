@@ -168,7 +168,7 @@ window.addEventListener("load", () => {
 
         new MultiPeerConnection({
           stream: canvasStream,
-          host: "localhost:8080",
+          host: "https://mccoy-zhu-outline-chat.glitch.me/",
           onStream: receivedStream,
           onPeerDisconnect: peerDisconnected,
           videoBitrate,
@@ -182,7 +182,7 @@ window.addEventListener("load", () => {
         const recorder = new MediaRecorder(canvasStream);
 
         recorder.addEventListener("stop", () => {
-          console.log("stopped");
+          console.log("stopped", chunks);
 
           // Create a new video element on the page
           const recording = document.createElement("video");
