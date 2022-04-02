@@ -1,4 +1,4 @@
-window.addEventListener("load", () => {
+window.addEventListener("DOMContentLoaded", () => {
   const videoArea = document.getElementById("video-area");
   const videosDiv = document.getElementById("videos");
 
