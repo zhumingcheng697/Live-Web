@@ -5,7 +5,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const inputs = tools.getElementsByTagName("input");
   const spans = tools.getElementsByTagName("span");
 
-  const defaults = [18, 7, 20, 6, 12, 4, 15, 4];
+  const defaults = [18, 7, 20, 6, 12, 4, 18, 4];
 
   let selected = null;
 
