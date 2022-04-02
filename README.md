@@ -33,3 +33,7 @@
 - ### [Earth Chat](https://github.com/zhumingcheng697/Live-Web/tree/main/earth-chat)
 
   Week 8 Session 1 Assignment
+
+- ### [Outline Chat](https://github.com/zhumingcheng697/Live-Web/tree/main/outline-chat)
+
+  Week 8 Session 2 / Week 9 Session 1 Assignment
