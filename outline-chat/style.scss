@@ -35,7 +35,7 @@ body {
   position: fixed;
   top: 0;
   left: var(--inset-left);
-  bottom: calc(var(--tools-height) + var(--inset-bottom));
+  bottom: var(--tools-height);
   right: var(--inset-right);
   padding-top: var(--inset-top);
   overflow: scroll;
