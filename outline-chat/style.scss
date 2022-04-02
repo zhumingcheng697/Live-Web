@@ -135,6 +135,10 @@ canvas.eighty-six {
     }
   }
 
+  span.disabled {
+    opacity: 0.5;
+  }
+
   .shrink {
     max-width: 200px;
     flex: 1 0 110px;

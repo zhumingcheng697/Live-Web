@@ -171,6 +171,7 @@ window.addEventListener("DOMContentLoaded", () => {
         });
 
         recordEl.disabled = false;
+        recordEl.nextElementSibling.classList.remove("disabled");
 
         let chunks = [];
 
