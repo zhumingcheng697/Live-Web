@@ -1,9 +1,11 @@
 window.addEventListener("DOMContentLoaded", () => {
   const tools = document.getElementById("tools");
-  const canvasArea = document.getElementById("canvas-area");
-  const allCanvas = canvasArea.getElementsByTagName("canvas");
+  const hiddenArea = document.getElementById("hidden");
+  const renderedArea = document.getElementById("rendered-area");
   const inputs = tools.getElementsByTagName("input");
   const spans = tools.getElementsByTagName("span");
+
+  const defaults = [18, 8, 18, 5, 12, 4, 15, 4];
 
   let selected = null;
 
@@ -25,8 +27,8 @@ window.addEventListener("DOMContentLoaded", () => {
       span.classList.add("disabled");
     }
 
-    for (let canvas of allCanvas) {
-      canvas.classList.remove("selected");
+    for (let image of renderedArea.getElementsByTagName("img")) {
+      image.classList.remove("selected");
     }
   }
 
@@ -49,17 +51,29 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   window.addEventListener("load", () => {
-    for (let image of document.getElementsByTagName("img")) {
+    let index = 0;
+    for (let image of hiddenArea.getElementsByTagName("img")) {
+      let shouldRequestNewFrame = true;
+
       const canvas = document.createElement("canvas");
       canvas.width = image.naturalWidth;
       canvas.height = image.naturalHeight;
       canvas.className = "eighty-six";
 
-      let threshold = 12;
-      let margin = 8;
+      const renderedImage = document.createElement("img");
+      renderedImage.className = "rendered";
+      renderedArea.appendChild(renderedImage);
+
+      const defaultThreshold = defaults[2 * index];
+      const defaultMargin = defaults[2 * index + 1];
+
+      ++index;
+
+      let threshold = defaultThreshold;
+      let margin = defaultMargin;
 
       const context = canvas.getContext("2d");
-      canvasArea.append(canvas);
+      hiddenArea.append(canvas);
 
       function draw() {
         context.drawImage(image, 0, 0);
@@ -76,16 +90,20 @@ window.addEventListener("DOMContentLoaded", () => {
           0,
           0
         );
+
+        renderedImage.src = canvas.toDataURL();
+
+        shouldRequestNewFrame = true;
       }
 
       draw();
 
       function showTools() {
         selected = image.src;
-        for (let canvas of allCanvas) {
-          canvas.classList.remove("selected");
+        for (let img of renderedArea.getElementsByTagName("img")) {
+          img.classList.remove("selected");
         }
-        canvas.classList.add("selected");
+        renderedImage.classList.add("selected");
         document.body.classList.remove("no-canvas-selected");
         for (let input of inputs) {
           input.disabled = false;
@@ -102,18 +120,37 @@ window.addEventListener("DOMContentLoaded", () => {
       inputs[0].addEventListener("input", () => {
         if (selected === image.src) {
           threshold = +inputs[0].value;
-          draw();
+
+          if (shouldRequestNewFrame) {
+            window.requestAnimationFrame(draw);
+            shouldRequestNewFrame = false;
+          }
         }
       });
 
       inputs[1].addEventListener("input", () => {
         if (selected === image.src) {
           margin = +inputs[1].value;
+
+          if (shouldRequestNewFrame) {
+            window.requestAnimationFrame(draw);
+            shouldRequestNewFrame = false;
+          }
+        }
+      });
+
+      inputs[2].addEventListener("click", () => {
+        if (selected === image.src) {
+          threshold = defaultThreshold;
+          margin = defaultMargin;
+
+          inputs[0].value = threshold;
+          inputs[1].value = margin;
           draw();
         }
       });
 
-      canvas.addEventListener("click", () => {
+      renderedImage.addEventListener("click", () => {
         if (selected === image.src) {
           hideTools();
         } else {

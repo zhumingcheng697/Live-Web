@@ -191,11 +191,11 @@ body {
 }
 
 body.eighty-six {
-  img.eighty-six {
+  #hidden {
     display: none;
   }
 
-  canvas.eighty-six {
+  img.rendered {
     object-fit: contain;
     width: 50%;
     cursor: pointer;
@@ -219,7 +219,7 @@ body.eighty-six {
 }
 
 @media (max-width: 800px) {
-  canvas.eighty-six {
+  img.rendered {
     width: 100%;
   }
 }
