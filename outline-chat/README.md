@@ -18,7 +18,7 @@ Users can record their own video feed, which will be added to the screen and loo
 
 Recorded screens will only be visible to the current user who recorded the video, and it will have a yellow border around it.
 
-When the user is recording, their video feed will have a red bolder around it (again, only visible to the current user), and when they are not recording, the bolder will be green.
+When the user is recording, their video feed will have a red border around it (again, only visible to the current user), and when they are not recording, the border will be green.
 
 I originally tried to capture both video and audio, and the streaming aspect worked well on Chrome and Safari on Mac and Safari on iOS, but Chrome on iOS actually would not allow you to capture both at the same time, and although Safari on iOS would allow you to capture, the recording aspect would be broken if you record a canvas stream that has an audio track. Thus, for better compatibility I removed the audio track.
 
