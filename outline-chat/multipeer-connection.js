@@ -170,10 +170,8 @@ class SimplePeerWrapper {
       }
     }
     if (line === -1) {
-      console.debug("Could not find the m line for", mediaType);
       return sdp;
     }
-    console.debug("Found the m line for", mediaType, "at line", line);
 
     // Pass the m line
     line++;
@@ -185,13 +183,11 @@ class SimplePeerWrapper {
 
     // If we're on a b line, replace it
     if (lines[line].indexOf("b") === 0) {
-      console.debug("Replaced b line at line", line);
       lines[line] = "b=AS:" + bitrate;
       return lines.join("\n");
     }
 
     // Add a new b line
-    console.debug("Adding new b line before line", line);
     let newLines = lines.slice(0, line);
     newLines.push("b=AS:" + bitrate);
     newLines = newLines.concat(lines.slice(line, lines.length));
