@@ -1,4 +1,19 @@
 window.addEventListener("load", () => {
+  function checkToolsHeight() {
+    document.documentElement.style.setProperty(
+      "--tools-height",
+      document.getElementById("tools").clientHeight + "px"
+    );
+  }
+
+  window.addEventListener("resize", () => {
+    checkToolsHeight();
+  });
+
+  checkToolsHeight();
+
+  const canvasArea = document.getElementById("canvas-area");
+
   for (let image of document.getElementsByTagName("img")) {
     const canvas = document.createElement("canvas");
     canvas.width = image.naturalWidth;
@@ -10,7 +25,7 @@ window.addEventListener("load", () => {
 
     const context = canvas.getContext("2d");
 
-    document.body.append(canvas);
+    canvasArea.append(canvas);
 
     context.drawImage(image, 0, 0);
 
