@@ -53,7 +53,8 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("load", () => {
     let index = 0;
     for (let image of hiddenArea.getElementsByTagName("img")) {
-      const edgeDetector = window.Worker && new Worker("./edge-detector.js");
+      const edgeDetector =
+        window.Worker && new Worker("./simple-edge-detector.js");
 
       let shouldRequestNewFrame = true;
 

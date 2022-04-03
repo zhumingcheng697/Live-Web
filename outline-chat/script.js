@@ -1,5 +1,5 @@
 window.addEventListener("DOMContentLoaded", () => {
-  const edgeDetector = window.Worker && new Worker("./edge-detector.js");
+  const edgeDetector = window.Worker && new Worker("./simple-edge-detector.js");
 
   const mainArea = document.getElementById("main-area");
   const videosDiv = document.getElementById("videos");
