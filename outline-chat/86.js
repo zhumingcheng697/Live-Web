@@ -53,7 +53,7 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("load", () => {
     let index = 0;
     for (let image of hiddenArea.getElementsByTagName("img")) {
-      const edgeDetector = new Worker("./edge-detector.js");
+      const edgeDetector = window.Worker && new Worker("./edge-detector.js");
 
       let shouldRequestNewFrame = true;
 
@@ -83,32 +83,53 @@ window.addEventListener("DOMContentLoaded", () => {
       function draw() {
         context.drawImage(image, 0, 0);
 
-        const { data } = context.getImageData(0, 0, width, height);
+        const imageData = context.getImageData(0, 0, width, height);
 
-        edgeDetector.postMessage(
-          {
+        if (edgeDetector) {
+          edgeDetector.postMessage(
+            {
+              threshold,
+              margin,
+              buffer: imageData.data.buffer,
+              width,
+              height,
+              mode: 1,
+            },
+            [imageData.data.buffer]
+          );
+        } else {
+          const newBuffer = detectEdge({
             threshold,
             margin,
-            buffer: data.buffer,
+            buffer: imageData.data.buffer,
             width,
             height,
             mode: 1,
-          },
-          [data.buffer]
-        );
+          });
+
+          imageData.data.set(new Uint8ClampedArray(newBuffer));
+
+          context.putImageData(imageData, 0, 0);
+
+          renderedImage.src = canvas.toDataURL();
+
+          shouldRequestNewFrame = true;
+        }
       }
 
-      edgeDetector.onmessage = (e) => {
-        const newImageData = context.createImageData(width, height);
+      if (edgeDetector) {
+        edgeDetector.onmessage = (e) => {
+          const newImageData = context.createImageData(width, height);
 
-        newImageData.data.set(new Uint8ClampedArray(e.data));
+          newImageData.data.set(new Uint8ClampedArray(e.data));
 
-        context.putImageData(newImageData, 0, 0);
+          context.putImageData(newImageData, 0, 0);
 
-        renderedImage.src = canvas.toDataURL();
+          renderedImage.src = canvas.toDataURL();
 
-        shouldRequestNewFrame = true;
-      };
+          shouldRequestNewFrame = true;
+        };
+      }
 
       draw();
 

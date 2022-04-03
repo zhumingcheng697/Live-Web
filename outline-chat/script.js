@@ -1,5 +1,5 @@
 window.addEventListener("DOMContentLoaded", () => {
-  const edgeDetector = new Worker("./edge-detector.js");
+  const edgeDetector = window.Worker && new Worker("./edge-detector.js");
 
   const mainArea = document.getElementById("main-area");
   const videosDiv = document.getElementById("videos");
@@ -152,30 +152,49 @@ window.addEventListener("DOMContentLoaded", () => {
           const margin = Math.round(+areaEl.value);
           const mode = +modeEl.value;
 
-          const { data } = previewContext.getImageData(0, 0, width, height);
+          const imageData = previewContext.getImageData(0, 0, width, height);
 
-          edgeDetector.postMessage(
-            {
+          if (edgeDetector) {
+            edgeDetector.postMessage(
+              {
+                threshold,
+                margin,
+                buffer: imageData.data.buffer,
+                width,
+                height,
+                mode,
+              },
+              [imageData.data.buffer]
+            );
+          } else {
+            const newBuffer = detectEdge({
               threshold,
               margin,
-              buffer: data.buffer,
+              buffer: imageData.data.buffer,
               width,
               height,
               mode,
-            },
-            [data.buffer]
-          );
+            });
+
+            imageData.data.set(new Uint8ClampedArray(newBuffer));
+
+            context.putImageData(imageData, 0, 0);
+
+            setTimeout(draw, 1000 / frameRate);
+          }
         }
 
-        edgeDetector.onmessage = (e) => {
-          const newImageData = context.createImageData(width, height);
+        if (edgeDetector) {
+          edgeDetector.onmessage = (e) => {
+            const newImageData = context.createImageData(width, height);
 
-          newImageData.data.set(new Uint8ClampedArray(e.data));
+            newImageData.data.set(new Uint8ClampedArray(e.data));
 
-          context.putImageData(newImageData, 0, 0);
+            context.putImageData(newImageData, 0, 0);
 
-          setTimeout(draw, 1000 / frameRate);
-        };
+            setTimeout(draw, 1000 / frameRate);
+          };
+        }
 
         draw();
 
