@@ -338,7 +338,7 @@ window.addEventListener("DOMContentLoaded", () => {
         this,
         "CAPTURE",
         stream,
-        "mccoy-zhu-drawing-board-remaster"
+        "mccoy-zhu-drawing-board-v3"
       );
 
       p5lm.socket &&
