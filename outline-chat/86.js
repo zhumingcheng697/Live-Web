@@ -85,11 +85,20 @@ window.addEventListener("DOMContentLoaded", () => {
           canvas.height
         );
 
-        context.putImageData(
-          detectEdge(threshold, margin, imageData, context, 1),
-          0,
-          0
+        const { data, width, height } = imageData;
+
+        const newBuffer = detectEdge(
+          threshold,
+          margin,
+          data.buffer,
+          width,
+          height,
+          1
         );
+
+        imageData.data.set(new Uint8ClampedArray(newBuffer));
+
+        context.putImageData(imageData, 0, 0);
 
         renderedImage.src = canvas.toDataURL();
 

@@ -148,11 +148,20 @@ window.addEventListener("DOMContentLoaded", () => {
             canvas.height
           );
 
-          context.putImageData(
-            detectEdge(threshold, margin, imageData, context, mode),
-            0,
-            0
+          const { data, width, height } = imageData;
+
+          const newBuffer = detectEdge(
+            threshold,
+            margin,
+            data.buffer,
+            width,
+            height,
+            mode
           );
+
+          imageData.data.set(new Uint8ClampedArray(newBuffer));
+
+          context.putImageData(imageData, 0, 0);
 
           setTimeout(draw, 1000 / frameRate);
         }
