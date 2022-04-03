@@ -56,8 +56,6 @@ window.addEventListener("DOMContentLoaded", () => {
       const edgeDetector =
         window.Worker && new Worker("./simple-edge-detector.js");
 
-      let shouldRequestNewFrame = true;
-
       const width = image.naturalWidth;
       const height = image.naturalHeight;
 
@@ -142,22 +140,14 @@ window.addEventListener("DOMContentLoaded", () => {
       inputs[0].addEventListener("input", () => {
         if (selected === image.src) {
           threshold = +inputs[0].value;
-
-          if (shouldRequestNewFrame) {
-            window.requestAnimationFrame(draw);
-            shouldRequestNewFrame = false;
-          }
+          draw();
         }
       });
 
       inputs[1].addEventListener("input", () => {
         if (selected === image.src) {
           margin = +inputs[1].value;
-
-          if (shouldRequestNewFrame) {
-            window.requestAnimationFrame(draw);
-            shouldRequestNewFrame = false;
-          }
+          draw();
         }
       });
 
