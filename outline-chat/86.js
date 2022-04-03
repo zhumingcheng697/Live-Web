@@ -56,7 +56,8 @@ window.addEventListener("DOMContentLoaded", () => {
       const edgeDetector =
         window.Worker && new Worker("./simple-edge-detector.js");
 
-      let shouldDrawNewFrame = true;
+      let isIdle = true;
+      let frameOutOfDate = false;
 
       const width = image.naturalWidth;
       const height = image.naturalHeight;
@@ -78,9 +79,6 @@ window.addEventListener("DOMContentLoaded", () => {
       let threshold = defaultThreshold;
       let margin = defaultMargin;
 
-      let queuedThreshold = null;
-      let queuedMargin = null;
-
       const context = canvas.getContext("2d");
       hiddenArea.append(canvas);
 
@@ -91,14 +89,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
         renderedImage.src = canvas.toDataURL();
 
-        if (queuedThreshold || queuedMargin) {
-          threshold = queuedThreshold || threshold;
-          margin = queuedMargin || margin;
-          queuedThreshold = null;
-          queuedMargin = null;
+        if (frameOutOfDate) {
+          frameOutOfDate = false;
           draw();
         } else {
-          shouldDrawNewFrame = true;
+          isIdle = true;
         }
       }
 
@@ -152,24 +147,24 @@ window.addEventListener("DOMContentLoaded", () => {
 
       inputs[0].addEventListener("input", () => {
         if (selected === image.src) {
-          if (shouldDrawNewFrame) {
-            threshold = +inputs[0].value;
-            shouldDrawNewFrame = false;
+          threshold = +inputs[0].value;
+          if (isIdle) {
+            isIdle = false;
             draw();
           } else {
-            queuedThreshold = +inputs[0].value;
+            frameOutOfDate = true;
           }
         }
       });
 
       inputs[1].addEventListener("input", () => {
         if (selected === image.src) {
-          if (shouldDrawNewFrame) {
-            margin = +inputs[1].value;
-            shouldDrawNewFrame = false;
+          margin = +inputs[1].value;
+          if (isIdle) {
+            isIdle = false;
             draw();
           } else {
-            queuedMargin = +inputs[1].value;
+            frameOutOfDate = true;
           }
         }
       });
