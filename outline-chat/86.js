@@ -5,7 +5,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const inputs = tools.getElementsByTagName("input");
   const spans = tools.getElementsByTagName("span");
 
-  const defaults = [18, 7, 20, 6, 12, 4, 18, 4];
+  const defaults = [18, 6, 20, 6, 12, 4, 18, 4];
 
   let selected = null;
 
@@ -56,6 +56,8 @@ window.addEventListener("DOMContentLoaded", () => {
       const edgeDetector =
         window.Worker && new Worker("./simple-edge-detector.js");
 
+      let shouldDrawNewFrame = true;
+
       const width = image.naturalWidth;
       const height = image.naturalHeight;
 
@@ -76,6 +78,9 @@ window.addEventListener("DOMContentLoaded", () => {
       let threshold = defaultThreshold;
       let margin = defaultMargin;
 
+      let queuedThreshold = null;
+      let queuedMargin = null;
+
       const context = canvas.getContext("2d");
       hiddenArea.append(canvas);
 
@@ -86,7 +91,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
         renderedImage.src = canvas.toDataURL();
 
-        shouldRequestNewFrame = true;
+        if (queuedThreshold || queuedMargin) {
+          threshold = queuedThreshold || threshold;
+          margin = queuedMargin || margin;
+          queuedThreshold = null;
+          queuedMargin = null;
+          draw();
+        } else {
+          shouldDrawNewFrame = true;
+        }
       }
 
       function draw() {
@@ -139,15 +152,25 @@ window.addEventListener("DOMContentLoaded", () => {
 
       inputs[0].addEventListener("input", () => {
         if (selected === image.src) {
-          threshold = +inputs[0].value;
-          draw();
+          if (shouldDrawNewFrame) {
+            threshold = +inputs[0].value;
+            shouldDrawNewFrame = false;
+            draw();
+          } else {
+            queuedThreshold = +inputs[0].value;
+          }
         }
       });
 
       inputs[1].addEventListener("input", () => {
         if (selected === image.src) {
-          margin = +inputs[1].value;
-          draw();
+          if (shouldDrawNewFrame) {
+            margin = +inputs[1].value;
+            shouldDrawNewFrame = false;
+            draw();
+          } else {
+            queuedMargin = +inputs[1].value;
+          }
         }
       });
 
