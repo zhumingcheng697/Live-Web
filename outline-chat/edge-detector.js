@@ -1,4 +1,4 @@
-function detectEdge(threshold, margin, buffer, width, height, mode) {
+function detectEdge({ threshold, margin, buffer, width, height, mode }) {
   const mode1 = mode ? !!(mode & 1) : true;
   const mode2 = !!(mode & 2);
 
@@ -64,3 +64,8 @@ function detectEdge(threshold, margin, buffer, width, height, mode) {
 
   return newData.buffer;
 }
+
+// onmessage = (e) => {
+//   const {threshold, margin, buffer, width, height, mode} = e.data;
+
+// }

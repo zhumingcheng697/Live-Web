@@ -87,14 +87,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
         const { data, width, height } = imageData;
 
-        const newBuffer = detectEdge(
+        const newBuffer = detectEdge({
           threshold,
           margin,
-          data.buffer,
+          buffer: data.buffer,
           width,
           height,
-          1
-        );
+          mode: 1,
+        });
 
         imageData.data.set(new Uint8ClampedArray(newBuffer));
 
