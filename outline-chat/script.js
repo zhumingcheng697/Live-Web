@@ -145,6 +145,14 @@ window.addEventListener("DOMContentLoaded", () => {
         const frameRate =
           stream.getVideoTracks()[0].getSettings().frameRate || 30;
 
+        function repaint(imageData, buffer) {
+          imageData.data.set(new Uint8ClampedArray(buffer));
+
+          context.putImageData(imageData, 0, 0);
+
+          setTimeout(draw, 1000 / frameRate);
+        }
+
         function draw() {
           previewContext.drawImage(video, 0, 0);
 
@@ -154,45 +162,25 @@ window.addEventListener("DOMContentLoaded", () => {
 
           const imageData = previewContext.getImageData(0, 0, width, height);
 
+          const payload = {
+            threshold,
+            margin,
+            buffer: imageData.data.buffer,
+            width,
+            height,
+            mode,
+          };
+
           if (edgeDetector) {
-            edgeDetector.postMessage(
-              {
-                threshold,
-                margin,
-                buffer: imageData.data.buffer,
-                width,
-                height,
-                mode,
-              },
-              [imageData.data.buffer]
-            );
+            edgeDetector.postMessage(payload, [imageData.data.buffer]);
           } else {
-            const newBuffer = detectEdge({
-              threshold,
-              margin,
-              buffer: imageData.data.buffer,
-              width,
-              height,
-              mode,
-            });
-
-            imageData.data.set(new Uint8ClampedArray(newBuffer));
-
-            context.putImageData(imageData, 0, 0);
-
-            setTimeout(draw, 1000 / frameRate);
+            repaint(imageData, detectEdge(payload));
           }
         }
 
         if (edgeDetector) {
           edgeDetector.onmessage = (e) => {
-            const newImageData = context.createImageData(width, height);
-
-            newImageData.data.set(new Uint8ClampedArray(e.data));
-
-            context.putImageData(newImageData, 0, 0);
-
-            setTimeout(draw, 1000 / frameRate);
+            repaint(context.createImageData(width, height), e.data);
           };
         }
 

@@ -80,54 +80,40 @@ window.addEventListener("DOMContentLoaded", () => {
       const context = canvas.getContext("2d");
       hiddenArea.append(canvas);
 
+      function repaint(imageData, buffer) {
+        imageData.data.set(new Uint8ClampedArray(buffer));
+
+        context.putImageData(imageData, 0, 0);
+
+        renderedImage.src = canvas.toDataURL();
+
+        shouldRequestNewFrame = true;
+      }
+
       function draw() {
         context.drawImage(image, 0, 0);
 
         const imageData = context.getImageData(0, 0, width, height);
 
+        const payload = {
+          threshold,
+          margin,
+          buffer: imageData.data.buffer,
+          width,
+          height,
+          mode: 1,
+        };
+
         if (edgeDetector) {
-          edgeDetector.postMessage(
-            {
-              threshold,
-              margin,
-              buffer: imageData.data.buffer,
-              width,
-              height,
-              mode: 1,
-            },
-            [imageData.data.buffer]
-          );
+          edgeDetector.postMessage(payload, [imageData.data.buffer]);
         } else {
-          const newBuffer = detectEdge({
-            threshold,
-            margin,
-            buffer: imageData.data.buffer,
-            width,
-            height,
-            mode: 1,
-          });
-
-          imageData.data.set(new Uint8ClampedArray(newBuffer));
-
-          context.putImageData(imageData, 0, 0);
-
-          renderedImage.src = canvas.toDataURL();
-
-          shouldRequestNewFrame = true;
+          repaint(imageData, detectEdge(payload));
         }
       }
 
       if (edgeDetector) {
         edgeDetector.onmessage = (e) => {
-          const newImageData = context.createImageData(width, height);
-
-          newImageData.data.set(new Uint8ClampedArray(e.data));
-
-          context.putImageData(newImageData, 0, 0);
-
-          renderedImage.src = canvas.toDataURL();
-
-          shouldRequestNewFrame = true;
+          repaint(context.createImageData(width, height), e.data);
         };
       }
 
