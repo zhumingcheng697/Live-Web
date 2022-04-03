@@ -53,11 +53,16 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener("load", () => {
     let index = 0;
     for (let image of hiddenArea.getElementsByTagName("img")) {
+      const edgeDetector = new Worker("./edge-detector.js");
+
       let shouldRequestNewFrame = true;
 
+      const width = image.naturalWidth;
+      const height = image.naturalHeight;
+
       const canvas = document.createElement("canvas");
-      canvas.width = image.naturalWidth;
-      canvas.height = image.naturalHeight;
+      canvas.width = width;
+      canvas.height = height;
       canvas.className = "eighty-six";
 
       const renderedImage = document.createElement("img");
@@ -78,32 +83,32 @@ window.addEventListener("DOMContentLoaded", () => {
       function draw() {
         context.drawImage(image, 0, 0);
 
-        const imageData = context.getImageData(
-          0,
-          0,
-          canvas.width,
-          canvas.height
+        const { data } = context.getImageData(0, 0, width, height);
+
+        edgeDetector.postMessage(
+          {
+            threshold,
+            margin,
+            buffer: data.buffer,
+            width,
+            height,
+            mode: 1,
+          },
+          [data.buffer]
         );
+      }
 
-        const { data, width, height } = imageData;
+      edgeDetector.onmessage = (e) => {
+        const newImageData = context.createImageData(width, height);
 
-        const newBuffer = detectEdge({
-          threshold,
-          margin,
-          buffer: data.buffer,
-          width,
-          height,
-          mode: 1,
-        });
+        newImageData.data.set(new Uint8ClampedArray(e.data));
 
-        imageData.data.set(new Uint8ClampedArray(newBuffer));
-
-        context.putImageData(imageData, 0, 0);
+        context.putImageData(newImageData, 0, 0);
 
         renderedImage.src = canvas.toDataURL();
 
         shouldRequestNewFrame = true;
-      }
+      };
 
       draw();
 

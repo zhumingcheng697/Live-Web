@@ -1,4 +1,6 @@
 window.addEventListener("DOMContentLoaded", () => {
+  const edgeDetector = new Worker("./edge-detector.js");
+
   const mainArea = document.getElementById("main-area");
   const videosDiv = document.getElementById("videos");
 
@@ -121,11 +123,20 @@ window.addEventListener("DOMContentLoaded", () => {
       video.onloadedmetadata = () => {
         video.play();
 
+        const width = video.videoWidth;
+        const height = video.videoHeight;
+
         const canvas = document.createElement("canvas");
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
+        canvas.width = width;
+        canvas.height = height;
 
         const context = canvas.getContext("2d");
+
+        const previewCanvas = document.createElement("canvas");
+        previewCanvas.width = width;
+        previewCanvas.height = height;
+
+        const previewContext = previewCanvas.getContext("2d");
 
         videosDiv.insertBefore(canvas, videosDiv.firstChild);
 
@@ -135,36 +146,36 @@ window.addEventListener("DOMContentLoaded", () => {
           stream.getVideoTracks()[0].getSettings().frameRate || 30;
 
         function draw() {
-          context.drawImage(video, 0, 0);
+          previewContext.drawImage(video, 0, 0);
 
           const threshold = +thresholdEl.value;
           const margin = Math.round(+areaEl.value);
           const mode = +modeEl.value;
 
-          const imageData = context.getImageData(
-            0,
-            0,
-            canvas.width,
-            canvas.height
+          const { data } = previewContext.getImageData(0, 0, width, height);
+
+          edgeDetector.postMessage(
+            {
+              threshold,
+              margin,
+              buffer: data.buffer,
+              width,
+              height,
+              mode,
+            },
+            [data.buffer]
           );
+        }
 
-          const { data, width, height } = imageData;
+        edgeDetector.onmessage = (e) => {
+          const newImageData = context.createImageData(width, height);
 
-          const newBuffer = detectEdge({
-            threshold,
-            margin,
-            buffer: data.buffer,
-            width,
-            height,
-            mode,
-          });
+          newImageData.data.set(new Uint8ClampedArray(e.data));
 
-          imageData.data.set(new Uint8ClampedArray(newBuffer));
-
-          context.putImageData(imageData, 0, 0);
+          context.putImageData(newImageData, 0, 0);
 
           setTimeout(draw, 1000 / frameRate);
-        }
+        };
 
         draw();
 
