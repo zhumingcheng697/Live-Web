@@ -29,3 +29,5 @@ Regular video stream recording does work on Safari, but you have to specify the 
 ```js
 new Blob(chunks, { type: recorder.mimeType });
 ```
+
+UPDATE: An issue that kept bothering me was that the UI would be quite laggy when the user is dragging the knobs to control the image filer. Fortunately, I was able to greatly improve the responsiveness on the main UI thread by running the more computationally expensive edge detection algorithm in worker threads using Web Worker.
