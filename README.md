@@ -37,3 +37,13 @@
 - ### [Outline Chat](https://github.com/zhumingcheng697/Live-Web/tree/main/outline-chat)
 
   Week 8 Session 2 / Week 9 Session 1 Assignment
+
+## More
+
+- ### [MultiPeerConnection](https://github.com/zhumingcheng697/MultiPeerConnection)
+
+  A More Efficient and User-Friendly [`multipeer-simple-peer-server`](https://github.com/vanevery/multipeer-simple-peer-server)
+
+- ### [86 Simple Edge Detector Demo](https://zhumingcheng697.github.io/Live-Web/outline-chat/86.html)
+
+  An Image Manipulation Demo with [`simple-edge-detector.js`](https://github.com/zhumingcheng697/Live-Web/blob/main/outline-chat/simple-edge-detector.js)
