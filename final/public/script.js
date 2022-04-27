@@ -468,6 +468,11 @@ window.addEventListener("DOMContentLoaded", () => {
       document.documentElement.classList.remove("setting-up");
       document.documentElement.classList.add("chatting");
       setupForm.parentNode.remove();
+      checkToolsHeight();
+      updateOrientation(window.orientation);
+      screen &&
+        screen.orientation &&
+        updateOrientation(screen.orientation.angle);
     }
   });
 
@@ -512,8 +517,7 @@ window.addEventListener("DOMContentLoaded", () => {
     stopCapture(false);
   });
 
+  checkToolsHeight();
   updateOrientation(window.orientation);
   screen && screen.orientation && updateOrientation(screen.orientation.angle);
-  checkToolsHeight();
-  updateLayout();
 });
