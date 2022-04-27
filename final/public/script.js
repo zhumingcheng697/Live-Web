@@ -4,6 +4,20 @@ function randomNumber(n, base = 10) {
     .join("");
 }
 
+function handleMediaElement(el, handleVideo) {
+  if (handleVideo) {
+    el.muted = true;
+    el.setAttribute("muted", "");
+  }
+  el.autoplay = true;
+  el.playsInline = true;
+  el.setAttribute("autoplay", "");
+  el.setAttribute("playsinline", "");
+  el.onloadedmetadata = () => {
+    el.play();
+  };
+}
+
 const addClickOrKeyListener = (target, listener) => {
   target.addEventListener("click", listener);
   target.addEventListener("keydown", (e) => {
@@ -58,16 +72,12 @@ const addDoubleClickOrKeyListener = (
 
 window.addEventListener("DOMContentLoaded", () => {
   const cameraOffText = "- Camera Off -";
-  const cameraOnText = "- Camera On -";
   const micOffText = "- Mic Off -";
-  const micOnText = "- Mic On -";
 
   let myUsername = "";
   let serverBlockTimeout;
   let preferredAudioLabel;
   let preferredVideoLabel;
-  let audioStream;
-  let videoStream;
 
   const getInsets = () => {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -87,8 +97,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const selectCameraEl = document.getElementById("select-camera");
   const selectMicEl = document.getElementById("select-mic");
 
+  const captureDiv = document.getElementById("capture-div");
+  const videoEl = captureDiv.querySelector("video");
+  const audioEl = captureDiv.querySelector("audio");
+  const usernameEl = captureDiv.querySelector(".username");
+
   const mainArea = document.getElementById("main-area");
-  const videosDiv = document.getElementById("videos");
+  const streamsDiv = document.getElementById("streams");
   const controls = document.getElementById("control");
 
   const baseWidth = 200;
@@ -164,7 +179,7 @@ window.addEventListener("DOMContentLoaded", () => {
     let col = Math.floor(availableWidth / baseWidth);
     let row = Math.floor(availableHeight / baseHeight);
 
-    const n = videosDiv.children.length;
+    const n = streamsDiv.children.length;
 
     let pCol, pRow;
 
@@ -238,18 +253,12 @@ window.addEventListener("DOMContentLoaded", () => {
             ? stream.getVideoTracks()[0].label === preferredVideoLabel
             : stream.getAudioTracks()[0].label === preferredAudioLabel;
 
-          if (startVideo) {
-            videoStream = stream;
-          } else {
-            audioStream = stream;
-          }
+          const el = startVideo ? videoEl : audioEl;
 
-          // captureVideoEl.srcObject = stream;
-          // captureVideoEl.onloadedmetadata = () => {
-          //   captureButton.disabled = false;
-          //   captureVideoEl.play();
-          //   updateLayout();
-          // };
+          el.srcObject = stream;
+          el.onloadedmetadata = () => {
+            el.play();
+          };
 
           if (!preferredDeviceLabel || labelMatch) {
             document.body.classList.add("stream-ready");
@@ -294,7 +303,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 option.value = e.label;
                 option.selected =
                   (forCamera ? preferredVideoLabel : preferredAudioLabel) ===
-                    e.label && (forCamera ? videoStream : audioStream);
+                    e.label && (forCamera ? videoEl : audioEl).srcObject;
                 selectEl.appendChild(option);
               });
             }
@@ -319,7 +328,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function stopCapture(stopVideo, switching = false) {
-    const stream = stopVideo ? videoStream : audioStream;
+    const el = stopVideo ? videoEl : audioEl;
+    const stream = el.srcObject;
 
     if (stream) {
       stream.getTracks().forEach((e) => {
@@ -330,12 +340,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (stopVideo) {
       document.body.classList.remove("stream-ready");
-      videoStream = null;
       if (!switching) selectCameraEl.selectedIndex = 0;
     } else {
-      audioStream = null;
       if (!switching) selectMicEl.selectedIndex = 0;
     }
+
+    el.srcObject = null;
   }
 
   // Whenever a peer disconnected
@@ -359,7 +369,7 @@ window.addEventListener("DOMContentLoaded", () => {
     newVideo.onloadedmetadata = () => {
       newVideo.play();
     };
-    videosDiv.appendChild(newVideo);
+    streamsDiv.appendChild(newVideo);
     updateLayout();
   }
 
@@ -454,6 +464,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const name = e.target.username.value;
     if (name) {
       myUsername = `${name}^${randomNumber(3)}`;
+      usernameEl.textContent = myUsername;
       document.documentElement.classList.remove("setting-up");
       document.documentElement.classList.add("chatting");
       setupForm.parentNode.remove();
@@ -494,6 +505,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
     stopCapture(false, true);
     startCapture(false);
+  });
+
+  addDoubleClickOrKeyListener(captureDiv, () => {
+    stopCapture(true);
+    stopCapture(false);
   });
 
   updateOrientation(window.orientation);

@@ -21,8 +21,8 @@
           all over the world.
         </p>
         <p>
-          Double click your own frame to quickly mute yourself and turn off your
-          camera, or double click others&rsquo; frames to report them.
+          Double click your own frame to quickly turn off your camera and mic,
+          or double click others&rsquo; frames to report them.
         </p>
         <p>Please be nice and give everyone a chance to speak.</p>
         <form id="intro-form">
@@ -53,20 +53,22 @@
 
     <div id="chatting-area">
       <div id="main-area">
-        <div id="videos">
+        <div id="streams">
           <div
-            style="
-              background: var(--bg1);
-              width: var(--each-width);
-              height: var(--each-height);
-            "
-          ></div>
+            id="capture-div"
+            tabindex="0"
+            title="Double Click to Turn Off Your Camera and Mic"
+          >
+            <p class="username">Username</p>
+            <video id="capture-video" playsinline muted></video>
+            <audio id="capture-audio" playsinline></audio>
+          </div>
         </div>
       </div>
       <form id="control">
         <div>
           <div>
-            <span>Video:</span>
+            <label>Video:</label>
             <select id="select-camera">
               <option>- Camera Off -</option>
               <option>- Camera On -</option>
@@ -74,7 +76,7 @@
           </div>
 
           <div>
-            <span>Audio:</span>
+            <label>Audio:</label>
             <select id="select-mic">
               <option>- Mic Off -</option>
               <option>- Mic On -</option>
