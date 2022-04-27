@@ -97,20 +97,28 @@ window.addEventListener("DOMContentLoaded", () => {
   const selectCameraEl = document.getElementById("select-camera");
   const selectMicEl = document.getElementById("select-mic");
 
+  const mainArea = document.getElementById("main-area");
+  const streamsDiv = document.getElementById("streams");
+  const controls = document.getElementById("control");
+
   const captureDiv = document.getElementById("capture-div");
   const videoEl = captureDiv.querySelector("video");
   const audioEl = captureDiv.querySelector("audio");
   const usernameEl = captureDiv.querySelector(".username");
-
-  const mainArea = document.getElementById("main-area");
-  const streamsDiv = document.getElementById("streams");
-  const controls = document.getElementById("control");
 
   const baseWidth = 200;
   const baseHeight = 150;
 
   const videoBitrate = 500; //kbps
   const audioBitrate = 100; //kbps
+
+  // const connection = new MultiPeerConnection({
+  //   host: "http://127.0.0.1:8080",
+  //   onStream: receivedStream,
+  //   onPeerDisconnect: peerDisconnected,
+  //   videoBitrate,
+  //   audioBitrate,
+  // });
 
   function updateLayout() {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -261,7 +269,8 @@ window.addEventListener("DOMContentLoaded", () => {
           };
 
           if (!preferredDeviceLabel || labelMatch) {
-            document.body.classList.add("stream-ready");
+            if (startVideo) captureDiv.classList.add("video-ready");
+            else captureDiv.classList.add("audio-ready");
           }
 
           navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -278,11 +287,11 @@ window.addEventListener("DOMContentLoaded", () => {
               return;
             }
 
-            document.body.classList.add("stream-ready");
-
             if (startVideo) {
+              captureDiv.classList.add("video-ready");
               preferredVideoLabel = stream.getVideoTracks()[0].label;
             } else {
+              captureDiv.classList.add("audio-ready");
               preferredAudioLabel = stream.getAudioTracks()[0].label;
             }
 
@@ -321,6 +330,13 @@ window.addEventListener("DOMContentLoaded", () => {
           });
         })
         .catch((e) => {
+          if (startVideo) {
+            captureDiv.classList.remove("video-ready");
+            selectCameraEl.selectedIndex = 0;
+          } else {
+            captureDiv.classList.remove("audio-ready");
+            selectMicEl.selectedIndex = 0;
+          }
           console.error(e);
           alert(`Unable to start the camera: ${e}`);
         });
@@ -338,12 +354,14 @@ window.addEventListener("DOMContentLoaded", () => {
       });
     }
 
-    if (stopVideo) {
-      document.body.classList.remove("stream-ready");
-      if (!switching) selectCameraEl.selectedIndex = 0;
-    } else {
-      if (!switching) selectMicEl.selectedIndex = 0;
-    }
+    if (!switching)
+      if (stopVideo) {
+        captureDiv.classList.remove("video-ready");
+        selectCameraEl.selectedIndex = 0;
+      } else {
+        captureDiv.classList.remove("audio-ready");
+        selectMicEl.selectedIndex = 0;
+      }
 
     el.srcObject = null;
   }
@@ -359,54 +377,23 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Whenever we get a stream from a peer
   function receivedStream(stream, simplePeerWrapper) {
-    const newVideo = document.createElement("VIDEO");
-    newVideo.id = simplePeerWrapper.socket_id;
-    newVideo.srcObject = stream;
-    newVideo.autoplay = true;
-    newVideo.playsInline = true;
-    newVideo.setAttribute("autoplay", "");
-    newVideo.setAttribute("playsinline", "");
-    newVideo.onloadedmetadata = () => {
-      newVideo.play();
-    };
-    streamsDiv.appendChild(newVideo);
+    const isVideo = !!stream.getVideoTracks().length;
+
+    let newCaptureDiv = document.getElementById(simplePeerWrapper.socket_id);
+
+    const existed = !!newCaptureDiv;
+
+    if (!existed) {
+      newCaptureDiv = document.createElement("DIV");
+      newCaptureDiv.id = simplePeerWrapper.socket_id;
+    }
+
+    const newMediaEl = document.createElement(isVideo ? "VIDEO" : "AUDIO");
+    newMediaEl.srcObject = stream;
+    handleMediaElement(newMediaEl, isVideo);
+    streamsDiv.appendChild(newMediaEl);
     updateLayout();
   }
-
-  // The video element on the page to display the webcam
-  let video = document.createElement("video");
-
-  // Constraints - what do we want?
-  let constraints = { audio: false, video: true };
-
-  // Prompt the user for permission, get the stream
-  // navigator.mediaDevices
-  //   .getUserMedia(constraints)
-  //   .then((stream) => {
-  //     /* Use the stream */
-
-  //     // Attach to our video object
-  //     video.srcObject = stream;
-  //     video.muted = true;
-  //     video.setAttribute("muted", "");
-
-  //     // Wait for the stream to load enough to play
-  //     video.onloadedmetadata = () => {
-  //       video.play();
-
-  //       // new MultiPeerConnection({
-  //       //   stream: stream,
-  //       //   host: "https://mccoy-zhu-outline-chat.glitch.me/",
-  //       //   onStream: receivedStream,
-  //       //   onPeerDisconnect: peerDisconnected,
-  //       //   videoBitrate,
-  //       //   audioBitrate,
-  //       // });
-  //     };
-  //   })
-  //   .catch((err) => {
-  //     alert(err);
-  //   });
 
   window.addEventListener("resize", () => {
     checkToolsHeight();

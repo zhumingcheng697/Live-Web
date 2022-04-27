@@ -9,7 +9,6 @@
     <title>McCoy’s Video Chat</title>
     <link rel="stylesheet" type="text/css" href="./style.css" />
     <script type="text/javascript" src="./multi-peer-connection.js"></script>
-    <script type="text/javascript" src="./simple-edge-detector.js"></script>
     <script type="text/javascript" src="./script.js"></script>
   </head>
   <body class="layout-b">
@@ -59,7 +58,10 @@
             tabindex="0"
             title="Double Click to Turn Off Your Camera and Mic"
           >
-            <p class="username">Username</p>
+            <div class="username">
+              <div class="mic-indicator"></div>
+              <p>Username</p>
+            </div>
             <video id="capture-video" playsinline muted></video>
             <audio id="capture-audio" playsinline></audio>
           </div>

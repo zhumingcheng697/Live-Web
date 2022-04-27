@@ -1,6 +1,6 @@
-if (process.env.DEBUG) {
-  const SimplePeer = require("simple-peer");
-}
+// if (process.env.DEBUG) {
+//   const SimplePeer = require("simple-peer");
+// }
 
 class MultiPeerConnection {
   constructor({
