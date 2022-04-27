@@ -294,7 +294,7 @@ window.addEventListener("DOMContentLoaded", () => {
                 option.value = e.label;
                 option.selected =
                   (forCamera ? preferredVideoLabel : preferredAudioLabel) ===
-                  e.label;
+                    e.label && (forCamera ? videoStream : audioStream);
                 selectEl.appendChild(option);
               });
             }
@@ -318,7 +318,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  function stopCapture(stopVideo) {
+  function stopCapture(stopVideo, switching = false) {
     const stream = stopVideo ? videoStream : audioStream;
 
     if (stream) {
@@ -331,10 +331,10 @@ window.addEventListener("DOMContentLoaded", () => {
     if (stopVideo) {
       document.body.classList.remove("stream-ready");
       videoStream = null;
-      selectCameraEl.selectedIndex = 0;
+      if (!switching) selectCameraEl.selectedIndex = 0;
     } else {
       audioStream = null;
-      selectMicEl.selectedIndex = 0;
+      if (!switching) selectMicEl.selectedIndex = 0;
     }
   }
 
@@ -474,7 +474,7 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    stopCapture(true);
+    stopCapture(true, true);
     startCapture(true);
   });
 
@@ -492,7 +492,7 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    stopCapture(false);
+    stopCapture(false, true);
     startCapture(false);
   });
 
