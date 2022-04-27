@@ -1,5 +1,5 @@
 // if (process.env.DEBUG) {
-//   const SimplePeer = require("simple-peer");
+// const SimplePeer = require("simple-peer");
 // }
 
 class MultiPeerConnection {
@@ -79,6 +79,18 @@ class MultiPeerConnection {
   sendData(data) {
     for (let peer of this.peers.values()) {
       peer.sendData(data);
+    }
+  }
+
+  addStream(stream) {
+    for (let peer of this.peers.values()) {
+      peer.addStream(stream);
+    }
+  }
+
+  removeStream(stream) {
+    for (let peer of this.peers.values()) {
+      peer.removeStream(stream);
     }
   }
 }
@@ -161,6 +173,14 @@ class SimplePeerWrapper {
 
   sendData(data) {
     this.simplepeer.send(data);
+  }
+
+  addStream(stream) {
+    this.simplepeer.addStream(stream);
+  }
+
+  removeStream(stream) {
+    this.simplepeer.removeStream(stream);
   }
 
   // Borrowed from after https://webrtchacks.com/limit-webrtc-bandwidth-sdp/

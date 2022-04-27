@@ -104,7 +104,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const captureDiv = document.getElementById("capture-div");
   const videoEl = captureDiv.querySelector("video");
   const audioEl = captureDiv.querySelector("audio");
-  const usernameEl = captureDiv.querySelector(".username");
+  const usernameEl = captureDiv.querySelector(".username > p");
 
   const baseWidth = 200;
   const baseHeight = 150;
@@ -112,13 +112,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const videoBitrate = 500; //kbps
   const audioBitrate = 100; //kbps
 
-  // const connection = new MultiPeerConnection({
-  //   host: "http://127.0.0.1:8080",
-  //   onStream: receivedStream,
-  //   onPeerDisconnect: peerDisconnected,
-  //   videoBitrate,
-  //   audioBitrate,
-  // });
+  const connection = new MultiPeerConnection({
+    host: "http://127.0.0.1:8080",
+    onStream: receivedStream,
+    onPeerDisconnect: peerDisconnected,
+    videoBitrate,
+    audioBitrate,
+  });
 
   function updateLayout() {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -262,6 +262,7 @@ window.addEventListener("DOMContentLoaded", () => {
             : stream.getAudioTracks()[0].label === preferredAudioLabel;
 
           const el = startVideo ? videoEl : audioEl;
+          const readyClass = startVideo ? "video-ready" : "audio-ready";
 
           el.srcObject = stream;
           el.onloadedmetadata = () => {
@@ -269,8 +270,10 @@ window.addEventListener("DOMContentLoaded", () => {
           };
 
           if (!preferredDeviceLabel || labelMatch) {
-            if (startVideo) captureDiv.classList.add("video-ready");
-            else captureDiv.classList.add("audio-ready");
+            if (!captureDiv.classList.contains(readyClass)) {
+              captureDiv.classList.add(readyClass);
+              connection.addStream(stream);
+            }
           }
 
           navigator.mediaDevices.enumerateDevices().then((devices) => {
@@ -287,11 +290,14 @@ window.addEventListener("DOMContentLoaded", () => {
               return;
             }
 
+            if (!captureDiv.classList.contains(readyClass)) {
+              captureDiv.classList.add(readyClass);
+              connection.addStream(stream);
+            }
+
             if (startVideo) {
-              captureDiv.classList.add("video-ready");
               preferredVideoLabel = stream.getVideoTracks()[0].label;
             } else {
-              captureDiv.classList.add("audio-ready");
               preferredAudioLabel = stream.getAudioTracks()[0].label;
             }
 
@@ -352,6 +358,12 @@ window.addEventListener("DOMContentLoaded", () => {
         e.stop();
         stream.removeTrack(e);
       });
+
+      try {
+        connection.removeStream(stream);
+      } catch (e) {
+        console.error(e);
+      }
     }
 
     if (!switching)
@@ -366,33 +378,74 @@ window.addEventListener("DOMContentLoaded", () => {
     el.srcObject = null;
   }
 
-  // Whenever a peer disconnected
-  function peerDisconnected(data) {
-    const element = document.getElementById(data);
-    if (element) {
-      element.remove();
-      updateLayout();
+  function getPeerCaptureDiv(id, username = null) {
+    let peerDiv = document.getElementById(id);
+
+    if (!username || peerDiv) {
+      return peerDiv;
     }
+
+    peerDiv = document.createElement("DIV");
+    peerDiv.id = id;
+    peerDiv.tabIndex = 0;
+    peerDiv.title = "Double Click to Report";
+
+    const usernameDiv = document.createElement("DIV");
+    usernameDiv.className = "username";
+
+    const micIndicatorDiv = document.createElement("DIV");
+    micIndicatorDiv.className = "mic-indicator";
+
+    const usernameP = document.createElement("P");
+    usernameP.textContent = username;
+
+    usernameDiv.appendChild(micIndicatorDiv);
+    usernameDiv.appendChild(usernameP);
+
+    peerDiv.appendChild(usernameDiv);
+    peerDiv.appendChild(document.createElement("VIDEO"));
+    peerDiv.appendChild(document.createElement("AUDIO"));
+
+    return peerDiv;
   }
 
   // Whenever we get a stream from a peer
   function receivedStream(stream, simplePeerWrapper) {
     const isVideo = !!stream.getVideoTracks().length;
+    const readyClass = isVideo ? "video-ready" : "audio-ready";
 
-    let newCaptureDiv = document.getElementById(simplePeerWrapper.socket_id);
+    const peerCaptureDiv = getPeerCaptureDiv(
+      simplePeerWrapper.socket_id,
+      simplePeerWrapper.socket_id
+    );
 
-    const existed = !!newCaptureDiv;
+    peerCaptureDiv.classList.add(readyClass);
 
-    if (!existed) {
-      newCaptureDiv = document.createElement("DIV");
-      newCaptureDiv.id = simplePeerWrapper.socket_id;
-    }
+    const mediaEl = peerCaptureDiv.querySelector(isVideo ? "video" : "audio");
+    mediaEl.srcObject = stream;
+    handleMediaElement(mediaEl, isVideo);
 
-    const newMediaEl = document.createElement(isVideo ? "VIDEO" : "AUDIO");
-    newMediaEl.srcObject = stream;
-    handleMediaElement(newMediaEl, isVideo);
-    streamsDiv.appendChild(newMediaEl);
+    streamsDiv.appendChild(peerCaptureDiv);
+
+    stream.getTracks().forEach((track) => {
+      track.addEventListener("mute", () => {
+        mediaEl.srcObject = null;
+        peerCaptureDiv.classList.remove(
+          track.kind === "video" ? "video-ready" : "audio-ready"
+        );
+      });
+    });
+
     updateLayout();
+  }
+
+  // Whenever a peer disconnected
+  function peerDisconnected(data) {
+    const element = getPeerCaptureDiv(data, false);
+    if (element) {
+      element.remove();
+      updateLayout();
+    }
   }
 
   window.addEventListener("resize", () => {
