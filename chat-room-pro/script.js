@@ -934,7 +934,7 @@ window.addEventListener("DOMContentLoaded", () => {
         generateBtn.classList.remove("disabled");
       })
       .catch(() => {
-        fetch("https://random-word-api.herokuapp.com/word?number=2&swear=0")
+        fetch("https://random-word-api.herokuapp.com/word?number=2")
           .then((res) => res.json())
           .then((words) => {
             usernameInput.value = words.join("-");
