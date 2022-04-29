@@ -48,18 +48,26 @@ io.sockets.on(
 
   // We are given a websocket object in our function
   function (socket) {
-    peers.set(socket.id, socket);
     console.log(`Peer ${socket.id} joined`);
 
-    socket.on("list", function () {
-      socket.emit("list-results", [...peers.keys()]);
+    socket.on("join", (username) => {
+      peers.set(socket.id, { socket, username });
+      socket.emit(
+        "user-list",
+        [...peers.values()].map(({ socket, username }) => [username, socket.id])
+      );
+      socket.broadcast.emit("join", username, socket.id);
+    });
+
+    socket.on("remove-stream", (removeVideo) => {
+      socket.broadcast.emit("remove-stream", socket.id, removeVideo);
     });
 
     // Relay signals back and forth
     socket.on("signal", (to, from, data) => {
       const peer = peers.get(to);
-      if (peer) {
-        peer.emit("signal", to, from, data);
+      if (peer && peer.socket) {
+        peer.socket.emit("signal", to, from, data);
       } else {
         console.error(`Peer ${to} not found`);
       }

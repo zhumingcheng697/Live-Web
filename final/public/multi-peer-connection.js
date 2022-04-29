@@ -1,9 +1,10 @@
 // if (process.env.DEBUG) {
-// const SimplePeer = require("simple-peer");
+//   const SimplePeer = require("simple-peer");
 // }
 
 class MultiPeerConnection {
   constructor({
+    socket,
     stream,
     onStream,
     onData,
@@ -13,12 +14,7 @@ class MultiPeerConnection {
     audioBitrate = null,
   }) {
     this.peers = new Map();
-    this.socket = host ? io.connect(host) : io.connect();
-
-    this.socket.on("connect", () => {
-      // Tell the server we want a list of the other users
-      this.socket.emit("list");
-    });
+    this.socket = socket || (host ? io.connect(host) : io.connect());
 
     this.socket.on("peer_disconnect", (data) => {
       this.peers.delete(data);
@@ -26,8 +22,8 @@ class MultiPeerConnection {
     });
 
     // Receive list results from server
-    this.socket.on("list-results", (data) => {
-      for (let id of data) {
+    this.socket.on("user-list", (data) => {
+      for (let [, id] of data) {
         if (id !== this.socket.id) {
           let peer = new SimplePeerWrapper(
             true,
@@ -92,6 +88,14 @@ class MultiPeerConnection {
     for (let peer of this.peers.values()) {
       peer.removeStream(stream);
     }
+  }
+
+  close() {
+    for (let peer of this.peers.values()) {
+      peer.destroy();
+    }
+
+    this.peers.clear();
   }
 }
 
@@ -181,6 +185,10 @@ class SimplePeerWrapper {
 
   removeStream(stream) {
     this.simplepeer.removeStream(stream);
+  }
+
+  destroy() {
+    this.simplepeer.destroy();
   }
 
   // Borrowed from after https://webrtchacks.com/limit-webrtc-bandwidth-sdp/

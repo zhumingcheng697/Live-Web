@@ -71,6 +71,9 @@ const addDoubleClickOrKeyListener = (
 };
 
 window.addEventListener("DOMContentLoaded", () => {
+  const socket = io.connect("http://127.0.0.1:8080");
+  const usernames = new Map();
+
   const cameraOffText = "- Camera Off -";
   const micOffText = "- Mic Off -";
 
@@ -113,7 +116,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const audioBitrate = 100; //kbps
 
   const connection = new MultiPeerConnection({
-    host: "http://127.0.0.1:8080",
+    socket,
     onStream: receivedStream,
     onPeerDisconnect: peerDisconnected,
     videoBitrate,
@@ -121,6 +124,12 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   function updateLayout() {
+    if (!document.body.classList.contains("layout-b"))
+      document.documentElement.style.setProperty(
+        "--tools-height",
+        controls.clientHeight + "px"
+      );
+
     const computedStyle = window.getComputedStyle(document.documentElement);
     const toolWidth = parseInt(computedStyle.getPropertyValue("--tools-width"));
     const toolHeight = parseInt(
@@ -170,14 +179,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     updateLayout();
-  }
-
-  function checkToolsHeight() {
-    if (!document.body.classList.contains("layout-b"))
-      document.documentElement.style.setProperty(
-        "--tools-height",
-        controls.clientHeight + "px"
-      );
   }
 
   function calculateVideoSize(availableWidth, availableHeight) {
@@ -333,6 +334,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
             setOptionsFor(true, cameras);
             setOptionsFor(false, mics);
+            updateLayout();
           });
         })
         .catch((e) => {
@@ -360,6 +362,7 @@ window.addEventListener("DOMContentLoaded", () => {
       });
 
       try {
+        socket.emit("remove-stream", stopVideo);
         connection.removeStream(stream);
       } catch (e) {
         console.error(e);
@@ -406,6 +409,8 @@ window.addEventListener("DOMContentLoaded", () => {
     peerDiv.appendChild(document.createElement("VIDEO"));
     peerDiv.appendChild(document.createElement("AUDIO"));
 
+    updateLayout();
+
     return peerDiv;
   }
 
@@ -414,10 +419,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const isVideo = !!stream.getVideoTracks().length;
     const readyClass = isVideo ? "video-ready" : "audio-ready";
 
-    const peerCaptureDiv = getPeerCaptureDiv(
-      simplePeerWrapper.socket_id,
-      simplePeerWrapper.socket_id
-    );
+    const peerCaptureDiv = getPeerCaptureDiv(simplePeerWrapper.socket_id, true);
 
     peerCaptureDiv.classList.add(readyClass);
 
@@ -426,15 +428,6 @@ window.addEventListener("DOMContentLoaded", () => {
     handleMediaElement(mediaEl, isVideo);
 
     streamsDiv.appendChild(peerCaptureDiv);
-
-    stream.getTracks().forEach((track) => {
-      track.addEventListener("mute", () => {
-        mediaEl.srcObject = null;
-        peerCaptureDiv.classList.remove(
-          track.kind === "video" ? "video-ready" : "audio-ready"
-        );
-      });
-    });
 
     updateLayout();
   }
@@ -446,10 +439,41 @@ window.addEventListener("DOMContentLoaded", () => {
       element.remove();
       updateLayout();
     }
+    usernames.delete(data);
   }
 
+  socket.on("join", (username, id) => {
+    if (!myUsername) return;
+
+    usernames.set(id, username);
+    streamsDiv.appendChild(getPeerCaptureDiv(id, username));
+    updateLayout();
+  });
+
+  socket.on("user-list", (record) => {
+    for (let [username, id] of record) {
+      if (id === socket.id) continue;
+      usernames.set(id, username);
+      streamsDiv.appendChild(getPeerCaptureDiv(id, username));
+      updateLayout();
+    }
+  });
+
+  socket.on("remove-stream", (id, removeVideo) => {
+    const peerCaptureDiv = getPeerCaptureDiv(id);
+
+    if (peerCaptureDiv) {
+      peerCaptureDiv.querySelector(removeVideo ? "video" : "audio").srcObject =
+        null;
+      peerCaptureDiv.classList.remove(
+        removeVideo ? "video-ready" : "audio-ready"
+      );
+    } else {
+      console.log("not found");
+    }
+  });
+
   window.addEventListener("resize", () => {
-    checkToolsHeight();
     updateLayout();
   });
 
@@ -487,7 +511,7 @@ window.addEventListener("DOMContentLoaded", () => {
         generateBtn.classList.remove("disabled");
       })
       .catch(() => {
-        fetch("https://random-word-api.herokuapp.com/word?number=2&swear=0")
+        fetch("https://random-word-api.herokuapp.com/word?number=2")
           .then((res) => res.json())
           .then((words) => {
             usernameInput.value = words.join("-");
@@ -505,10 +529,10 @@ window.addEventListener("DOMContentLoaded", () => {
     if (name) {
       myUsername = `${name}^${randomNumber(3)}`;
       usernameEl.textContent = myUsername;
+      socket.emit("join", myUsername);
       document.documentElement.classList.remove("setting-up");
       document.documentElement.classList.add("chatting");
       setupForm.parentNode.remove();
-      checkToolsHeight();
       updateOrientation(window.orientation);
       screen &&
         screen.orientation &&
@@ -557,7 +581,6 @@ window.addEventListener("DOMContentLoaded", () => {
     stopCapture(false);
   });
 
-  checkToolsHeight();
   updateOrientation(window.orientation);
   screen && screen.orientation && updateOrientation(screen.orientation.angle);
 });
