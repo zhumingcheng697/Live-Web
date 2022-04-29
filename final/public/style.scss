@@ -11,6 +11,7 @@
   --bg1: #e5e5ea;
   --bg2: #e5e5ea;
   --bg3: #d1d1d6;
+  --bg4: #d1d1d6;
 }
 
 html {
@@ -61,125 +62,144 @@ select {
   bottom: var(--tools-height);
   right: var(--inset-right);
   padding-top: var(--inset-top);
-  overflow: scroll;
   transition: bottom 0.3s;
   -webkit-user-select: none;
   user-select: none;
 
-  #streams {
+  #stream-area {
     width: 100%;
-    min-height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
-    flex-wrap: wrap;
-    -webkit-user-select: none;
-    user-select: none;
+    height: 100%;
+    overflow: scroll;
 
-    & > div {
-      width: calc(var(--each-width) - 8px);
-      height: calc(var(--each-height) - 8px);
-      box-sizing: border-box;
-      margin: 4px;
-      position: relative;
+    #streams {
+      width: 100%;
+      min-height: 100%;
       display: flex;
       justify-content: center;
       align-items: center;
-      background: var(--bg1);
-      transition: background-color 0.3s;
-      cursor: help;
+      align-content: center;
+      flex-wrap: wrap;
+      -webkit-user-select: none;
+      user-select: none;
 
-      & > .username {
+      & > div {
+        width: calc(var(--each-width) - 8px);
+        height: calc(var(--each-height) - 8px);
+        box-sizing: border-box;
+        margin: 4px;
+        position: relative;
         display: flex;
+        justify-content: center;
         align-items: center;
-        word-break: break-word;
-        white-space: break-spaces;
-        font-size: calc(var(--each-width) / 25 + 1em);
-        margin: 10px;
+        background: var(--bg1);
         transition: background-color 0.3s;
+        cursor: help;
 
-        & > * {
-          margin: 0;
-          padding: 0;
-
-          &.mic-indicator {
-            flex-shrink: 0;
-            display: none;
-            width: calc((var(--each-width) / 25 + 1em) * 0.3);
-            height: calc((var(--each-width) / 25 + 1em) * 0.3);
-            line-height: calc((var(--each-width) / 25 + 1em) * 0.3);
-            border-radius: 100%;
-            background: #f43;
-            margin-right: calc((var(--each-width) / 25 + 1em) * 0.15);
-          }
-
-          &.connecting-text {
-            display: none;
-          }
-        }
-      }
-
-      & > video {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        display: none;
-      }
-
-      & > audio {
-        display: none;
-      }
-
-      &.connecting {
         & > .username {
-          & > .mic-indicator {
-            display: none;
-          }
+          display: flex;
+          align-items: center;
+          word-break: break-word;
+          white-space: break-spaces;
+          font-size: calc(var(--each-width) / 25 + 1em);
+          margin: 10px;
+          transition: background-color 0.3s;
 
-          & > .username-text {
-            display: none;
-          }
+          & > * {
+            margin: 0;
+            padding: 0;
 
-          & > .connecting-text {
-            display: block;
-          }
-        }
-      }
+            &.mic-indicator {
+              flex-shrink: 0;
+              display: none;
+              width: calc((var(--each-width) / 25 + 1em) * 0.3);
+              height: calc((var(--each-width) / 25 + 1em) * 0.3);
+              line-height: calc((var(--each-width) / 25 + 1em) * 0.3);
+              border-radius: 100%;
+              background: #f43;
+              margin-right: calc((var(--each-width) / 25 + 1em) * 0.15);
+            }
 
-      &.video-ready {
-        & > .username {
-          position: absolute;
-          left: 0;
-          bottom: 0;
-          font-size: 1em;
-          margin: 0;
-          padding: 6px 10px;
-          background: var(--bg1-half);
-          z-index: 10;
-
-          & > .mic-indicator {
-            width: 0.6em;
-            height: 0.6em;
-            line-height: 0.6em;
-            margin-right: 6px;
+            &.connecting-text {
+              display: none;
+            }
           }
         }
 
         & > video {
-          display: inline;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: none;
         }
-      }
 
-      &.audio-ready {
-        & > .username {
-          .mic-indicator {
-            display: block;
+        & > audio {
+          display: none;
+        }
+
+        &.connecting {
+          & > .username {
+            & > .mic-indicator {
+              display: none;
+            }
+
+            & > .username-text {
+              display: none;
+            }
+
+            & > .connecting-text {
+              display: block;
+            }
+          }
+        }
+
+        &.video-ready {
+          & > .username {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            font-size: 1em;
+            margin: 0;
+            padding: 6px 10px;
+            background: var(--bg1-half);
+            z-index: 10;
+
+            & > .mic-indicator {
+              width: 0.6em;
+              height: 0.6em;
+              line-height: 0.6em;
+              margin-right: 6px;
+            }
+          }
+
+          & > video {
+            display: inline;
+          }
+        }
+
+        &.audio-ready {
+          & > .username {
+            .mic-indicator {
+              display: block;
+            }
           }
         }
       }
     }
+  }
+
+  #pop-up-area {
+    position: fixed;
+    top: calc(var(--inset-top) + 20px);
+    left: 0;
+    right: 0;
+    background: var(--bg4);
+    transition: background-color 0.3s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    align-content: center;
+    z-index: 15;
   }
 }
 
@@ -250,6 +270,10 @@ body.upside-down {
     padding-top: 0;
     bottom: 0;
     padding-bottom: var(--inset-bottom);
+
+    #pop-up-area {
+      top: 20px;
+    }
   }
 
   #control {
@@ -263,7 +287,8 @@ body.upside-down {
 @media (max-height: 480px) {
   body.layout-b {
     #main-area {
-      top: var(--inset-top);
+      top: 0;
+      padding-top: var(--inset-top);
       bottom: 0;
       padding-bottom: var(--inset-bottom);
       left: var(--inset-left);
@@ -419,6 +444,7 @@ html.blocked {
     --bg1: #1c1c1e;
     --bg2: #2c2c2e;
     --bg3: #2c2c2e;
+    --bg4: #3a3a3c;
   }
 
   html {

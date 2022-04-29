@@ -52,20 +52,23 @@
 
     <div id="chatting-area">
       <div id="main-area">
-        <div id="streams">
-          <div
-            id="capture-div"
-            tabindex="0"
-            title="Double Click to Turn Off Your Camera and Mic"
-          >
-            <div class="username">
-              <div class="mic-indicator"></div>
-              <p class="username-text">Username</p>
+        <div id="stream-area">
+          <div id="streams">
+            <div
+              id="capture-div"
+              tabindex="0"
+              title="Double Click to Turn Off Your Camera and Mic"
+            >
+              <div class="username">
+                <div class="mic-indicator"></div>
+                <p class="username-text">Username</p>
+              </div>
+              <video id="capture-video" playsinline muted></video>
+              <audio id="capture-audio" playsinline></audio>
             </div>
-            <video id="capture-video" playsinline muted></video>
-            <audio id="capture-audio" playsinline></audio>
           </div>
         </div>
+        <div id="pop-up-area"><span>hi</span></div>
       </div>
       <form id="control">
         <div>
