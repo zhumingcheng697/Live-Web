@@ -118,6 +118,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const connection = new MultiPeerConnection({
     socket,
     onStream: receivedStream,
+    onPeerConnect: peerConnected,
     onPeerDisconnect: peerDisconnected,
     videoBitrate,
     audioBitrate,
@@ -392,6 +393,7 @@ window.addEventListener("DOMContentLoaded", () => {
     peerDiv.id = id;
     peerDiv.tabIndex = 0;
     peerDiv.title = "Double Click to Report";
+    peerDiv.className = "connecting";
 
     const usernameDiv = document.createElement("DIV");
     usernameDiv.className = "username";
@@ -401,9 +403,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const usernameP = document.createElement("P");
     usernameP.textContent = username;
+    usernameP.className = "username-text";
+
+    const connectingP = document.createElement("P");
+    connectingP.textContent = "Connecting…";
+    connectingP.className = "connecting-text";
 
     usernameDiv.appendChild(micIndicatorDiv);
     usernameDiv.appendChild(usernameP);
+    usernameDiv.appendChild(connectingP);
 
     peerDiv.appendChild(usernameDiv);
     peerDiv.appendChild(document.createElement("VIDEO"));
@@ -419,7 +427,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const isVideo = !!stream.getVideoTracks().length;
     const readyClass = isVideo ? "video-ready" : "audio-ready";
 
-    const peerCaptureDiv = getPeerCaptureDiv(simplePeerWrapper.socket_id, true);
+    const peerCaptureDiv = getPeerCaptureDiv(simplePeerWrapper.socket_id);
 
     peerCaptureDiv.classList.add(readyClass);
 
@@ -432,9 +440,17 @@ window.addEventListener("DOMContentLoaded", () => {
     updateLayout();
   }
 
+  function peerConnected(simplePeerWrapper) {
+    const element = getPeerCaptureDiv(simplePeerWrapper.socket_id);
+
+    if (element) {
+      element.classList.remove("connecting");
+    }
+  }
+
   // Whenever a peer disconnected
   function peerDisconnected(data) {
-    const element = getPeerCaptureDiv(data, false);
+    const element = getPeerCaptureDiv(data);
     if (element) {
       element.remove();
       updateLayout();

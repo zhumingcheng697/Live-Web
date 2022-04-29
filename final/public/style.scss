@@ -113,6 +113,10 @@ select {
             background: #f43;
             margin-right: calc((var(--each-width) / 25 + 1em) * 0.15);
           }
+
+          &.connecting-text {
+            display: none;
+          }
         }
       }
 
@@ -126,6 +130,22 @@ select {
 
       & > audio {
         display: none;
+      }
+
+      &.connecting {
+        & > .username {
+          & > .mic-indicator {
+            display: none;
+          }
+
+          & > .username-text {
+            display: none;
+          }
+
+          & > .connecting-text {
+            display: block;
+          }
+        }
       }
 
       &.video-ready {

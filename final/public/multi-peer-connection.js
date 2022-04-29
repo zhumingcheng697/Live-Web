@@ -5,18 +5,17 @@
 class MultiPeerConnection {
   constructor({
     socket,
-    stream,
+    streams,
     onStream,
     onData,
+    onPeerConnect,
     onPeerDisconnect,
     host,
     videoBitrate = null,
     audioBitrate = null,
   }) {
     this.peers = new Map();
-    this.streams = new Set();
-
-    if (stream) this.streams.add(stream);
+    this.streams = streams || new Set();
 
     this.socket = socket || (host ? io.connect(host) : io.connect());
 
@@ -34,6 +33,7 @@ class MultiPeerConnection {
             id,
             this.socket,
             this.streams,
+            onPeerConnect,
             onStream,
             onData,
             videoBitrate,
@@ -62,6 +62,7 @@ class MultiPeerConnection {
           from,
           this.socket,
           this.streams,
+          onPeerConnect,
           onStream,
           onData,
           videoBitrate,
@@ -112,6 +113,7 @@ class SimplePeerWrapper {
     socket_id,
     socket,
     streams,
+    peerConnectCallback,
     streamCallback,
     dataCallback,
     videoBitrate = null,
@@ -167,6 +169,7 @@ class SimplePeerWrapper {
           this.simplepeer.addStream(stream);
         });
       }
+      peerConnectCallback && peerConnectCallback(this);
     });
 
     // Stream coming in to us
