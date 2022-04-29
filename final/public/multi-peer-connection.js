@@ -14,6 +14,10 @@ class MultiPeerConnection {
     audioBitrate = null,
   }) {
     this.peers = new Map();
+    this.streams = new Set();
+
+    if (stream) this.streams.add(stream);
+
     this.socket = socket || (host ? io.connect(host) : io.connect());
 
     this.socket.on("peer_disconnect", (data) => {
@@ -29,7 +33,7 @@ class MultiPeerConnection {
             true,
             id,
             this.socket,
-            stream,
+            this.streams,
             onStream,
             onData,
             videoBitrate,
@@ -57,7 +61,7 @@ class MultiPeerConnection {
           false,
           from,
           this.socket,
-          stream,
+          this.streams,
           onStream,
           onData,
           videoBitrate,
@@ -79,6 +83,7 @@ class MultiPeerConnection {
   }
 
   addStream(stream) {
+    this.streams.add(stream);
     for (let peer of this.peers.values()) {
       peer.addStream(stream);
     }
@@ -88,6 +93,7 @@ class MultiPeerConnection {
     for (let peer of this.peers.values()) {
       peer.removeStream(stream);
     }
+    this.streams.delete(stream);
   }
 
   close() {
@@ -105,7 +111,7 @@ class SimplePeerWrapper {
     initiator,
     socket_id,
     socket,
-    stream,
+    streams,
     streamCallback,
     dataCallback,
     videoBitrate = null,
@@ -140,7 +146,7 @@ class SimplePeerWrapper {
     this.socket = socket;
 
     // Our video stream - need getters and setters for this
-    this.stream = stream;
+    this.streams = streams;
 
     // Callback for when we get a stream from a peer
     this.streamCallback = streamCallback;
@@ -156,8 +162,10 @@ class SimplePeerWrapper {
     // When we have a connection, send our stream
     this.simplepeer.on("connect", () => {
       // Let's give them our stream
-      if (stream) {
-        this.simplepeer.addStream(stream);
+      if (streams) {
+        streams.forEach((stream) => {
+          this.simplepeer.addStream(stream);
+        });
       }
     });
 
