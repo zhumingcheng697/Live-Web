@@ -233,8 +233,8 @@ select {
   justify-content: space-between;
   align-items: center;
   align-content: center;
-  padding: 7px calc(4px + var(--inset-right)) calc(7px + var(--inset-bottom))
-    calc(4px + var(--inset-left));
+  padding: 7px calc(7px + var(--inset-right)) calc(7px + var(--inset-bottom))
+    calc(7px + var(--inset-left));
   box-sizing: border-box;
   flex-wrap: wrap;
   background-color: var(--bg1);
@@ -296,8 +296,8 @@ body.upside-down {
   #control {
     top: 0;
     bottom: auto;
-    padding: calc(7px + var(--inset-top)) calc(4px + var(--inset-right)) 7px
-      calc(4px + var(--inset-left));
+    padding: calc(7px + var(--inset-top)) calc(7px + var(--inset-right)) 7px
+      calc(7px + var(--inset-left));
   }
 }
 
@@ -321,8 +321,8 @@ body.upside-down {
       justify-content: space-between;
       flex-wrap: nowrap;
       width: var(--tools-width);
-      padding: calc(7px + var(--inset-top)) calc(4px + var(--inset-right))
-        calc(7px + var(--inset-bottom)) 4px;
+      padding: calc(7px + var(--inset-top)) calc(7px + var(--inset-right))
+        calc(7px + var(--inset-bottom)) 7px;
 
       & > div {
         flex-direction: column;
@@ -342,8 +342,8 @@ body.upside-down {
       #control {
         left: 0;
         right: auto;
-        padding: calc(7px + var(--inset-top)) 4px
-          calc(7px + var(--inset-bottom)) calc(4px + var(--inset-left));
+        padding: calc(7px + var(--inset-top)) 7px
+          calc(7px + var(--inset-bottom)) calc(7px + var(--inset-left));
       }
     }
   }
