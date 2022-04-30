@@ -339,7 +339,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
             setOptionsFor(true, cameras);
             setOptionsFor(false, mics);
-            updateLayout();
+
+            insertPeerCaptureDiv(captureDiv);
           });
         })
         .catch((e) => {
@@ -350,6 +351,7 @@ window.addEventListener("DOMContentLoaded", () => {
             captureDiv.classList.remove("audio-ready");
             selectMicEl.selectedIndex = 0;
           }
+          insertPeerCaptureDiv(captureDiv);
           console.error(e);
           alert(`Unable to start the camera: ${e}`);
         });
@@ -376,12 +378,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
     captureDiv.classList.remove(stopVideo ? "video-ready" : "audio-ready");
 
-    if (!switching)
+    if (!switching) {
       if (stopVideo) {
         selectCameraEl.selectedIndex = 0;
       } else {
         selectMicEl.selectedIndex = 0;
       }
+
+      insertPeerCaptureDiv(captureDiv);
+    }
 
     el.srcObject = null;
   }
@@ -458,8 +463,6 @@ window.addEventListener("DOMContentLoaded", () => {
         `.stream:not(.video-ready):not(.audio-ready):not(#${peerCaptureDiv.id})`
       );
     }
-
-    console.log(sibling);
 
     streamsDiv.insertBefore(peerCaptureDiv, sibling);
 

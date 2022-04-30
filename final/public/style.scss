@@ -65,6 +65,7 @@ select {
   transition: bottom 0.3s;
   -webkit-user-select: none;
   user-select: none;
+  cursor: default;
 
   #stream-area {
     width: 100%;
@@ -94,6 +95,10 @@ select {
         background: var(--bg1);
         transition: background-color 0.3s;
         cursor: help;
+
+        &#capture-div {
+          border: solid 4px #fc0;
+        }
 
         & > .username {
           display: flex;
@@ -202,6 +207,7 @@ select {
     pointer-events: none;
 
     & > * {
+      pointer-events: all;
       background: var(--bg4);
       transition: background-color 0.3s, height 0.3s;
       border-radius: 16px;
