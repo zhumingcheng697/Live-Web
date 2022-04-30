@@ -230,6 +230,22 @@ select {
         }
       }
     }
+
+    &:not(.reporting) {
+      #reporting-dialog {
+        display: none;
+      }
+    }
+
+    &:not(.reported) {
+      #reported-dialog {
+        display: none;
+      }
+    }
+
+    &:not(.reporting):not(.reported) {
+      display: none;
+    }
   }
 }
 

@@ -83,6 +83,9 @@ window.addEventListener("DOMContentLoaded", () => {
   let preferredAudioLabel;
   let preferredVideoLabel;
 
+  let reportingUsername;
+  let reportingId;
+
   const getInsets = () => {
     const computedStyle = window.getComputedStyle(document.documentElement);
     return {
@@ -109,6 +112,12 @@ window.addEventListener("DOMContentLoaded", () => {
   const videoEl = captureDiv.querySelector("video");
   const audioEl = captureDiv.querySelector("audio");
   const usernameEl = captureDiv.querySelector(".username > p");
+
+  const popupArea = document.getElementById("pop-up-area");
+  const reportingEl = document.getElementById("reporting-dialog");
+  const reportingInputs = reportingEl.querySelectorAll("input");
+  const reportedEl = document.getElementById("reported-dialog");
+  const reportedOKEl = reportedEl.querySelector("input");
 
   const baseWidth = 200;
   const baseHeight = 150;
@@ -651,9 +660,50 @@ window.addEventListener("DOMContentLoaded", () => {
     startCapture(false);
   });
 
-  addDoubleClickOrKeyListener(captureDiv, () => {
-    stopCapture(true);
-    stopCapture(false);
+  reportingInputs[0].addEventListener("click", () => {
+    // report and hide stream
+  });
+
+  reportingInputs[1].addEventListener("click", () => {
+    reportingUsername = null;
+    reportingId = null;
+    popupArea.classList.remove("reporting");
+  });
+
+  reportedOKEl.addEventListener("click", () => {
+    popupArea.classList.remove("reported");
+  });
+
+  addDoubleClickOrKeyListener(streamsDiv, (e) => {
+    function getStreamDiv(el) {
+      if (!el) return null;
+      if (el.classList.contains("stream")) return el;
+      return getStreamDiv(el.parentNode);
+    }
+
+    const streamDiv = getStreamDiv(e.target);
+
+    if (!streamDiv) return;
+
+    if (streamDiv === captureDiv) {
+      stopCapture(true);
+      stopCapture(false);
+      return;
+    }
+
+    const usernameEl = streamDiv.querySelector(".username-text");
+
+    if (!usernameEl) return;
+
+    const username = usernameEl.textContent;
+
+    reportingUsername = username;
+    reportingId = streamDiv.id.replace(/^peer-/, "");
+
+    reportingEl.parentNode.appendChild(reportingEl);
+    reportingInputs[0].value = `Report ${username}`;
+
+    popupArea.classList.add("reporting");
   });
 
   updateOrientation(window.orientation);
