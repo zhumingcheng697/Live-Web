@@ -37,6 +37,7 @@ const addDoubleClickOrKeyListener = (
   let lastMouseTarget = null;
   let lastMouseTimeoutId;
   target.addEventListener("mousedown", (e) => {
+    e.preventDefault();
     clearTimeout(lastMouseTimeoutId);
 
     if (lastMouseTarget == e.target && Date.now() - lastMouseTime < timeout) {

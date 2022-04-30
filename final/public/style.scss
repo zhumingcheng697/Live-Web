@@ -11,7 +11,7 @@
   --bg1: #e5e5ea;
   --bg2: #e5e5ea;
   --bg3: #d1d1d6;
-  --bg4: #d1d1d6;
+  --bg4: #c0c0c5;
 }
 
 html {
@@ -200,7 +200,7 @@ select {
     left: 0;
     right: 0;
     z-index: 15;
-    max-height: 30vh;
+    max-height: 20vh;
     overflow: auto;
 
     & > #pop-ups {
@@ -209,12 +209,25 @@ select {
       align-items: center;
       align-content: center;
       flex-direction: column-reverse;
-      margin: 5px 0;
 
-      & > * {
-        background: var(--bg4);
+      & > .pop-up {
+        background: var(--bg3);
         transition: background-color 0.3s, height 0.3s;
         border-radius: 10px;
+        padding: 6px;
+        margin: 3px 10px;
+
+        & > * {
+          margin: 2px;
+        }
+
+        input[type="button"] {
+          padding: 5px 10px;
+
+          &.subtle {
+            background: var(--bg4);
+          }
+        }
       }
     }
   }
@@ -321,6 +334,7 @@ body.upside-down {
       justify-content: space-between;
       flex-wrap: nowrap;
       width: var(--tools-width);
+      box-sizing: content-box;
       padding: calc(7px + var(--inset-top)) calc(7px + var(--inset-right))
         calc(7px + var(--inset-bottom)) 7px;
 
