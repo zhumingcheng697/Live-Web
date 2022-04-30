@@ -82,7 +82,7 @@ select {
       -webkit-user-select: none;
       user-select: none;
 
-      & > div {
+      & > .stream {
         width: calc(var(--each-width) - 8px);
         height: calc(var(--each-height) - 8px);
         box-sizing: border-box;
@@ -199,6 +199,7 @@ select {
     align-content: center;
     flex-direction: column-reverse;
     z-index: 15;
+    pointer-events: none;
 
     & > * {
       background: var(--bg4);

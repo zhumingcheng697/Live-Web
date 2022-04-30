@@ -294,7 +294,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
             if (!captureDiv.classList.contains(readyClass)) {
               captureDiv.classList.add(readyClass);
-              connection.addStream(stream);
+              try {
+                connection.addStream(stream);
+              } catch (e) {
+                console.error(e);
+              }
             }
 
             if (startVideo) {
@@ -370,12 +374,12 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
 
+    captureDiv.classList.remove(stopVideo ? "video-ready" : "audio-ready");
+
     if (!switching)
       if (stopVideo) {
-        captureDiv.classList.remove("video-ready");
         selectCameraEl.selectedIndex = 0;
       } else {
-        captureDiv.classList.remove("audio-ready");
         selectMicEl.selectedIndex = 0;
       }
 
@@ -383,17 +387,17 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function getPeerCaptureDiv(id, username = null) {
-    let peerDiv = document.getElementById(id);
+    let peerDiv = document.getElementById("peer-" + id);
 
     if (!username || peerDiv) {
       return peerDiv;
     }
 
     peerDiv = document.createElement("DIV");
-    peerDiv.id = id;
+    peerDiv.id = "peer-" + id;
     peerDiv.tabIndex = 0;
     peerDiv.title = "Double Click to Report";
-    peerDiv.className = "connecting";
+    peerDiv.className = "connecting stream";
 
     const usernameDiv = document.createElement("DIV");
     usernameDiv.className = "username";
@@ -422,6 +426,46 @@ window.addEventListener("DOMContentLoaded", () => {
     return peerDiv;
   }
 
+  function insertPeerCaptureDiv(peerCaptureDiv) {
+    const videoReady = peerCaptureDiv.classList.contains("video-ready");
+    const audioReady = peerCaptureDiv.classList.contains("audio-ready");
+
+    let sibling;
+
+    if (videoReady && audioReady) {
+      sibling = streamsDiv.firstChild;
+    } else if (videoReady) {
+      sibling =
+        streamsDiv.querySelector(
+          `.stream.video-ready:not(.audio-ready):not(#${peerCaptureDiv.id})`
+        ) ||
+        streamsDiv.querySelector(
+          `.stream:not(.video-ready).audio-ready:not(#${peerCaptureDiv.id})`
+        ) ||
+        streamsDiv.querySelector(
+          `.stream:not(.video-ready):not(.audio-ready):not(#${peerCaptureDiv.id})`
+        );
+    } else if (audioReady) {
+      sibling =
+        streamsDiv.querySelector(
+          `.stream:not(.video-ready).audio-ready:not(#${peerCaptureDiv.id})`
+        ) ||
+        streamsDiv.querySelector(
+          `.stream:not(.video-ready):not(.audio-ready):not(#${peerCaptureDiv.id})`
+        );
+    } else {
+      sibling = streamsDiv.querySelector(
+        `.stream:not(.video-ready):not(.audio-ready):not(#${peerCaptureDiv.id})`
+      );
+    }
+
+    console.log(sibling);
+
+    streamsDiv.insertBefore(peerCaptureDiv, sibling);
+
+    updateLayout();
+  }
+
   // Whenever we get a stream from a peer
   function receivedStream(stream, simplePeerWrapper) {
     const isVideo = !!stream.getVideoTracks().length;
@@ -435,9 +479,7 @@ window.addEventListener("DOMContentLoaded", () => {
     mediaEl.srcObject = stream;
     handleMediaElement(mediaEl, isVideo);
 
-    streamsDiv.appendChild(peerCaptureDiv);
-
-    updateLayout();
+    insertPeerCaptureDiv(peerCaptureDiv);
   }
 
   function peerConnected(simplePeerWrapper) {
@@ -484,8 +526,7 @@ window.addEventListener("DOMContentLoaded", () => {
       peerCaptureDiv.classList.remove(
         removeVideo ? "video-ready" : "audio-ready"
       );
-    } else {
-      console.log("not found");
+      insertPeerCaptureDiv(peerCaptureDiv);
     }
   });
 
