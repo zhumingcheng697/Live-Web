@@ -195,23 +195,27 @@ select {
 
   #pop-up-area {
     position: absolute;
-    top: calc(var(--inset-top) + 20px);
+    top: 0;
+    padding-top: calc(var(--inset-top) + 20px);
     left: 0;
     right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
-    flex-direction: column-reverse;
     z-index: 15;
-    pointer-events: none;
+    max-height: 30vh;
+    overflow: auto;
 
-    & > * {
-      pointer-events: all;
-      background: var(--bg4);
-      transition: background-color 0.3s, height 0.3s;
-      border-radius: 16px;
-      padding: 8px 16px;
+    & > #pop-ups {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      align-content: center;
+      flex-direction: column-reverse;
+      margin: 5px 0;
+
+      & > * {
+        background: var(--bg4);
+        transition: background-color 0.3s, height 0.3s;
+        border-radius: 10px;
+      }
     }
   }
 }
@@ -285,7 +289,7 @@ body.upside-down {
     padding-bottom: var(--inset-bottom);
 
     #pop-up-area {
-      top: 20px;
+      padding-top: 20px;
     }
   }
 
@@ -357,9 +361,9 @@ input[type="text"] {
   transition: background-color 0.3s, color 0.3s;
 }
 
+select,
 input[type="submit"],
-input[type="button"],
-select {
+input[type="button"] {
   appearance: none;
   -webkit-appearance: none;
   font-weight: normal;
@@ -368,15 +372,11 @@ select {
   padding: 8px 12px;
   font-size: 14px;
   transition: background-color 0.3s, color 0.3s;
-}
-
-select {
-  background-color: var(--bg3);
-  transition: background-color 0.3s, color 0.3s;
-  color: var(--blue-color);
   text-overflow: ellipsis;
   box-sizing: border-box;
   flex-shrink: 1;
+  word-break: break-word;
+  white-space: break-spaces;
 }
 
 input[type="submit"],
@@ -385,13 +385,16 @@ input[type="button"] {
   color: #fff;
 }
 
-select {
-  box-sizing: border-box;
+select,
+input[type="submit"].subtle,
+input[type="button"].subtle {
+  background-color: var(--bg3);
+  color: var(--blue-color);
 }
 
+select,
 input[type="submit"],
 input[type="button"],
-select,
 button {
   cursor: pointer;
 
@@ -449,6 +452,7 @@ html.blocked {
   padding-right: var(--inset-right);
   padding-top: var(--inset-top);
   padding-bottom: var(--inset-bottom);
+  box-sizing: border-box;
 }
 
 @media (prefers-color-scheme: dark) {

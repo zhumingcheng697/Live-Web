@@ -142,8 +142,22 @@ window.addEventListener("DOMContentLoaded", () => {
     const fullWidth = window.innerWidth - insets.left - insets.right;
     const fullHeight = window.innerHeight - insets.top - insets.bottom;
 
-    const sizeA = calculateVideoSize(fullWidth, fullHeight - toolHeight);
-    const sizeB = calculateVideoSize(fullWidth - toolWidth, fullHeight);
+    const sizeA = calculateVideoSize(
+      fullWidth,
+      fullHeight -
+        toolHeight +
+        (document.body.classList.contains("upside-down")
+          ? insets.top
+          : insets.bottom)
+    );
+    const sizeB = calculateVideoSize(
+      fullWidth -
+        toolWidth +
+        (document.body.classList.contains("home-button-left")
+          ? insets.left
+          : insets.right),
+      fullHeight
+    );
 
     let size;
 
