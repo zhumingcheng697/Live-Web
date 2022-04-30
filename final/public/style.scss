@@ -27,7 +27,7 @@ body {
 
 body {
   height: 100%;
-  overflow: hidden;
+  overflow: auto;
   font-size: 14px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
@@ -69,7 +69,7 @@ select {
   #stream-area {
     width: 100%;
     height: 100%;
-    overflow: scroll;
+    overflow: auto;
 
     #streams {
       width: 100%;
@@ -189,17 +189,23 @@ select {
   }
 
   #pop-up-area {
-    position: fixed;
+    position: absolute;
     top: calc(var(--inset-top) + 20px);
     left: 0;
     right: 0;
-    background: var(--bg4);
-    transition: background-color 0.3s;
     display: flex;
     justify-content: center;
     align-items: center;
     align-content: center;
+    flex-direction: column-reverse;
     z-index: 15;
+
+    & > * {
+      background: var(--bg4);
+      transition: background-color 0.3s, height 0.3s;
+      border-radius: 16px;
+      padding: 8px 16px;
+    }
   }
 }
 

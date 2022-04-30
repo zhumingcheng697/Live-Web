@@ -38,7 +38,7 @@ body {
   bottom: var(--tools-height);
   right: var(--inset-right);
   padding-top: var(--inset-top);
-  overflow: scroll;
+  overflow: auto;
   transition: bottom 0.3s;
 
   #videos {
