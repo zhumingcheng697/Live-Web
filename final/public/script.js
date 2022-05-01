@@ -66,6 +66,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const cameraOffText = "- Camera Off -";
   const micOffText = "- Mic Off -";
+  const autoPlayText = "Unable to auto-play audio. Click anywhere to play.";
 
   let myUsername = "";
   let serverBlockTimeout;
@@ -135,6 +136,8 @@ window.addEventListener("DOMContentLoaded", () => {
     el.setAttribute("playsinline", "");
     el.onloadedmetadata = () => {
       el.play().catch(() => {
+        confirmingChildren[0].textContent = autoPlayText;
+        popupArea.className = "confirming";
         mediaToPlay.add(el);
       });
     };
@@ -571,6 +574,13 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   document.addEventListener("click", () => {
+    if (
+      confirmingChildren[0].textContent === autoPlayText &&
+      popupArea.className === "confirming"
+    ) {
+      popupArea.className = "";
+    }
+
     if (mediaToPlay.size) {
       for (let media of mediaToPlay) {
         media.play().then(() => {
