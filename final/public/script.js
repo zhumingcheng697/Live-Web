@@ -136,12 +136,27 @@ window.addEventListener("DOMContentLoaded", () => {
     el.setAttribute("playsinline", "");
     el.onloadedmetadata = () => {
       el.play().catch(() => {
-        confirmingChildren[0].textContent = autoPlayText;
-        popupArea.className = "confirming";
         mediaToPlay.add(el);
+        showConfirmPopup(autoPlayText, false);
       });
     };
   }
+
+  const showConfirmPopup = (() => {
+    let timeout;
+
+    return (msg, delay = 4000) => {
+      clearTimeout(timeout);
+      confirmingChildren[0].textContent = msg;
+      popupArea.className = "confirming";
+
+      if (delay && delay > 100) {
+        timeout = setTimeout(() => {
+          popupArea.classList.remove("confirming");
+        }, delay);
+      }
+    };
+  })();
 
   function updateLayout() {
     if (!document.body.classList.contains("layout-b"))
@@ -569,8 +584,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on("reported", (from) => {
-    confirmingChildren[0].textContent = "You have been reported";
-    popupArea.className = "confirming";
+    showConfirmPopup("You have been reported.");
   });
 
   document.addEventListener("click", () => {
@@ -697,9 +711,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
   reportingChildren[0].addEventListener("click", () => {
     reportedIds.add(reportingId);
-    confirmingChildren[0].textContent = `You have reported and hidden ${usernames.get(
-      reportingId
-    )}.`;
 
     const reportedDiv = getPeerCaptureDiv(reportingId);
 
@@ -712,9 +723,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
     socket.emit("report", reportingId);
 
-    reportingId = null;
+    showConfirmPopup(
+      `You have reported and hidden ${usernames.get(reportingId)}.`
+    );
 
-    popupArea.className = "confirming";
+    reportingId = null;
   });
 
   reportingChildren[1].addEventListener("click", () => {
@@ -743,15 +756,14 @@ window.addEventListener("DOMContentLoaded", () => {
       if (streamReady) {
         stopCapture(true);
         stopCapture(false);
-
-        confirmingChildren[0].textContent =
-          "Your camera and mic have been turned off.";
-      } else {
-        confirmingChildren[0].textContent =
-          "Your camera and mic are already off.";
       }
 
-      popupArea.className = "confirming";
+      showConfirmPopup(
+        streamReady
+          ? "Your camera and mic have been turned off."
+          : "Your camera and mic are already off."
+      );
+
       return;
     }
 
@@ -764,11 +776,11 @@ window.addEventListener("DOMContentLoaded", () => {
     reportingId = streamDiv.id.replace(/^peer-/, "");
 
     if (reportedIds.has(reportingId) || !streamReady) {
-      confirmingChildren[0].textContent = streamReady
-        ? `You have already reported ${username}.`
-        : `You can only report users who have their camera or mic on.`;
-
-      popupArea.className = "confirming";
+      showConfirmPopup(
+        streamReady
+          ? `You have already reported ${username}.`
+          : `You can only report users who have their camera or mic on.`
+      );
     } else {
       reportingChildren[0].value = `Report and Hide ${username}`;
       popupArea.className = "reporting";
