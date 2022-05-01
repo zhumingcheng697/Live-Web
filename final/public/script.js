@@ -66,12 +66,13 @@ window.addEventListener("DOMContentLoaded", () => {
   const autoPlayText = "Unable to auto-play audio. Click anywhere to play.";
 
   let myUsername = "";
-  let serverBlockTimeout;
   let preferredAudioLabel;
   let preferredVideoLabel;
 
   let reportingId;
   let reportingUsername;
+
+  const isBlocked = document.body.classList.contains("blocked");
 
   const getInsets = () => {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -509,6 +510,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Whenever we get a stream from a peer
   function receivedStream(stream, simplePeerWrapper) {
+    if (!myUsername || isBlocked()) return;
+
     const isVideo = !!stream.getVideoTracks().length;
     const readyClass = isVideo ? "video-ready" : "audio-ready";
 
@@ -542,7 +545,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   socket.on("join", (username, id) => {
-    if (!myUsername) return;
+    if (!myUsername || isBlocked()) return;
     streamsDiv.appendChild(getPeerCaptureDiv(id, username));
     updateLayout();
   });
@@ -571,6 +574,37 @@ window.addEventListener("DOMContentLoaded", () => {
   socket.on("reported", (from) => {
     showConfirmPopup("You have been reported.");
     connection.removeStreamsTo(from);
+  });
+
+  socket.on("blocked", (id, username) => {
+    if (username === myUsername) {
+      showConfirmPopup(
+        `You have been blocked for streaming inappropriate content.`,
+        false
+      );
+
+      streamsDiv.querySelectorAll(".stream:not(#capture-div)").forEach((e) => {
+        e.remove();
+      });
+      stopCapture(true);
+      stopCapture(false);
+      selectCameraEl.disabled = true;
+      selectMicEl.disabled = true;
+      captureDiv.classList.add("reported");
+      document.body.classList.add("blocked");
+      connection.close();
+      updateLayout();
+    } else {
+      const peerDiv = getPeerCaptureDiv(id);
+
+      if (peerDiv) {
+        showConfirmPopup(
+          `${username} has been blocked for streaming inappropriate content.`
+        );
+        peerDiv.remove();
+        updateLayout();
+      }
+    }
   });
 
   document.addEventListener("click", () => {
@@ -721,6 +755,8 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   addDoubleClickOrKeyListener(streamsDiv, (e) => {
+    if (document.body.classList.contains("blocked")) return;
+
     function getStreamDiv(el) {
       if (!el) return null;
       if (el.classList && el.classList.contains("stream")) return el;

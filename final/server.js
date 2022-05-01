@@ -51,7 +51,7 @@ io.sockets.on(
     console.log(`Peer ${socket.id} joined`);
 
     socket.on("join", (username) => {
-      peers.set(socket.id, { socket, username });
+      peers.set(socket.id, { socket, username, report_count: 0 });
       socket.emit(
         "user-list",
         [...peers.values()].map(({ socket, username }) => [username, socket.id])
@@ -75,10 +75,28 @@ io.sockets.on(
 
     socket.on("report", (to) => {
       const peer = peers.get(to);
-      if (peer && peer.socket) {
-        peer.socket.emit("reported", socket.id);
-      } else {
+      if (!peer || !peer.socket) {
         console.error(`Peer ${to} not found`);
+        return;
+      }
+
+      peer.report_count += 1;
+
+      if (
+        peer.report_count >= 3 ||
+        peer.report_count >= (peers.size - 1) * 0.5
+      ) {
+        peers.delete(to);
+        io.emit("blocked", peer.socket.id, peer.username);
+      } else {
+        peer.socket.emit("reported", socket.id);
+
+        setTimeout(() => {
+          const peer = peers.get(to);
+          if (peer && peer.report_count > 0) {
+            peer.report_count -= 1;
+          }
+        }, 5 * 60 * 1000);
       }
     });
 
