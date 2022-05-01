@@ -4,20 +4,6 @@ function randomNumber(n, base = 10) {
     .join("");
 }
 
-function handleMediaElement(el, handleVideo) {
-  if (handleVideo) {
-    el.muted = true;
-    el.setAttribute("muted", "");
-  }
-  el.autoplay = true;
-  el.playsInline = true;
-  el.setAttribute("autoplay", "");
-  el.setAttribute("playsinline", "");
-  el.onloadedmetadata = () => {
-    el.play();
-  };
-}
-
 const addClickOrKeyListener = (target, listener) => {
   target.addEventListener("click", listener);
   target.addEventListener("keydown", (e) => {
@@ -75,6 +61,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect("http://127.0.0.1:8080");
   const usernames = new Map();
 
+  const mediaToPlay = new Set();
   const reportedIds = new Set();
 
   const cameraOffText = "- Camera Off -";
@@ -136,6 +123,22 @@ window.addEventListener("DOMContentLoaded", () => {
     videoBitrate,
     audioBitrate,
   });
+
+  function handleMediaElement(el, handleVideo) {
+    if (handleVideo) {
+      el.muted = true;
+      el.setAttribute("muted", "");
+    }
+    el.autoplay = true;
+    el.playsInline = true;
+    el.setAttribute("autoplay", "");
+    el.setAttribute("playsinline", "");
+    el.onloadedmetadata = () => {
+      el.play().catch(() => {
+        mediaToPlay.add(el);
+      });
+    };
+  }
 
   function updateLayout() {
     if (!document.body.classList.contains("layout-b"))
@@ -559,6 +562,16 @@ window.addEventListener("DOMContentLoaded", () => {
         removeVideo ? "video-ready" : "audio-ready"
       );
       insertPeerCaptureDiv(peerCaptureDiv);
+    }
+  });
+
+  document.addEventListener("click", () => {
+    if (mediaToPlay.size) {
+      for (let media of mediaToPlay) {
+        media.play().then(() => {
+          mediaToPlay.delete(media);
+        });
+      }
     }
   });
 
