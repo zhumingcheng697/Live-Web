@@ -75,6 +75,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect("http://127.0.0.1:8080");
   const usernames = new Map();
 
+  const reportedIds = new Set();
+
   const cameraOffText = "- Camera Off -";
   const micOffText = "- Mic Off -";
 
@@ -83,7 +85,6 @@ window.addEventListener("DOMContentLoaded", () => {
   let preferredAudioLabel;
   let preferredVideoLabel;
 
-  let reportingUsername;
   let reportingId;
 
   const getInsets = () => {
@@ -114,10 +115,12 @@ window.addEventListener("DOMContentLoaded", () => {
   const usernameEl = captureDiv.querySelector(".username > p");
 
   const popupArea = document.getElementById("pop-up-area");
+
+  const confirmingEl = document.getElementById("confirming-dialog");
+  const confirmingChildren = confirmingEl.children;
+
   const reportingEl = document.getElementById("reporting-dialog");
-  const reportingInputs = reportingEl.querySelectorAll("input");
-  const reportedEl = document.getElementById("reported-dialog");
-  const reportedOKEl = reportedEl.querySelector("input");
+  const reportingChildren = reportingEl.children;
 
   const baseWidth = 200;
   const baseHeight = 150;
@@ -495,6 +498,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Whenever we get a stream from a peer
   function receivedStream(stream, simplePeerWrapper) {
+    reportedIds.delete(simplePeerWrapper.socket_id);
+
     const isVideo = !!stream.getVideoTracks().length;
     const readyClass = isVideo ? "video-ready" : "audio-ready";
 
@@ -573,8 +578,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   introForm.addEventListener("submit", (e) => {
     e.preventDefault();
-    document.documentElement.classList.remove("intro");
-    document.documentElement.classList.add("setting-up");
+    document.documentElement.className = "setting-up";
     introForm.parentNode.remove();
   });
 
@@ -614,8 +618,7 @@ window.addEventListener("DOMContentLoaded", () => {
       myUsername = `${name}^${randomNumber(3)}`;
       usernameEl.textContent = myUsername;
       socket.emit("join", myUsername);
-      document.documentElement.classList.remove("setting-up");
-      document.documentElement.classList.add("chatting");
+      document.documentElement.className = "chatting";
       setupForm.parentNode.remove();
       updateOrientation(window.orientation);
       screen &&
@@ -660,18 +663,22 @@ window.addEventListener("DOMContentLoaded", () => {
     startCapture(false);
   });
 
-  reportingInputs[0].addEventListener("click", () => {
-    // report and hide stream
+  confirmingChildren[1].addEventListener("click", () => {
+    popupArea.className = "";
   });
 
-  reportingInputs[1].addEventListener("click", () => {
-    reportingUsername = null;
+  reportingChildren[0].addEventListener("click", () => {
+    reportedIds.add(reportingId);
+    confirmingChildren[0].textContent = `You have reported ${usernames.get(
+      reportingId
+    )} successfully.`;
     reportingId = null;
-    popupArea.classList.remove("reporting");
+    popupArea.className = "confirming";
   });
 
-  reportedOKEl.addEventListener("click", () => {
-    popupArea.classList.remove("reported");
+  reportingChildren[1].addEventListener("click", () => {
+    reportingId = null;
+    popupArea.className = "";
   });
 
   addDoubleClickOrKeyListener(streamsDiv, (e) => {
@@ -685,9 +692,25 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (!streamDiv) return;
 
+    const streamReady =
+      streamDiv.classList.contains("video-ready") ||
+      streamDiv.classList.contains("audio-ready");
+
     if (streamDiv === captureDiv) {
-      stopCapture(true);
-      stopCapture(false);
+      popupArea.classList.remove("reporting");
+
+      if (streamReady) {
+        stopCapture(true);
+        stopCapture(false);
+
+        confirmingChildren[0].textContent =
+          "Your camera and mic have been turned off.";
+      } else {
+        confirmingChildren[0].textContent =
+          "Your camera and mic are already off.";
+      }
+
+      popupArea.className = "confirming";
       return;
     }
 
@@ -697,13 +720,18 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const username = usernameEl.textContent;
 
-    reportingUsername = username;
     reportingId = streamDiv.id.replace(/^peer-/, "");
 
-    reportingEl.parentNode.appendChild(reportingEl);
-    reportingInputs[0].value = `Report ${username}`;
+    if (reportedIds.has(reportingId) || !streamReady) {
+      confirmingChildren[0].textContent = streamReady
+        ? `You have already reported ${username}.`
+        : `You can only report users who have their camera or mic on.`;
 
-    popupArea.classList.add("reporting");
+      popupArea.className = "confirming";
+    } else {
+      reportingChildren[0].value = `Report ${username}`;
+      popupArea.className = "reporting";
+    }
   });
 
   updateOrientation(window.orientation);
