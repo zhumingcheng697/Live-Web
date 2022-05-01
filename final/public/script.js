@@ -570,6 +570,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   socket.on("reported", (from) => {
     showConfirmPopup("You have been reported.");
+    connection.removeStreamsTo(from);
   });
 
   document.addEventListener("click", () => {
@@ -698,10 +699,10 @@ window.addEventListener("DOMContentLoaded", () => {
     const reportedDiv = getPeerCaptureDiv(reportingId);
 
     if (reportedDiv) {
-      // reportedDiv.classList.remove("video-ready");
-      // reportedDiv.classList.remove("audio-ready");
-      // reportedDiv.querySelector("video").srcObject = null;
-      // reportedDiv.querySelector("audio").srcObject = null;
+      reportedDiv.classList.remove("video-ready");
+      reportedDiv.classList.remove("audio-ready");
+      reportedDiv.querySelector("video").srcObject = null;
+      reportedDiv.querySelector("audio").srcObject = null;
       reportedDiv.classList.add("reported");
     }
 
@@ -760,7 +761,7 @@ window.addEventListener("DOMContentLoaded", () => {
     reportingId = streamDiv.id.replace(/^peer-/, "");
     reportingUsername = username;
 
-    if (streamDiv.classList.has("reported") || !streamReady) {
+    if (streamDiv.classList.contains("reported") || !streamReady) {
       showConfirmPopup(
         streamReady
           ? `You have already reported ${username}.`

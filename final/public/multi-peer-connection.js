@@ -97,6 +97,18 @@ class MultiPeerConnection {
     this.streams.delete(stream);
   }
 
+  removeStreamsTo(id) {
+    const peer = this.peers.get(id);
+
+    if (peer) {
+      if (this.streams) {
+        this.streams.forEach((stream) => {
+          peer.removeStream(stream);
+        });
+      }
+    }
+  }
+
   close() {
     for (let peer of this.peers.values()) {
       peer.destroy();
