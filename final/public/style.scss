@@ -188,6 +188,13 @@ select {
             }
           }
         }
+
+        &.reported {
+          & > .username {
+            color: #f43;
+            text-decoration: line-through;
+          }
+        }
       }
     }
   }

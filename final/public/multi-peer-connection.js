@@ -191,15 +191,27 @@ class SimplePeerWrapper {
   }
 
   addStream(stream) {
-    this.simplepeer.addStream(stream);
+    try {
+      this.simplepeer.addStream(stream);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   removeStream(stream) {
-    this.simplepeer.removeStream(stream);
+    try {
+      this.simplepeer.removeStream(stream);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   destroy() {
-    this.simplepeer.destroy();
+    try {
+      this.simplepeer.destroy();
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   // Borrowed from after https://webrtchacks.com/limit-webrtc-bandwidth-sdp/

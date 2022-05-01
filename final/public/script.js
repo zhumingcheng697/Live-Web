@@ -59,10 +59,7 @@ const addDoubleClickOrKeyListener = (
 
 window.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect("http://127.0.0.1:8080");
-  const usernames = new Map();
-
   const mediaToPlay = new Set();
-  const reportedIds = new Set();
 
   const cameraOffText = "- Camera Off -";
   const micOffText = "- Mic Off -";
@@ -74,6 +71,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let preferredVideoLabel;
 
   let reportingId;
+  let reportingUsername;
 
   const getInsets = () => {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -342,11 +340,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
             if (!captureDiv.classList.contains(readyClass)) {
               captureDiv.classList.add(readyClass);
-              try {
-                connection.addStream(stream);
-              } catch (e) {
-                console.error(e);
-              }
+              connection.addStream(stream);
             }
 
             if (startVideo) {
@@ -416,12 +410,8 @@ window.addEventListener("DOMContentLoaded", () => {
         stream.removeTrack(e);
       });
 
-      try {
-        socket.emit("remove-stream", stopVideo);
-        connection.removeStream(stream);
-      } catch (e) {
-        console.error(e);
-      }
+      socket.emit("remove-stream", stopVideo);
+      connection.removeStream(stream);
     }
 
     captureDiv.classList.remove(stopVideo ? "video-ready" : "audio-ready");
@@ -519,13 +509,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Whenever we get a stream from a peer
   function receivedStream(stream, simplePeerWrapper) {
-    reportedIds.delete(simplePeerWrapper.socket_id);
-
     const isVideo = !!stream.getVideoTracks().length;
     const readyClass = isVideo ? "video-ready" : "audio-ready";
 
     const peerCaptureDiv = getPeerCaptureDiv(simplePeerWrapper.socket_id);
 
+    peerCaptureDiv.classList.remove("reported");
     peerCaptureDiv.classList.add(readyClass);
 
     const mediaEl = peerCaptureDiv.querySelector(isVideo ? "video" : "audio");
@@ -550,13 +539,10 @@ window.addEventListener("DOMContentLoaded", () => {
       element.remove();
       updateLayout();
     }
-    usernames.delete(data);
   }
 
   socket.on("join", (username, id) => {
     if (!myUsername) return;
-
-    usernames.set(id, username);
     streamsDiv.appendChild(getPeerCaptureDiv(id, username));
     updateLayout();
   });
@@ -564,7 +550,6 @@ window.addEventListener("DOMContentLoaded", () => {
   socket.on("user-list", (record) => {
     for (let [username, id] of record) {
       if (id === socket.id) continue;
-      usernames.set(id, username);
       streamsDiv.appendChild(getPeerCaptureDiv(id, username));
       updateLayout();
     }
@@ -710,28 +695,27 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   reportingChildren[0].addEventListener("click", () => {
-    reportedIds.add(reportingId);
-
     const reportedDiv = getPeerCaptureDiv(reportingId);
 
     if (reportedDiv) {
-      reportedDiv.classList.remove("video-ready");
-      reportedDiv.classList.remove("audio-ready");
-      reportedDiv.querySelector("video").srcObject = null;
-      reportedDiv.querySelector("audio").srcObject = null;
+      // reportedDiv.classList.remove("video-ready");
+      // reportedDiv.classList.remove("audio-ready");
+      // reportedDiv.querySelector("video").srcObject = null;
+      // reportedDiv.querySelector("audio").srcObject = null;
+      reportedDiv.classList.add("reported");
     }
 
     socket.emit("report", reportingId);
 
-    showConfirmPopup(
-      `You have reported and hidden ${usernames.get(reportingId)}.`
-    );
+    showConfirmPopup(`You have reported and hidden ${reportingUsername}.`);
 
     reportingId = null;
+    reportingUsername = null;
   });
 
   reportingChildren[1].addEventListener("click", () => {
     reportingId = null;
+    reportingUsername = null;
     popupArea.className = "";
   });
 
@@ -774,8 +758,9 @@ window.addEventListener("DOMContentLoaded", () => {
     const username = usernameEl.textContent;
 
     reportingId = streamDiv.id.replace(/^peer-/, "");
+    reportingUsername = username;
 
-    if (reportedIds.has(reportingId) || !streamReady) {
+    if (streamDiv.classList.has("reported") || !streamReady) {
       showConfirmPopup(
         streamReady
           ? `You have already reported ${username}.`
