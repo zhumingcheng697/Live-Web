@@ -72,7 +72,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let reportingId;
   let reportingUsername;
 
-  const isBlocked = document.body.classList.contains("blocked");
+  const isBlocked = () => document.body.classList.contains("blocked");
 
   const getInsets = () => {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -101,13 +101,15 @@ window.addEventListener("DOMContentLoaded", () => {
   const audioEl = captureDiv.querySelector("audio");
   const usernameEl = captureDiv.querySelector(".username > p");
 
-  const popupArea = document.getElementById("pop-up-area");
+  const mainPopupArea = document.getElementById("main-pop-up-area");
 
-  const confirmingChildren =
-    document.getElementById("confirming-dialog").children;
+  const mainConfirmingChildren = document.getElementById(
+    "main-confirming-dialog"
+  ).children;
 
-  const reportingChildren =
-    document.getElementById("reporting-dialog").children;
+  const mainReportingChildren = document.getElementById(
+    "main-reporting-dialog"
+  ).children;
 
   const baseWidth = 200;
   const baseHeight = 150;
@@ -144,14 +146,15 @@ window.addEventListener("DOMContentLoaded", () => {
   const showConfirmPopup = (() => {
     let timeout;
 
-    return (msg, delay = 4000) => {
+    return (msg, delay = 5000) => {
       clearTimeout(timeout);
-      confirmingChildren[0].textContent = msg;
-      popupArea.className = "confirming";
+      mainConfirmingChildren[0].textContent = msg;
+      mainPopupArea.classList.remove("reporting");
+      mainPopupArea.classList.add("confirming");
 
       if (delay && delay > 100) {
         timeout = setTimeout(() => {
-          popupArea.classList.remove("confirming");
+          mainPopupArea.classList.remove("confirming");
         }, delay);
       }
     };
@@ -609,10 +612,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("click", () => {
     if (
-      confirmingChildren[0].textContent === autoPlayText &&
-      popupArea.className === "confirming"
+      mainConfirmingChildren[0].textContent === autoPlayText &&
+      mainPopupArea.classList.contains("confirming")
     ) {
-      popupArea.className = "";
+      mainPopupArea.classList.remove("confirming");
     }
 
     if (mediaToPlay.size) {
@@ -725,11 +728,11 @@ window.addEventListener("DOMContentLoaded", () => {
     startCapture(false);
   });
 
-  confirmingChildren[1].addEventListener("click", () => {
-    popupArea.className = "";
+  mainConfirmingChildren[1].addEventListener("click", () => {
+    mainPopupArea.classList.remove("confirming");
   });
 
-  reportingChildren[0].addEventListener("click", () => {
+  mainReportingChildren[0].addEventListener("click", () => {
     const reportedDiv = getPeerCaptureDiv(reportingId);
 
     if (reportedDiv) {
@@ -748,10 +751,10 @@ window.addEventListener("DOMContentLoaded", () => {
     reportingUsername = null;
   });
 
-  reportingChildren[1].addEventListener("click", () => {
+  mainReportingChildren[1].addEventListener("click", () => {
     reportingId = null;
     reportingUsername = null;
-    popupArea.className = "";
+    mainPopupArea.classList.remove("reporting");
   });
 
   addDoubleClickOrKeyListener(streamsDiv, (e) => {
@@ -772,7 +775,7 @@ window.addEventListener("DOMContentLoaded", () => {
       streamDiv.classList.contains("audio-ready");
 
     if (streamDiv === captureDiv) {
-      popupArea.classList.remove("reporting");
+      mainPopupArea.classList.remove("reporting");
 
       if (streamReady) {
         stopCapture(true);
@@ -804,8 +807,9 @@ window.addEventListener("DOMContentLoaded", () => {
           : `You can only report users who have their camera or mic on.`
       );
     } else {
-      reportingChildren[0].value = `Report and Hide ${username}`;
-      popupArea.className = "reporting";
+      mainReportingChildren[0].value = `Report and Hide ${username}`;
+      mainPopupArea.classList.remove("confirming");
+      mainPopupArea.classList.add("reporting");
     }
   });
 
