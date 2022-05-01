@@ -73,6 +73,15 @@ io.sockets.on(
       }
     });
 
+    socket.on("report", (to) => {
+      const peer = peers.get(to);
+      if (peer && peer.socket) {
+        peer.socket.emit("reported", socket.id);
+      } else {
+        console.error(`Peer ${to} not found`);
+      }
+    });
+
     socket.on("disconnect", function () {
       console.log(`Peer ${socket.id} left`);
       io.emit("peer_disconnect", socket.id);

@@ -103,11 +103,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const popupArea = document.getElementById("pop-up-area");
 
-  const confirmingEl = document.getElementById("confirming-dialog");
-  const confirmingChildren = confirmingEl.children;
+  const confirmingChildren =
+    document.getElementById("confirming-dialog").children;
 
-  const reportingEl = document.getElementById("reporting-dialog");
-  const reportingChildren = reportingEl.children;
+  const reportingChildren =
+    document.getElementById("reporting-dialog").children;
 
   const baseWidth = 200;
   const baseHeight = 150;
@@ -565,6 +565,11 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  socket.on("reported", (from) => {
+    confirmingChildren[0].textContent = "You have been reported";
+    popupArea.className = "confirming";
+  });
+
   document.addEventListener("click", () => {
     if (mediaToPlay.size) {
       for (let media of mediaToPlay) {
@@ -682,10 +687,23 @@ window.addEventListener("DOMContentLoaded", () => {
 
   reportingChildren[0].addEventListener("click", () => {
     reportedIds.add(reportingId);
-    confirmingChildren[0].textContent = `You have reported ${usernames.get(
+    confirmingChildren[0].textContent = `You have reported and hidden ${usernames.get(
       reportingId
-    )} successfully.`;
+    )}.`;
+
+    const reportedDiv = getPeerCaptureDiv(reportingId);
+
+    if (reportedDiv) {
+      reportedDiv.classList.remove("video-ready");
+      reportedDiv.classList.remove("audio-ready");
+      reportedDiv.querySelector("video").srcObject = null;
+      reportedDiv.querySelector("audio").srcObject = null;
+    }
+
+    socket.emit("report", reportingId);
+
     reportingId = null;
+
     popupArea.className = "confirming";
   });
 
@@ -697,7 +715,7 @@ window.addEventListener("DOMContentLoaded", () => {
   addDoubleClickOrKeyListener(streamsDiv, (e) => {
     function getStreamDiv(el) {
       if (!el) return null;
-      if (el.classList.contains("stream")) return el;
+      if (el.classList && el.classList.contains("stream")) return el;
       return getStreamDiv(el.parentNode);
     }
 
@@ -742,7 +760,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
       popupArea.className = "confirming";
     } else {
-      reportingChildren[0].value = `Report ${username}`;
+      reportingChildren[0].value = `Report and Hide ${username}`;
       popupArea.className = "reporting";
     }
   });
