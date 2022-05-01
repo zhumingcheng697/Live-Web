@@ -103,12 +103,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const mainPopupArea = document.getElementById("main-pop-up-area");
 
-  const mainConfirmingChildren = document.getElementById(
-    "main-confirming-dialog"
-  ).children;
+  const mainAlertChildren =
+    document.getElementById("main-alert-dialog").children;
 
-  const mainReportingChildren = document.getElementById(
-    "main-reporting-dialog"
+  const mainConfirmChildren = document.getElementById(
+    "main-confirm-dialog"
   ).children;
 
   const baseWidth = 200;
@@ -138,23 +137,23 @@ window.addEventListener("DOMContentLoaded", () => {
     el.onloadedmetadata = () => {
       el.play().catch(() => {
         mediaToPlay.add(el);
-        showConfirmPopup(autoPlayText, false);
+        showAlertPopup(autoPlayText, false);
       });
     };
   }
 
-  const showConfirmPopup = (() => {
+  const showAlertPopup = (() => {
     let timeout;
 
     return (msg, delay = 5000) => {
       clearTimeout(timeout);
-      mainConfirmingChildren[0].textContent = msg;
-      mainPopupArea.classList.remove("reporting");
-      mainPopupArea.classList.add("confirming");
+      mainAlertChildren[0].textContent = msg;
+      mainPopupArea.classList.remove("confirming");
+      mainPopupArea.classList.add("alerting");
 
       if (delay && delay > 100) {
         timeout = setTimeout(() => {
-          mainPopupArea.classList.remove("confirming");
+          mainPopupArea.classList.remove("alerting");
         }, delay);
       }
     };
@@ -575,13 +574,13 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on("reported", (from) => {
-    showConfirmPopup("You have been reported.");
+    showAlertPopup("You have been reported.");
     connection.removeStreamsTo(from);
   });
 
   socket.on("blocked", (id, username) => {
     if (username === myUsername) {
-      showConfirmPopup(
+      showAlertPopup(
         `You have been blocked for streaming inappropriate content.`,
         false
       );
@@ -601,7 +600,7 @@ window.addEventListener("DOMContentLoaded", () => {
       const peerDiv = getPeerCaptureDiv(id);
 
       if (peerDiv) {
-        showConfirmPopup(
+        showAlertPopup(
           `${username} has been blocked for streaming inappropriate content.`
         );
         peerDiv.remove();
@@ -612,10 +611,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
   document.addEventListener("click", () => {
     if (
-      mainConfirmingChildren[0].textContent === autoPlayText &&
-      mainPopupArea.classList.contains("confirming")
+      mainAlertChildren[0].textContent === autoPlayText &&
+      mainPopupArea.classList.contains("alerting")
     ) {
-      mainPopupArea.classList.remove("confirming");
+      mainPopupArea.classList.remove("alerting");
     }
 
     if (mediaToPlay.size) {
@@ -728,11 +727,11 @@ window.addEventListener("DOMContentLoaded", () => {
     startCapture(false);
   });
 
-  mainConfirmingChildren[1].addEventListener("click", () => {
-    mainPopupArea.classList.remove("confirming");
+  mainAlertChildren[1].addEventListener("click", () => {
+    mainPopupArea.classList.remove("alerting");
   });
 
-  mainReportingChildren[0].addEventListener("click", () => {
+  mainConfirmChildren[0].addEventListener("click", () => {
     const reportedDiv = getPeerCaptureDiv(reportingId);
 
     if (reportedDiv) {
@@ -745,16 +744,16 @@ window.addEventListener("DOMContentLoaded", () => {
 
     socket.emit("report", reportingId);
 
-    showConfirmPopup(`You have reported and hidden ${reportingUsername}.`);
+    showAlertPopup(`You have reported and hidden ${reportingUsername}.`);
 
     reportingId = null;
     reportingUsername = null;
   });
 
-  mainReportingChildren[1].addEventListener("click", () => {
+  mainConfirmChildren[1].addEventListener("click", () => {
     reportingId = null;
     reportingUsername = null;
-    mainPopupArea.classList.remove("reporting");
+    mainPopupArea.classList.remove("confirming");
   });
 
   addDoubleClickOrKeyListener(streamsDiv, (e) => {
@@ -775,14 +774,14 @@ window.addEventListener("DOMContentLoaded", () => {
       streamDiv.classList.contains("audio-ready");
 
     if (streamDiv === captureDiv) {
-      mainPopupArea.classList.remove("reporting");
+      mainPopupArea.classList.remove("confirming");
 
       if (streamReady) {
         stopCapture(true);
         stopCapture(false);
       }
 
-      showConfirmPopup(
+      showAlertPopup(
         streamReady
           ? "Your camera and mic have been turned off."
           : "Your camera and mic are already off."
@@ -801,15 +800,15 @@ window.addEventListener("DOMContentLoaded", () => {
     reportingUsername = username;
 
     if (streamDiv.classList.contains("reported") || !streamReady) {
-      showConfirmPopup(
+      showAlertPopup(
         streamReady
           ? `You have already reported ${username}.`
           : `You can only report users who have their camera or mic on.`
       );
     } else {
-      mainReportingChildren[0].value = `Report and Hide ${username}`;
-      mainPopupArea.classList.remove("confirming");
-      mainPopupArea.classList.add("reporting");
+      mainConfirmChildren[0].value = `Report and Hide ${username}`;
+      mainPopupArea.classList.remove("alerting");
+      mainPopupArea.classList.add("confirming");
     }
   });
 

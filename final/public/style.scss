@@ -102,18 +102,18 @@ select {
   }
 
   &:not(.confirming) {
-    .confirming-dialog {
+    .confirm-dialog {
       display: none;
     }
   }
 
-  &:not(.reporting) {
-    .reporting-dialog {
+  &:not(.alerting) {
+    .alert-dialog {
       display: none;
     }
   }
 
-  &:not(.confirming):not(.reporting) {
+  &:not(.confirming):not(.alerting) {
     display: none;
   }
 }
