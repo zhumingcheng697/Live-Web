@@ -194,12 +194,12 @@ select {
 
   #pop-up-area {
     position: absolute;
-    top: 0;
-    padding-top: calc(var(--inset-top) + 20px);
+    top: calc(var(--inset-top) + 20px);
     left: 0;
     right: 0;
     z-index: 15;
-    max-height: 20vh;
+    width: max-content;
+    margin: auto;
     overflow: auto;
 
     #pop-ups {
@@ -318,7 +318,7 @@ body.upside-down {
     padding-bottom: var(--inset-bottom);
 
     #pop-up-area {
-      padding-top: 20px;
+      top: 20px;
     }
   }
 
