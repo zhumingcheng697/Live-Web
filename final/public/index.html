@@ -1,4 +1,4 @@
-<html class="connecting intro">
+<html class="intro">
   <head>
     <meta
       name="viewport"
@@ -11,7 +11,7 @@
     <script type="text/javascript" src="./multi-peer-connection.js"></script>
     <script type="text/javascript" src="./script.js"></script>
   </head>
-  <body class="layout-b">
+  <body>
     <div id="body-container">
       <div id="intro-area">
         <h1>Hello and Welcome!</h1>
@@ -48,6 +48,42 @@
           <span tabindex="0" id="generate-random">Generate a Random One</span>
         </p>
       </div>
+
+      <div id="room-area">
+        <div class="pop-up-area" id="room-pop-up-area">
+          <div class="pop-ups">
+            <div class="pop-up alert-dialog" id="room-alert-dialog">
+              <span></span>
+              <input type="button" value="OK" class="subtle" />
+            </div>
+            <div class="pop-up confirm-dialog" id="room-confirm-dialog">
+              <span></span>
+              <input type="button" value="Join the Room" />
+              <input type="button" value="Cancel" class="subtle" />
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <h2>Please pick a topic to start a new room:</h2>
+          <form id="new-room-form">
+            <input
+              enterkeyhint="go"
+              type="text"
+              name="topic"
+              placeholder="Topic"
+              maxlength="40"
+              required
+            />
+            <input type="submit" value="Confirm" />
+          </form>
+        </div>
+        <div id="choose-room-area" class="no-existing-room">
+          <p>- or -</p>
+          <h2>Choose from 0 open rooms:</h2>
+          <div id="rooms"></div>
+        </div>
+      </div>
     </div>
 
     <div id="chatting-area">
@@ -76,7 +112,7 @@
               <input type="button" value="OK" class="subtle" />
             </div>
             <div class="pop-up confirm-dialog" id="main-confirm-dialog">
-              <input type="button" value="OK" />
+              <input type="button" value="Report and Hide" />
               <input type="button" value="Cancel" class="subtle" />
             </div>
           </div>

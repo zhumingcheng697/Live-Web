@@ -56,15 +56,14 @@ select {
 }
 
 #room-area {
-  &.no-existing-room {
-    #choose-room-area {
-      display: none;
-    }
+  #choose-room-area.no-existing-room {
+    display: none;
   }
 }
 
 .pop-up-area {
   position: absolute;
+  top: calc(var(--inset-top) + 20px);
   left: 0;
   right: 0;
   z-index: 15;
@@ -262,10 +261,6 @@ select {
       }
     }
   }
-
-  #main-pop-up-area {
-    top: calc(var(--inset-top) + 20px);
-  }
 }
 
 #control {
@@ -336,7 +331,7 @@ body.upside-down {
     bottom: 0;
     padding-bottom: var(--inset-bottom);
 
-    #main-pop-up-area {
+    .pop-up-area {
       top: 20px;
     }
   }
@@ -494,7 +489,8 @@ html:not(.picking-room) #room-area {
 }
 
 html:not(.chatting) #chatting-area {
-  display: none;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 html.blocked {
@@ -506,6 +502,7 @@ html.blocked {
 }
 
 #body-container {
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: center;

@@ -72,7 +72,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let reportingId;
   let reportingUsername;
 
-  const isBlocked = () => document.body.classList.contains("blocked");
+  let isBlocked = false;
 
   const getInsets = () => {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -88,11 +88,12 @@ window.addEventListener("DOMContentLoaded", () => {
   const setupForm = document.getElementById("setup-form");
   const usernameInput = document.getElementById("username");
   const generateBtn = document.getElementById("generate-random");
+  const newRoomForm = document.getElementById("new-room-form");
+  const chooseRoomArea = document.getElementById("choose-room-area");
 
   const selectCameraEl = document.getElementById("select-camera");
   const selectMicEl = document.getElementById("select-mic");
 
-  const mainArea = document.getElementById("main-area");
   const streamsDiv = document.getElementById("streams");
   const controls = document.getElementById("control");
 
@@ -101,11 +102,16 @@ window.addEventListener("DOMContentLoaded", () => {
   const audioEl = captureDiv.querySelector("audio");
   const usernameEl = captureDiv.querySelector(".username > p");
 
-  const mainPopupArea = document.getElementById("main-pop-up-area");
+  const roomPopupArea = document.getElementById("room-pop-up-area");
+  const roomAlertChildren =
+    document.getElementById("room-alert-dialog").children;
+  const roomConfirmChildren = document.getElementById(
+    "room-confirm-dialog"
+  ).children;
 
+  const mainPopupArea = document.getElementById("main-pop-up-area");
   const mainAlertChildren =
     document.getElementById("main-alert-dialog").children;
-
   const mainConfirmChildren = document.getElementById(
     "main-confirm-dialog"
   ).children;
@@ -137,12 +143,33 @@ window.addEventListener("DOMContentLoaded", () => {
     el.onloadedmetadata = () => {
       el.play().catch(() => {
         mediaToPlay.add(el);
-        showAlertPopup(autoPlayText, false);
+        showMainAlertPopup(autoPlayText, false);
       });
     };
   }
 
-  const showAlertPopup = (() => {
+  function normalizeTopic(str) {
+    return str.replace(/(?:^\s+)|(?:\s+$)/g, "").replace(/\s+/, " ");
+  }
+
+  const showRoomAlertPopup = (() => {
+    let timeout;
+
+    return (msg, delay = 5000) => {
+      clearTimeout(timeout);
+      roomAlertChildren[0].textContent = msg;
+      roomPopupArea.classList.remove("confirming");
+      roomPopupArea.classList.add("alerting");
+
+      if (delay && delay > 100) {
+        timeout = setTimeout(() => {
+          roomPopupArea.classList.remove("alerting");
+        }, delay);
+      }
+    };
+  })();
+
+  const showMainAlertPopup = (() => {
     let timeout;
 
     return (msg, delay = 5000) => {
@@ -160,7 +187,7 @@ window.addEventListener("DOMContentLoaded", () => {
   })();
 
   function updateLayout() {
-    if (!document.body.classList.contains("layout-b"))
+    if (!document.body.classList.contains("layout-b") && controls.clientHeight)
       document.documentElement.style.setProperty(
         "--tools-height",
         controls.clientHeight + "px"
@@ -512,7 +539,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Whenever we get a stream from a peer
   function receivedStream(stream, simplePeerWrapper) {
-    if (!myUsername || isBlocked()) return;
+    if (!myUsername || isBlocked) return;
 
     const isVideo = !!stream.getVideoTracks().length;
     const readyClass = isVideo ? "video-ready" : "audio-ready";
@@ -547,7 +574,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   socket.on("join", (username, id) => {
-    if (!myUsername || isBlocked()) return;
+    if (!myUsername || isBlocked) return;
     streamsDiv.appendChild(getPeerCaptureDiv(id, username));
     updateLayout();
   });
@@ -574,33 +601,30 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on("reported", (from) => {
-    showAlertPopup("You have been reported.");
+    showMainAlertPopup("You have been reported.");
     connection.removeStreamsTo(from);
   });
 
   socket.on("blocked", (id, username) => {
     if (username === myUsername) {
-      showAlertPopup(
-        `You have been blocked for streaming inappropriate content.`,
-        false
-      );
-
       streamsDiv.querySelectorAll(".stream:not(#capture-div)").forEach((e) => {
         e.remove();
       });
       stopCapture(true);
       stopCapture(false);
-      selectCameraEl.disabled = true;
-      selectMicEl.disabled = true;
-      captureDiv.classList.add("reported");
-      document.body.classList.add("blocked");
       connection.close();
       updateLayout();
+      isBlocked = true;
+      document.documentElement.className = "picking-room";
+      showRoomAlertPopup(
+        `You have been blocked for streaming inappropriate content.`,
+        false
+      );
     } else {
       const peerDiv = getPeerCaptureDiv(id);
 
       if (peerDiv) {
-        showAlertPopup(
+        showMainAlertPopup(
           `${username} has been blocked for streaming inappropriate content.`
         );
         peerDiv.remove();
@@ -682,12 +706,26 @@ window.addEventListener("DOMContentLoaded", () => {
       myUsername = `${name}^${randomNumber(3)}`;
       usernameEl.textContent = myUsername;
       socket.emit("join", myUsername);
-      document.documentElement.className = "chatting";
+      document.documentElement.className = "picking-room";
       setupForm.parentNode.remove();
       updateOrientation(window.orientation);
       screen &&
         screen.orientation &&
         updateOrientation(screen.orientation.angle);
+    }
+  });
+
+  newRoomForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const topic = normalizeTopic(e.target.topic.value);
+    e.target.topic.value = topic;
+
+    if (true || document.getElementById(`room-btn-${topic}`)) {
+      roomToJoin = topic;
+      roomConfirmChildren[0].textContent = `Room ${topic} already exists.`;
+      roomPopupArea.classList.remove("alerting");
+      roomPopupArea.classList.add("confirming");
     }
   });
 
@@ -727,6 +765,18 @@ window.addEventListener("DOMContentLoaded", () => {
     startCapture(false);
   });
 
+  roomAlertChildren[1].addEventListener("click", () => {
+    roomPopupArea.classList.remove("alerting");
+  });
+
+  roomConfirmChildren[1].addEventListener("click", () => {
+    // roomPopupArea.classList.remove("alerting");
+  });
+
+  roomConfirmChildren[2].addEventListener("click", () => {
+    roomPopupArea.classList.remove("confirming");
+  });
+
   mainAlertChildren[1].addEventListener("click", () => {
     mainPopupArea.classList.remove("alerting");
   });
@@ -744,7 +794,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     socket.emit("report", reportingId);
 
-    showAlertPopup(`You have reported and hidden ${reportingUsername}.`);
+    showMainAlertPopup(`You have reported and hidden ${reportingUsername}.`);
 
     reportingId = null;
     reportingUsername = null;
@@ -781,7 +831,7 @@ window.addEventListener("DOMContentLoaded", () => {
         stopCapture(false);
       }
 
-      showAlertPopup(
+      showMainAlertPopup(
         streamReady
           ? "Your camera and mic have been turned off."
           : "Your camera and mic are already off."
@@ -800,7 +850,7 @@ window.addEventListener("DOMContentLoaded", () => {
     reportingUsername = username;
 
     if (streamDiv.classList.contains("reported") || !streamReady) {
-      showAlertPopup(
+      showMainAlertPopup(
         streamReady
           ? `You have already reported ${username}.`
           : `You can only report users who have their camera or mic on.`
