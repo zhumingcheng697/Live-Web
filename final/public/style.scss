@@ -304,10 +304,13 @@ form {
   flex-wrap: wrap;
   background-color: var(--bg1);
   transition: background-color 0.3s, transform 0.3s;
+  overflow: auto;
 
   #room-name {
     font-size: 1.05em;
     font-weight: 600;
+    word-break: break-word;
+    white-space: break-spaces;
   }
 
   & > div {

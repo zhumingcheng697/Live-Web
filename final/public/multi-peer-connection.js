@@ -153,6 +153,8 @@ class SimplePeerWrapper {
       });
     }
 
+    this.connected = false;
+
     // Their socket id, our unique id for them
     this.socket_id = socket_id;
 
@@ -175,10 +177,11 @@ class SimplePeerWrapper {
 
     // When we have a connection, send our stream
     this.simplepeer.on("connect", () => {
+      this.connected = true;
       // Let's give them our stream
       if (streams) {
         streams.forEach((stream) => {
-          this.simplepeer.addStream(stream);
+          this.addStream(stream);
         });
       }
       peerConnectCallback && peerConnectCallback(this);
@@ -203,6 +206,8 @@ class SimplePeerWrapper {
   }
 
   addStream(stream) {
+    if (!this.connected) return;
+
     try {
       this.simplepeer.addStream(stream);
     } catch (e) {

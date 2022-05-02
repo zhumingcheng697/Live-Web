@@ -61,6 +61,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect("http://127.0.0.1:8080");
   const mediaToPlay = new Set();
 
+  const blockRecord = new Map();
+
   const cameraOffText = "- Camera Off -";
   const micOffText = "- Mic Off -";
   const autoPlayText = "Unable to auto-play audio. Click anywhere to play.";
@@ -73,7 +75,8 @@ window.addEventListener("DOMContentLoaded", () => {
   let usernameToReport;
   let roomTopic;
 
-  let isBlocked = false;
+  const isInRoom = () =>
+    document.documentElement.classList.contains("chatting");
 
   const getInsets = () => {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -136,6 +139,26 @@ window.addEventListener("DOMContentLoaded", () => {
     videoBitrate,
     audioBitrate,
   });
+
+  function gotBlockedFrom(room) {
+    let roomRecord = blockRecord.get(room);
+    if (!roomRecord) {
+      roomRecord = { time: 0.5 };
+      blockRecord.set(room, roomRecord);
+    }
+
+    roomRecord.end = Date.now() + 1000 * 60 * roomRecord.time;
+    roomRecord.time *= 2;
+
+    setTimeout(() => {
+      const roomRecord = blockRecord.get(room);
+      if (roomRecord) {
+        roomRecord.end = null;
+      }
+    }, 1000 * 60 * roomRecord.time);
+
+    return roomRecord.time;
+  }
 
   function handleMediaElement(el, handleVideo) {
     if (handleVideo) {
@@ -460,15 +483,15 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function leaveRoom() {
+    socket.emit("leave-room");
+    connection.close();
+    document.documentElement.className = "picking-room";
     streamsDiv.querySelectorAll(".stream:not(#capture-div)").forEach((e) => {
       e.remove();
     });
     stopCapture(true);
     stopCapture(false);
-    connection.close();
-    socket.emit("leave-room");
     updateLayout();
-    document.documentElement.className = "picking-room";
     roomNameEl.textContent = "";
   }
 
@@ -552,24 +575,28 @@ window.addEventListener("DOMContentLoaded", () => {
 
   // Whenever we get a stream from a peer
   function receivedStream(stream, simplePeerWrapper) {
-    if (!myUsername || isBlocked) return;
+    if (!isInRoom()) return;
 
     const isVideo = !!stream.getVideoTracks().length;
     const readyClass = isVideo ? "video-ready" : "audio-ready";
 
     const peerCaptureDiv = getPeerCaptureDiv(simplePeerWrapper.socket_id);
 
-    peerCaptureDiv.classList.remove("reported");
-    peerCaptureDiv.classList.add(readyClass);
+    if (peerCaptureDiv) {
+      peerCaptureDiv.classList.remove("reported");
+      peerCaptureDiv.classList.add(readyClass);
 
-    const mediaEl = peerCaptureDiv.querySelector(isVideo ? "video" : "audio");
-    mediaEl.srcObject = stream;
-    handleMediaElement(mediaEl, isVideo);
+      const mediaEl = peerCaptureDiv.querySelector(isVideo ? "video" : "audio");
+      mediaEl.srcObject = stream;
+      handleMediaElement(mediaEl, isVideo);
 
-    insertPeerCaptureDiv(peerCaptureDiv);
+      insertPeerCaptureDiv(peerCaptureDiv);
+    }
   }
 
   function peerConnected(simplePeerWrapper) {
+    if (!isInRoom()) return;
+
     const element = getPeerCaptureDiv(simplePeerWrapper.socket_id);
 
     if (element) {
@@ -587,7 +614,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   socket.on("join-room", (username, id) => {
-    if (!myUsername || isBlocked) return;
+    if (!isInRoom()) return;
+
     streamsDiv.appendChild(getPeerCaptureDiv(id, username));
     updateLayout();
   });
@@ -620,10 +648,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   socket.on("blocked", (idReported, usernameReported) => {
     if (usernameReported === myUsername) {
-      isBlocked = true;
       leaveRoom();
       showRoomAlertPopup(
-        `You have been blocked for streaming inappropriate content.`,
+        `You have been blocked from room ${roomTopic} for ${gotBlockedFrom(
+          roomTopic
+        )} min for streaming inappropriate content.`,
         false
       );
       roomTopic = null;
@@ -799,11 +828,29 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   roomConfirmChildren[1].addEventListener("click", () => {
+    const roomRecord = blockRecord.get(roomTopic);
+    if (roomRecord) {
+      const timeEnd = roomRecord.end;
+      if (timeEnd) {
+        const timeLeft = roomRecord.end - Date.now();
+
+        if (timeLeft <= 0) {
+          roomRecord.end = null;
+        } else {
+          showRoomAlertPopup(
+            `You have been blocked from room ${roomTopic}. Wait ${Math.ceil(
+              timeLeft / 60 / 1000
+            )} min to request to join again.`
+          );
+          return;
+        }
+      }
+    }
+
     roomPopupArea.classList.remove("confirming");
-    isBlocked = false;
-    socket.emit("join-room", roomTopic);
     roomNameEl.textContent = `Room ${roomTopic}`;
     document.documentElement.className = "chatting";
+    socket.emit("join-room", roomTopic);
   });
 
   roomConfirmChildren[2].addEventListener("click", () => {
