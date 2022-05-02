@@ -92,8 +92,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const newRoomForm = document.getElementById("new-room-form");
   const chooseRoomArea = document.getElementById("choose-room-area");
 
+  const roomNameEl = document.getElementById("room-name");
   const selectCameraEl = document.getElementById("select-camera");
   const selectMicEl = document.getElementById("select-mic");
+  const leaveRoomBtn = document.getElementById("leave-room");
 
   const streamsDiv = document.getElementById("streams");
   const controls = document.getElementById("control");
@@ -119,8 +121,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const mainDangerConfirmChildren = document.getElementById(
     "main-danger-confirm-dialog"
   ).children;
-
-  const leaveRoomBtn = document.getElementById("leave-room");
 
   const baseWidth = 200;
   const baseHeight = 150;
@@ -219,14 +219,7 @@ window.addEventListener("DOMContentLoaded", () => {
           ? insets.top
           : insets.bottom)
     );
-    const sizeB = calculateVideoSize(
-      fullWidth -
-        toolWidth +
-        (document.body.classList.contains("home-button-left")
-          ? insets.left
-          : insets.right),
-      fullHeight
-    );
+    const sizeB = calculateVideoSize(fullWidth - toolWidth - 14, fullHeight);
 
     let size;
 
@@ -476,6 +469,7 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.emit("leave-room");
     updateLayout();
     document.documentElement.className = "picking-room";
+    roomNameEl.textContent = "";
   }
 
   function getPeerCaptureDiv(id, username = null) {
@@ -632,6 +626,7 @@ window.addEventListener("DOMContentLoaded", () => {
         `You have been blocked for streaming inappropriate content.`,
         false
       );
+      roomTopic = null;
     } else {
       const peerDiv = getPeerCaptureDiv(idReported);
 
@@ -650,6 +645,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     leaveRoom();
     showRoomAlertPopup(`Connection lost.`, false);
+    roomTopic = null;
   });
 
   socket.on("reconnect", () => {
@@ -806,6 +802,7 @@ window.addEventListener("DOMContentLoaded", () => {
     roomPopupArea.classList.remove("confirming");
     isBlocked = false;
     socket.emit("join-room", roomTopic);
+    roomNameEl.textContent = `Room ${roomTopic}`;
     document.documentElement.className = "chatting";
   });
 
