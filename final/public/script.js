@@ -116,8 +116,9 @@ window.addEventListener("DOMContentLoaded", () => {
   const mainConfirmChildren = document.getElementById(
     "main-confirm-dialog"
   ).children;
-  const mainLeaveChildren =
-    document.getElementById("main-leave-dialog").children;
+  const mainDangerConfirmChildren = document.getElementById(
+    "main-danger-confirm-dialog"
+  ).children;
 
   const leaveRoomBtn = document.getElementById("leave-room");
 
@@ -181,7 +182,7 @@ window.addEventListener("DOMContentLoaded", () => {
       clearTimeout(timeout);
       mainAlertChildren[0].textContent = msg;
       mainPopupArea.classList.remove("confirming");
-      mainPopupArea.classList.remove("leaving");
+      mainPopupArea.classList.remove("danger-confirming");
       mainPopupArea.classList.add("alerting");
 
       if (delay && delay > 100) {
@@ -778,7 +779,7 @@ window.addEventListener("DOMContentLoaded", () => {
   leaveRoomBtn.addEventListener("click", () => {
     mainPopupArea.classList.remove("alerting");
     mainPopupArea.classList.remove("confirming");
-    mainPopupArea.classList.add("leaving");
+    mainPopupArea.classList.add("danger-confirming");
   });
 
   roomAlertChildren[1].addEventListener("click", () => {
@@ -822,15 +823,15 @@ window.addEventListener("DOMContentLoaded", () => {
     mainPopupArea.classList.remove("confirming");
   });
 
-  mainLeaveChildren[1].addEventListener("click", () => {
-    mainPopupArea.classList.remove("leaving");
+  mainDangerConfirmChildren[1].addEventListener("click", () => {
+    mainPopupArea.classList.remove("danger-confirming");
     leaveRoom();
     showRoomAlertPopup(`You have left room ${roomTopic}.`);
     roomTopic = null;
   });
 
-  mainLeaveChildren[2].addEventListener("click", () => {
-    mainPopupArea.classList.remove("leaving");
+  mainDangerConfirmChildren[2].addEventListener("click", () => {
+    mainPopupArea.classList.remove("danger-confirming");
   });
 
   addDoubleClickOrKeyListener(streamsDiv, (e) => {
@@ -885,7 +886,7 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       mainConfirmChildren[0].value = `Report and Hide ${username}`;
       mainPopupArea.classList.remove("alerting");
-      mainPopupArea.classList.remove("leaving");
+      mainPopupArea.classList.remove("danger-confirming");
       mainPopupArea.classList.add("confirming");
     }
   });

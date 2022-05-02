@@ -112,13 +112,13 @@ select {
     }
   }
 
-  &:not(.leaving) {
-    .leave-dialog {
+  &:not(.danger-confirming) {
+    .danger-confirm-dialog {
       display: none;
     }
   }
 
-  &:not(.confirming):not(.alerting):not(.leaving) {
+  &:not(.confirming):not(.alerting):not(.danger-confirming) {
     display: none;
   }
 }
