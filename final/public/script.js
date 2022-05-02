@@ -93,6 +93,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const usernameInput = document.getElementById("username");
   const generateBtn = document.getElementById("generate-random");
   const newRoomForm = document.getElementById("new-room-form");
+  const roomNameInput = document.getElementById("new-room-name");
   const chooseRoomArea = document.getElementById("choose-room-area");
 
   const roomNameEl = document.getElementById("room-name");
@@ -851,6 +852,7 @@ window.addEventListener("DOMContentLoaded", () => {
     roomNameEl.textContent = `Room ${roomTopic}`;
     document.documentElement.className = "chatting";
     socket.emit("join-room", roomTopic);
+    roomNameInput.value = "";
   });
 
   roomConfirmChildren[2].addEventListener("click", () => {
