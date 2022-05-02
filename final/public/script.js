@@ -147,8 +147,8 @@ window.addEventListener("DOMContentLoaded", () => {
       blockRecord.set(room, roomRecord);
     }
 
-    roomRecord.end = Date.now() + 1000 * 60 * roomRecord.time;
     roomRecord.time *= 2;
+    roomRecord.end = Date.now() + 1000 * 60 * roomRecord.time;
 
     setTimeout(() => {
       const roomRecord = blockRecord.get(room);
@@ -661,7 +661,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
       if (peerDiv) {
         showMainAlertPopup(
-          `${usernameReported} has been blocked for streaming inappropriate content.`
+          `${usernameReported} has been blocked from the room for streaming inappropriate content.`
         );
         peerDiv.remove();
         updateLayout();
@@ -870,11 +870,11 @@ window.addEventListener("DOMContentLoaded", () => {
       reportedDiv.querySelector("video").srcObject = null;
       reportedDiv.querySelector("audio").srcObject = null;
       reportedDiv.classList.add("reported");
+      socket.emit("report", idToReport);
+      showMainAlertPopup(`You have reported and hidden ${usernameToReport}.`);
+    } else {
+      showMainAlertPopup(`${usernameToReport} has already left the room.`);
     }
-
-    socket.emit("report", idToReport);
-
-    showMainAlertPopup(`You have reported and hidden ${usernameToReport}.`);
 
     idToReport = null;
     usernameToReport = null;

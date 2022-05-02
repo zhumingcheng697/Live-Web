@@ -97,20 +97,17 @@ form {
       box-shadow: #bbb 0 0 7px;
 
       & > * {
-        margin: 2px;
+        margin: 1px;
       }
 
       span {
         display: inline-block;
       }
 
-      input[type="button"] {
-        padding: 5px 10px;
-      }
-
       select,
       input[type="submit"],
       input[type="button"] {
+        padding: 4px 9px;
         font-weight: 400;
       }
     }
