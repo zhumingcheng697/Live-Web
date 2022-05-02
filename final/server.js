@@ -27,8 +27,6 @@ httpServer.listen(port);
  */
 const peers = new Map();
 
-const rooms = new Set();
-
 // WebSocket Portion
 // WebSockets work with the HTTP server
 const { Server } = require("socket.io");
@@ -41,42 +39,69 @@ const io = new Server(httpServer, {
 
 console.log(`Server started on port ${port}`);
 
+const getRoomNames = () => io.of("/").adapter.rooms.keys();
+
+const getPeersInRoom = (roomName) =>
+  io.of("/").adapter.rooms.get(roomName) || [];
+
 // Register a callback function to run when we have an individual connection
 // This is run for each individual user that connects
 io.sockets.on(
   "connection",
 
   // We are given a websocket object in our function
-  function (socket) {
+  (socket) => {
+    let room;
+
     console.log(`Peer ${socket.id} joined`);
 
     socket.on("join", (username) => {
-      peers.set(socket.id, { socket, username, report_count: 0 });
+      socket.emit("rooms", [...getRoomNames()]);
+
+      if (peers.has(socket.id)) return;
+      peers.set(socket.id, { username, report_count: 0 });
+    });
+
+    socket.on("join-room", (roomName) => {
       socket.emit(
         "user-list",
-        [...peers.values()].map(({ socket, username }) => [username, socket.id])
+        [...getPeersInRoom(roomName)].map((id) => [
+          (peers.get(id) || {}).username,
+          id,
+        ])
       );
-      socket.broadcast.emit("join", username, socket.id);
+      socket.join(roomName);
+      socket.broadcast
+        .to(roomName)
+        .emit("join-room", (peers.get(socket.id) || {}).username, socket.id);
+      room = roomName;
+    });
+
+    socket.on("leave-room", () => {
+      if (!room) return;
+
+      socket.broadcast.to(room).emit("peer_disconnect", socket.id);
+      socket.leave(room);
+      room = null;
     });
 
     socket.on("remove-stream", (removeVideo) => {
-      socket.broadcast.emit("remove-stream", socket.id, removeVideo);
+      if (!room) return;
+
+      socket.broadcast.to(room).emit("remove-stream", socket.id, removeVideo);
     });
 
     // Relay signals back and forth
     socket.on("signal", (to, from, data) => {
-      const peer = peers.get(to);
-      if (peer && peer.socket) {
-        peer.socket.emit("signal", to, from, data);
-      } else {
-        console.error(`Peer ${to} not found`);
-      }
+      socket.to(to).emit("signal", to, from, data);
     });
 
-    socket.on("report", (to) => {
-      const peer = peers.get(to);
-      if (!peer || !peer.socket) {
-        console.error(`Peer ${to} not found`);
+    socket.on("report", (idReported) => {
+      if (!room) return;
+
+      const peer = peers.get(idReported);
+      if (!peer) {
+        console.error(`Peer ${idReported} not found`);
         return;
       }
 
@@ -84,15 +109,14 @@ io.sockets.on(
 
       if (
         peer.report_count >= 3 ||
-        peer.report_count >= (peers.size - 1) * 0.5
+        peer.report_count >= (getPeersInRoom(room).size - 1) * 0.5
       ) {
-        peers.delete(to);
-        io.emit("blocked", peer.socket.id, peer.username);
+        io.to(room).emit("blocked", idReported, peer.username);
       } else {
-        peer.socket.emit("reported", socket.id);
+        socket.to(idReported).emit("reported", socket.id);
 
         setTimeout(() => {
-          const peer = peers.get(to);
+          const peer = peers.get(idReported);
           if (peer && peer.report_count > 0) {
             peer.report_count -= 1;
           }
@@ -100,10 +124,16 @@ io.sockets.on(
       }
     });
 
-    socket.on("disconnect", function () {
+    socket.on("disconnect", () => {
       console.log(`Peer ${socket.id} left`);
-      io.emit("peer_disconnect", socket.id);
+
+      if (room) {
+        io.to(room).emit("peer_disconnect", socket.id);
+        socket.leave(room);
+      }
+
       peers.delete(socket.id);
+      room = null;
     });
   }
 );

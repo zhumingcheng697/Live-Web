@@ -69,8 +69,8 @@ window.addEventListener("DOMContentLoaded", () => {
   let preferredAudioLabel;
   let preferredVideoLabel;
 
-  let reportingId;
-  let reportingUsername;
+  let idToReport;
+  let usernameToReport;
   let roomTopic;
 
   let isBlocked = false;
@@ -473,6 +473,7 @@ window.addEventListener("DOMContentLoaded", () => {
     stopCapture(true);
     stopCapture(false);
     connection.close();
+    socket.emit("leave-room");
     updateLayout();
     document.documentElement.className = "picking-room";
   }
@@ -591,7 +592,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  socket.on("join", (username, id) => {
+  socket.on("join-room", (username, id) => {
     if (!myUsername || isBlocked) return;
     streamsDiv.appendChild(getPeerCaptureDiv(id, username));
     updateLayout();
@@ -618,13 +619,13 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  socket.on("reported", (from) => {
+  socket.on("reported", (idReporting) => {
     showMainAlertPopup("You have been reported.");
-    connection.removeStreamsTo(from);
+    connection.removeStreamsTo(idReporting);
   });
 
-  socket.on("blocked", (id, username) => {
-    if (username === myUsername) {
+  socket.on("blocked", (idReported, usernameReported) => {
+    if (usernameReported === myUsername) {
       isBlocked = true;
       leaveRoom();
       showRoomAlertPopup(
@@ -632,16 +633,30 @@ window.addEventListener("DOMContentLoaded", () => {
         false
       );
     } else {
-      const peerDiv = getPeerCaptureDiv(id);
+      const peerDiv = getPeerCaptureDiv(idReported);
 
       if (peerDiv) {
         showMainAlertPopup(
-          `${username} has been blocked for streaming inappropriate content.`
+          `${usernameReported} has been blocked for streaming inappropriate content.`
         );
         peerDiv.remove();
         updateLayout();
       }
     }
+  });
+
+  socket.on("disconnect", () => {
+    if (!myUsername) return;
+
+    leaveRoom();
+    showRoomAlertPopup(`Connection lost.`, false);
+  });
+
+  socket.on("reconnect", () => {
+    if (!myUsername) return;
+
+    socket.emit("join", myUsername);
+    showRoomAlertPopup(`Reconnected to server.`);
   });
 
   document.addEventListener("click", () => {
@@ -790,6 +805,7 @@ window.addEventListener("DOMContentLoaded", () => {
   roomConfirmChildren[1].addEventListener("click", () => {
     roomPopupArea.classList.remove("confirming");
     isBlocked = false;
+    socket.emit("join-room", roomTopic);
     document.documentElement.className = "chatting";
   });
 
@@ -802,7 +818,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   mainConfirmChildren[0].addEventListener("click", () => {
-    const reportedDiv = getPeerCaptureDiv(reportingId);
+    const reportedDiv = getPeerCaptureDiv(idToReport);
 
     if (reportedDiv) {
       reportedDiv.classList.remove("video-ready");
@@ -812,17 +828,17 @@ window.addEventListener("DOMContentLoaded", () => {
       reportedDiv.classList.add("reported");
     }
 
-    socket.emit("report", reportingId);
+    socket.emit("report", idToReport);
 
-    showMainAlertPopup(`You have reported and hidden ${reportingUsername}.`);
+    showMainAlertPopup(`You have reported and hidden ${usernameToReport}.`);
 
-    reportingId = null;
-    reportingUsername = null;
+    idToReport = null;
+    usernameToReport = null;
   });
 
   mainConfirmChildren[1].addEventListener("click", () => {
-    reportingId = null;
-    reportingUsername = null;
+    idToReport = null;
+    usernameToReport = null;
     mainPopupArea.classList.remove("confirming");
   });
 
@@ -877,8 +893,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const username = usernameEl.textContent;
 
-    reportingId = streamDiv.id.replace(/^peer-/, "");
-    reportingUsername = username;
+    idToReport = streamDiv.id.replace(/^peer-/, "");
+    usernameToReport = username;
 
     if (streamDiv.classList.contains("reported") || !streamReady) {
       showMainAlertPopup(
