@@ -736,6 +736,7 @@ window.addEventListener("DOMContentLoaded", () => {
       roomTopic = topic;
       roomConfirmChildren[0].textContent = `Room ${topic} already exists.`;
       roomPopupArea.classList.remove("alerting");
+      roomPopupArea.classList.remove("danger-confirming");
       roomPopupArea.classList.add("confirming");
     }
   });
@@ -787,7 +788,9 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   roomConfirmChildren[1].addEventListener("click", () => {
-    // roomPopupArea.classList.remove("alerting");
+    roomPopupArea.classList.remove("confirming");
+    isBlocked = false;
+    document.documentElement.className = "chatting";
   });
 
   roomConfirmChildren[2].addEventListener("click", () => {
