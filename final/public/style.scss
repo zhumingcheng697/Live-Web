@@ -112,7 +112,13 @@ select {
     }
   }
 
-  &:not(.confirming):not(.alerting) {
+  &:not(.leaving) {
+    .leave-dialog {
+      display: none;
+    }
+  }
+
+  &:not(.confirming):not(.alerting):not(.leaving) {
     display: none;
   }
 }
@@ -295,10 +301,6 @@ select {
     &.end {
       margin: 4px;
       flex-grow: 1;
-
-      #exit-room {
-        background-color: #f43;
-      }
     }
 
     & > div {
@@ -456,6 +458,10 @@ button {
     cursor: not-allowed;
     opacity: 0.5;
   }
+}
+
+input[type="button"].dangerous {
+  background-color: #f43;
 }
 
 #generate-random {

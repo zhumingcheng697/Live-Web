@@ -115,6 +115,14 @@
               <input type="button" value="Report and Hide" />
               <input type="button" value="Cancel" class="subtle" />
             </div>
+            <div class="pop-up leave-dialog" id="main-leave-dialog">
+              <span
+                >You will have to request to rejoin the room once you
+                leave.</span
+              >
+              <input type="button" value="Leave" class="dangerous" />
+              <input type="button" value="Cancel" class="subtle" />
+            </div>
           </div>
         </div>
       </div>
@@ -137,7 +145,12 @@
           </div>
         </div>
         <div class="end">
-          <input id="exit-room" type="button" value="Exit Room" />
+          <input
+            id="leave-room"
+            class="dangerous"
+            type="button"
+            value="Leave Room"
+          />
         </div>
       </form>
     </div>

@@ -71,6 +71,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   let reportingId;
   let reportingUsername;
+  let roomTopic;
 
   let isBlocked = false;
 
@@ -115,6 +116,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const mainConfirmChildren = document.getElementById(
     "main-confirm-dialog"
   ).children;
+  const mainLeaveChildren =
+    document.getElementById("main-leave-dialog").children;
+
+  const leaveRoomBtn = document.getElementById("leave-room");
 
   const baseWidth = 200;
   const baseHeight = 150;
@@ -176,6 +181,7 @@ window.addEventListener("DOMContentLoaded", () => {
       clearTimeout(timeout);
       mainAlertChildren[0].textContent = msg;
       mainPopupArea.classList.remove("confirming");
+      mainPopupArea.classList.remove("leaving");
       mainPopupArea.classList.add("alerting");
 
       if (delay && delay > 100) {
@@ -459,6 +465,17 @@ window.addEventListener("DOMContentLoaded", () => {
     el.srcObject = null;
   }
 
+  function leaveRoom() {
+    streamsDiv.querySelectorAll(".stream:not(#capture-div)").forEach((e) => {
+      e.remove();
+    });
+    stopCapture(true);
+    stopCapture(false);
+    connection.close();
+    updateLayout();
+    document.documentElement.className = "picking-room";
+  }
+
   function getPeerCaptureDiv(id, username = null) {
     let peerDiv = document.getElementById("peer-" + id);
 
@@ -607,15 +624,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   socket.on("blocked", (id, username) => {
     if (username === myUsername) {
-      streamsDiv.querySelectorAll(".stream:not(#capture-div)").forEach((e) => {
-        e.remove();
-      });
-      stopCapture(true);
-      stopCapture(false);
-      connection.close();
-      updateLayout();
       isBlocked = true;
-      document.documentElement.className = "picking-room";
+      leaveRoom();
       showRoomAlertPopup(
         `You have been blocked for streaming inappropriate content.`,
         false
@@ -722,7 +732,7 @@ window.addEventListener("DOMContentLoaded", () => {
     e.target.topic.value = topic;
 
     if (true || document.getElementById(`room-btn-${topic}`)) {
-      roomToJoin = topic;
+      roomTopic = topic;
       roomConfirmChildren[0].textContent = `Room ${topic} already exists.`;
       roomPopupArea.classList.remove("alerting");
       roomPopupArea.classList.add("confirming");
@@ -765,6 +775,12 @@ window.addEventListener("DOMContentLoaded", () => {
     startCapture(false);
   });
 
+  leaveRoomBtn.addEventListener("click", () => {
+    mainPopupArea.classList.remove("alerting");
+    mainPopupArea.classList.remove("confirming");
+    mainPopupArea.classList.add("leaving");
+  });
+
   roomAlertChildren[1].addEventListener("click", () => {
     roomPopupArea.classList.remove("alerting");
   });
@@ -804,6 +820,17 @@ window.addEventListener("DOMContentLoaded", () => {
     reportingId = null;
     reportingUsername = null;
     mainPopupArea.classList.remove("confirming");
+  });
+
+  mainLeaveChildren[1].addEventListener("click", () => {
+    mainPopupArea.classList.remove("leaving");
+    leaveRoom();
+    showRoomAlertPopup(`You have left room ${roomTopic}.`);
+    roomTopic = null;
+  });
+
+  mainLeaveChildren[2].addEventListener("click", () => {
+    mainPopupArea.classList.remove("leaving");
   });
 
   addDoubleClickOrKeyListener(streamsDiv, (e) => {
@@ -858,6 +885,7 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
       mainConfirmChildren[0].value = `Report and Hide ${username}`;
       mainPopupArea.classList.remove("alerting");
+      mainPopupArea.classList.remove("leaving");
       mainPopupArea.classList.add("confirming");
     }
   });
