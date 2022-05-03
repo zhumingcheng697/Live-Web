@@ -75,6 +75,12 @@ form {
         padding: 10px 18px;
         font-size: 15px;
       }
+
+      select,
+      input[type="submit"].subtle,
+      input[type="button"].subtle {
+        background-color: var(--bg2);
+      }
     }
 
     &.no-existing-room {
