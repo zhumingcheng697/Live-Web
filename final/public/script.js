@@ -95,6 +95,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const newRoomForm = document.getElementById("new-room-form");
   const roomNameInput = document.getElementById("new-room-name");
   const chooseRoomArea = document.getElementById("choose-room-area");
+  const chooseRoomText = chooseRoomArea.querySelector("h2");
+  const roomsDiv = document.getElementById("rooms");
 
   const roomNameEl = document.getElementById("room-name");
   const selectCameraEl = document.getElementById("select-camera");
@@ -496,6 +498,35 @@ window.addEventListener("DOMContentLoaded", () => {
     roomNameEl.textContent = "";
   }
 
+  function getRoomBtn(roomName, createNew = false) {
+    let roomBtn = document.getElementById("room-" + roomName);
+
+    if (!createNew || roomBtn) {
+      return roomBtn;
+    }
+
+    roomBtn = document.createElement("input");
+    roomBtn.type = "button";
+    roomBtn.className = "room subtle";
+    roomBtn.value = roomName;
+    roomBtn.id = "room-" + roomName;
+
+    return roomBtn;
+  }
+
+  function updateRoomCount() {
+    const roomCount = roomsDiv.childElementCount;
+    chooseRoomText.textContent = `Choose from ${roomCount} open room${
+      roomCount === 1 ? "" : "s"
+    }:`;
+
+    if (roomCount) {
+      chooseRoomArea.classList.remove("no-existing-room");
+    } else {
+      chooseRoomArea.classList.add("no-existing-room");
+    }
+  }
+
   function getPeerCaptureDiv(id, username = null) {
     let peerDiv = document.getElementById("peer-" + id);
 
@@ -685,18 +716,26 @@ window.addEventListener("DOMContentLoaded", () => {
     showRoomAlertPopup(`Reconnected to server.`);
   });
 
-  socket.on("rooms", console.log);
-
-  socket.on("new-room", () => {
-    if (!myUsername) return;
-
-    // add new room
+  socket.on("rooms", (rooms) => {
+    if (rooms.length) {
+      for (let room of rooms) {
+        roomsDiv.appendChild(getRoomBtn(room, true));
+      }
+      updateRoomCount();
+    }
   });
 
-  socket.on("delete-room", () => {
-    if (!myUsername) return;
+  socket.on("new-room", (newRoom) => {
+    roomsDiv.appendChild(getRoomBtn(newRoom, true));
+    updateRoomCount();
+  });
 
-    // remove room
+  socket.on("delete-room", (room) => {
+    const roomDiv = getRoomBtn(room);
+    if (roomDiv) {
+      roomDiv.remove();
+      updateRoomCount();
+    }
   });
 
   document.addEventListener("click", () => {

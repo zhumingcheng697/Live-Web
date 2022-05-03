@@ -65,8 +65,19 @@ form {
 }
 
 #room-area {
-  #choose-room-area.no-existing-room {
-    display: none;
+  #choose-room-area {
+    #rooms {
+      margin-left: 6px;
+      margin-right: 6px;
+
+      & > input {
+        margin: 4px;
+      }
+    }
+
+    &.no-existing-room {
+      display: none;
+    }
   }
 }
 

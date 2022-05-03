@@ -61,9 +61,9 @@ io.sockets.on(
 
     console.log(`Peer ${socket.id} joined`);
 
-    socket.on("join", (username) => {
-      socket.emit("rooms", [...rooms]);
+    socket.emit("rooms", [...rooms]);
 
+    socket.on("join", (username) => {
       if (peers.has(socket.id)) return;
       peers.set(socket.id, { username, report_count: 0 });
     });
