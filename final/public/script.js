@@ -685,6 +685,20 @@ window.addEventListener("DOMContentLoaded", () => {
     showRoomAlertPopup(`Reconnected to server.`);
   });
 
+  socket.on("rooms", console.log);
+
+  socket.on("new-room", () => {
+    if (!myUsername) return;
+
+    // add new room
+  });
+
+  socket.on("delete-room", () => {
+    if (!myUsername) return;
+
+    // remove room
+  });
+
   document.addEventListener("click", () => {
     if (
       mainAlertChildren[0].textContent === autoPlayText &&

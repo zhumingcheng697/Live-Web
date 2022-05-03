@@ -27,6 +27,8 @@ httpServer.listen(port);
  */
 const peers = new Map();
 
+const rooms = new Set();
+
 // WebSocket Portion
 // WebSockets work with the HTTP server
 const { Server } = require("socket.io");
@@ -39,10 +41,14 @@ const io = new Server(httpServer, {
 
 console.log(`Server started on port ${port}`);
 
-const getRoomNames = () => io.of("/").adapter.rooms.keys();
-
 const getPeersInRoom = (roomName) =>
-  io.of("/").adapter.rooms.get(roomName) || [];
+  io.of("/").adapter.rooms.get(roomName) || new Set();
+
+io.of("/").adapter.on("delete-room", (room) => {
+  if (rooms.delete(room)) {
+    io.emit("delete-room", room);
+  }
+});
 
 // Register a callback function to run when we have an individual connection
 // This is run for each individual user that connects
@@ -56,7 +62,7 @@ io.sockets.on(
     console.log(`Peer ${socket.id} joined`);
 
     socket.on("join", (username) => {
-      socket.emit("rooms", [...getRoomNames()]);
+      socket.emit("rooms", [...rooms]);
 
       if (peers.has(socket.id)) return;
       peers.set(socket.id, { username, report_count: 0 });
@@ -70,6 +76,12 @@ io.sockets.on(
           id,
         ])
       );
+
+      if (!rooms.has(roomName)) {
+        rooms.add(roomName);
+        io.emit("new-room", roomName);
+      }
+
       socket.join(roomName);
       socket.broadcast
         .to(roomName)
