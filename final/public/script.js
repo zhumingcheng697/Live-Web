@@ -485,6 +485,35 @@ window.addEventListener("DOMContentLoaded", () => {
     el.srcObject = null;
   }
 
+  function joinRoom() {
+    if (!roomTopic) return;
+
+    const roomRecord = blockRecord.get(roomTopic);
+    if (roomRecord) {
+      const timeEnd = roomRecord.end;
+      if (timeEnd) {
+        const timeLeft = roomRecord.end - Date.now();
+
+        if (timeLeft <= 0) {
+          roomRecord.end = null;
+        } else {
+          showRoomAlertPopup(
+            `You have been blocked from room ${roomTopic}. Wait ${Math.ceil(
+              timeLeft / 60 / 1000
+            )} min to request to join again.`
+          );
+          return;
+        }
+      }
+    }
+
+    roomPopupArea.classList.remove("confirming");
+    roomNameEl.textContent = `Room ${roomTopic}`;
+    document.documentElement.className = "chatting";
+    socket.emit("join-room", roomTopic);
+    roomNameInput.value = "";
+  }
+
   function leaveRoom() {
     socket.emit("leave-room");
     connection.close();
@@ -499,7 +528,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function getRoomBtn(roomName, createNew = false) {
-    let roomBtn = document.getElementById("room-" + roomName);
+    let roomBtn = document.getElementById("room-btn-" + roomName);
 
     if (!createNew || roomBtn) {
       return roomBtn;
@@ -509,7 +538,7 @@ window.addEventListener("DOMContentLoaded", () => {
     roomBtn.type = "button";
     roomBtn.className = "room subtle";
     roomBtn.value = roomName;
-    roomBtn.id = "room-" + roomName;
+    roomBtn.id = "room-btn-" + roomName;
 
     return roomBtn;
   }
@@ -824,15 +853,26 @@ window.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
 
     const topic = normalizeTopic(e.target.topic.value);
-    e.target.topic.value = topic;
+    roomTopic = topic;
 
-    if (true || document.getElementById(`room-btn-${topic}`)) {
-      roomTopic = topic;
+    if (getRoomBtn(topic, false)) {
       roomConfirmChildren[0].textContent = `Room ${topic} already exists.`;
       roomPopupArea.classList.remove("alerting");
       roomPopupArea.classList.remove("danger-confirming");
       roomPopupArea.classList.add("confirming");
+    } else {
+      joinRoom();
     }
+  });
+
+  roomsDiv.addEventListener("click", (e) => {
+    if (!e.target.id || !e.target.classList.contains("room")) return;
+
+    const roomName = e.target.id.replace(/^room-btn-/, "");
+
+    if (!roomName) return;
+    roomTopic = roomName;
+    joinRoom();
   });
 
   selectCameraEl.addEventListener("change", (e) => {
@@ -882,30 +922,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   roomConfirmChildren[1].addEventListener("click", () => {
-    const roomRecord = blockRecord.get(roomTopic);
-    if (roomRecord) {
-      const timeEnd = roomRecord.end;
-      if (timeEnd) {
-        const timeLeft = roomRecord.end - Date.now();
-
-        if (timeLeft <= 0) {
-          roomRecord.end = null;
-        } else {
-          showRoomAlertPopup(
-            `You have been blocked from room ${roomTopic}. Wait ${Math.ceil(
-              timeLeft / 60 / 1000
-            )} min to request to join again.`
-          );
-          return;
-        }
-      }
-    }
-
-    roomPopupArea.classList.remove("confirming");
-    roomNameEl.textContent = `Room ${roomTopic}`;
-    document.documentElement.className = "chatting";
-    socket.emit("join-room", roomTopic);
-    roomNameInput.value = "";
+    joinRoom();
   });
 
   roomConfirmChildren[2].addEventListener("click", () => {
