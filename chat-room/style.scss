@@ -74,6 +74,8 @@ input[type="text"] {
   border-radius: 6px;
   padding: 8px 10px;
   font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
   background-color: #e5e5ea;
   min-width: 200px;
   color: #000;
@@ -85,6 +87,9 @@ input[type="submit"] {
   border-radius: 6px;
   padding: 8px 12px;
   font-size: 14px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  font-weight: 500;
   background-color: #027aff;
   color: #fff;
 
