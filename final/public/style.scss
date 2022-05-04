@@ -55,7 +55,8 @@ form {
 }
 
 #setup-form,
-#new-room-form {
+#new-room-form,
+#request-form {
   flex-wrap: wrap;
   justify-content: center;
 
@@ -64,9 +65,26 @@ form {
   }
 }
 
+#request-form {
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+
+  textarea {
+    width: 100%;
+    max-width: max(600px, 60%);
+  }
+}
+
 #room-area {
   #choose-room-area {
+    & > p {
+      padding-bottom: 8px;
+    }
+
     #rooms {
+      padding-top: 8px;
+      padding-bottom: 8px;
       margin-left: 6px;
       margin-right: 6px;
 
@@ -220,7 +238,7 @@ form {
               height: calc((var(--each-width) / 25 + 1em) * 0.3);
               line-height: calc((var(--each-width) / 25 + 1em) * 0.3);
               border-radius: 100%;
-              background: #f43;
+              background: #f32;
               margin-right: calc((var(--each-width) / 25 + 1em) * 0.15);
             }
 
@@ -292,7 +310,7 @@ form {
 
         &.reported {
           & > .username {
-            color: #f43;
+            color: #f32;
             text-decoration: line-through;
           }
         }
@@ -446,6 +464,7 @@ body.blocked {
 }
 
 select,
+textarea,
 input[type="submit"],
 input[type="button"],
 input[type="text"] {
@@ -459,11 +478,19 @@ input[type="text"] {
   transition: background-color 0.3s, color 0.3s;
 }
 
+textarea {
+  resize: none;
+  min-height: 200px;
+}
+
 input[type="text"] {
-  border-radius: 6px;
+  flex-basis: 225px;
+}
+
+textarea,
+input[type="text"] {
   padding: 8px 10px;
   background-color: var(--bg2);
-  flex-basis: 225px;
   flex-grow: 1;
   color: #000;
 }
@@ -506,10 +533,11 @@ button {
 }
 
 input[type="button"].dangerous {
-  background-color: #f43;
+  background-color: #f32;
 }
 
-#generate-random {
+#generate-random,
+#choose-another {
   cursor: pointer;
   color: var(--blue-color);
 
@@ -527,6 +555,10 @@ input[type="button"].dangerous {
   }
 }
 
+#request-area {
+  width: 100%;
+}
+
 html:not(.intro) #intro-area {
   display: none;
 }
@@ -536,6 +568,10 @@ html:not(.setting-up) #setup-area {
 }
 
 html:not(.picking-room) #room-area {
+  display: none;
+}
+
+html:not(.requesting) #request-area {
   display: none;
 }
 

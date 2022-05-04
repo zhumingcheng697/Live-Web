@@ -6,7 +6,7 @@
     />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/simple-peer/9.11.0/simplepeer.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.0/socket.io.js"></script>
-    <title>McCoy’s Video Chat</title>
+    <title>McCoy’s Chat Plaza</title>
     <link rel="stylesheet" type="text/css" href="./style.css" />
     <script type="text/javascript" src="./multi-peer-connection.js"></script>
     <script type="text/javascript" src="./script.js"></script>
@@ -58,7 +58,7 @@
             </div>
             <div class="pop-up confirm-dialog" id="room-confirm-dialog">
               <span></span>
-              <input type="button" value="Join the Room" />
+              <input type="button" value="Request to Join" />
               <input type="button" value="Cancel" class="subtle" />
             </div>
           </div>
@@ -84,6 +84,25 @@
           <h2>Choose from 0 open rooms:</h2>
           <div id="rooms"></div>
         </div>
+      </div>
+
+      <div id="request-area">
+        <h2>Request to join room:</h2>
+        <form id="request-form">
+          <textarea
+            enterkeyhint="send"
+            id="request-message"
+            name="message"
+            placeholder="Message"
+            maxlength="40"
+            required
+          ></textarea>
+          <input type="submit" value="Request" />
+        </form>
+        <p>- or -</p>
+        <p>
+          <span tabindex="0" id="choose-another">Choose Another Room</span>
+        </p>
       </div>
     </div>
 
@@ -121,7 +140,7 @@
               id="main-danger-confirm-dialog"
             >
               <span
-                >You will have to request to rejoin the room once you
+                >You might have to request to rejoin the room once you
                 leave.</span
               >
               <input type="button" value="Leave" class="dangerous" />

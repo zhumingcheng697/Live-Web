@@ -60,6 +60,7 @@ const addDoubleClickOrKeyListener = (
 window.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect("http://127.0.0.1:8080");
   const mediaToPlay = new Set();
+  const deletedRooms = new Set();
 
   const blockRecord = new Map();
 
@@ -77,6 +78,9 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const isInRoom = () =>
     document.documentElement.classList.contains("chatting");
+
+  const isRequesting = () =>
+    document.documentElement.classList.contains("requesting");
 
   const getInsets = () => {
     const computedStyle = window.getComputedStyle(document.documentElement);
@@ -97,6 +101,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const chooseRoomArea = document.getElementById("choose-room-area");
   const chooseRoomText = chooseRoomArea.querySelector("h2");
   const roomsDiv = document.getElementById("rooms");
+
+  const requestAreaText = document.querySelector("#request-area > h2");
+  const requestForm = document.getElementById("request-form");
+  const chooseAnotherRoomEl = document.getElementById("choose-another");
 
   const roomNameEl = document.getElementById("room-name");
   const selectCameraEl = document.getElementById("select-camera");
@@ -485,6 +493,11 @@ window.addEventListener("DOMContentLoaded", () => {
     el.srcObject = null;
   }
 
+  function startRequestToJoin() {
+    requestAreaText.textContent = `Request to join room ${roomTopic}:`;
+    document.documentElement.className = "requesting";
+  }
+
   function joinRoom() {
     if (!roomTopic) return;
 
@@ -510,6 +523,7 @@ window.addEventListener("DOMContentLoaded", () => {
     roomPopupArea.classList.remove("confirming");
     roomNameEl.textContent = `Room ${roomTopic}`;
     document.documentElement.className = "chatting";
+    document.title = `Room ${roomTopic} – McCoy’s Chat Plaza`;
     socket.emit("join-room", roomTopic);
     roomNameInput.value = "";
   }
@@ -518,6 +532,7 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.emit("leave-room");
     connection.close();
     document.documentElement.className = "picking-room";
+    document.title = "McCoy’s Chat Plaza";
     streamsDiv.querySelectorAll(".stream:not(#capture-div)").forEach((e) => {
       e.remove();
     });
@@ -765,6 +780,10 @@ window.addEventListener("DOMContentLoaded", () => {
       roomDiv.remove();
       updateRoomCount();
     }
+
+    if (roomTopic === room && isRequesting()) {
+      deletedRooms.add(room);
+    }
   });
 
   document.addEventListener("click", () => {
@@ -872,7 +891,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (!roomName) return;
     roomTopic = roomName;
-    joinRoom();
+    startRequestToJoin();
   });
 
   selectCameraEl.addEventListener("change", (e) => {
@@ -922,11 +941,20 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   roomConfirmChildren[1].addEventListener("click", () => {
-    joinRoom();
+    startRequestToJoin();
   });
 
   roomConfirmChildren[2].addEventListener("click", () => {
     roomPopupArea.classList.remove("confirming");
+  });
+
+  addClickOrKeyListener(chooseAnotherRoomEl, () => {
+    document.documentElement.className = "picking-room";
+    roomTopic = null;
+  });
+
+  requestForm.addEventListener("submit", (e) => {
+    e.preventDefault();
   });
 
   mainAlertChildren[1].addEventListener("click", () => {
@@ -970,8 +998,6 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   addDoubleClickOrKeyListener(streamsDiv, (e) => {
-    if (document.body.classList.contains("blocked")) return;
-
     function getStreamDiv(el) {
       if (!el) return null;
       if (el.classList && el.classList.contains("stream")) return el;
