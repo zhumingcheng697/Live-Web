@@ -60,7 +60,6 @@ const addDoubleClickOrKeyListener = (
 window.addEventListener("DOMContentLoaded", () => {
   const socket = io.connect("http://127.0.0.1:8080");
   const mediaToPlay = new Set();
-  const deletedRooms = new Set();
 
   const blockRecord = new Map();
 
@@ -75,6 +74,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let idToReport;
   let usernameToReport;
   let roomTopic;
+  let isRequestSent = false;
 
   const isInRoom = () =>
     document.documentElement.classList.contains("chatting");
@@ -104,6 +104,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   const requestAreaText = document.querySelector("#request-area > h2");
   const requestForm = document.getElementById("request-form");
+  const requestFormInput = requestForm.querySelectorAll("input, textarea");
   const chooseAnotherRoomEl = document.getElementById("choose-another");
 
   const roomNameEl = document.getElementById("room-name");
@@ -119,11 +120,14 @@ window.addEventListener("DOMContentLoaded", () => {
   const audioEl = captureDiv.querySelector("audio");
   const usernameEl = captureDiv.querySelector(".username > p");
 
-  const roomPopupArea = document.getElementById("room-pop-up-area");
-  const roomAlertChildren =
-    document.getElementById("room-alert-dialog").children;
-  const roomConfirmChildren = document.getElementById(
-    "room-confirm-dialog"
+  const bodyPopupArea = document.getElementById("body-pop-up-area");
+  const bodyAlertChildren =
+    document.getElementById("body-alert-dialog").children;
+  const bodyConfirmChildren = document.getElementById(
+    "body-confirm-dialog"
+  ).children;
+  const bodyDangerConfirmChildren = document.getElementById(
+    "body-danger-confirm-dialog"
   ).children;
 
   const mainPopupArea = document.getElementById("main-pop-up-area");
@@ -137,6 +141,9 @@ window.addEventListener("DOMContentLoaded", () => {
   ).children;
 
   const reviewChildren = document.getElementById("main-review-dialog").children;
+  const requestReviewArea = document.getElementById("request-review-area");
+  const requestReviewText = requestReviewArea.querySelector("h2");
+  const requestReviewBtns = requestReviewArea.querySelectorAll("input");
 
   const baseWidth = 200;
   const baseHeight = 150;
@@ -194,18 +201,18 @@ window.addEventListener("DOMContentLoaded", () => {
     return str.replace(/(?:^\s+)|(?:\s+$)/g, "").replace(/\s+/, " ");
   }
 
-  const showRoomAlertPopup = (() => {
+  const showBodyAlertPopup = (() => {
     let timeout;
 
     return (msg, delay = 5000) => {
       clearTimeout(timeout);
-      roomAlertChildren[0].textContent = msg;
-      roomPopupArea.classList.remove("confirming");
-      roomPopupArea.classList.add("alerting");
+      bodyAlertChildren[0].textContent = msg;
+      bodyPopupArea.children[0].appendChild(bodyAlertChildren[0].parentNode);
+      bodyPopupArea.classList.add("alerting");
 
       if (delay && delay > 100) {
         timeout = setTimeout(() => {
-          roomPopupArea.classList.remove("alerting");
+          bodyPopupArea.classList.remove("alerting");
         }, delay);
       }
     };
@@ -217,8 +224,7 @@ window.addEventListener("DOMContentLoaded", () => {
     return (msg, delay = 5000) => {
       clearTimeout(timeout);
       mainAlertChildren[0].textContent = msg;
-      mainPopupArea.classList.remove("confirming");
-      mainPopupArea.classList.remove("danger-confirming");
+      mainPopupArea.children[0].appendChild(mainAlertChildren[0].parentNode);
       mainPopupArea.classList.add("alerting");
 
       if (delay && delay > 100) {
@@ -498,6 +504,15 @@ window.addEventListener("DOMContentLoaded", () => {
   function startRequestToJoin() {
     requestAreaText.textContent = `Request to join room ${roomTopic}:`;
     document.documentElement.className = "requesting";
+    bodyPopupArea.classList.remove("confirming");
+  }
+
+  function resetRequestEl() {
+    isRequestSent = false;
+    requestFormInput.forEach((e) => {
+      e.disabled = false;
+    });
+    requestForm.message.value = "";
   }
 
   function joinRoom() {
@@ -512,7 +527,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (timeLeft <= 0) {
           roomRecord.end = null;
         } else {
-          showRoomAlertPopup(
+          showBodyAlertPopup(
             `You have been blocked from room ${roomTopic}. Wait ${Math.ceil(
               timeLeft / 60 / 1000
             )} min to request to join again.`
@@ -522,12 +537,15 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
 
-    roomPopupArea.classList.remove("confirming");
+    bodyPopupArea.classList.remove("alerting");
+    bodyPopupArea.classList.remove("confirming");
+    bodyPopupArea.classList.remove("danger-confirming");
     roomNameEl.textContent = `Room ${roomTopic}`;
     document.documentElement.className = "chatting";
     document.title = `Room ${roomTopic} – McCoy’s Chat Plaza`;
     socket.emit("join-room", roomTopic);
     roomNameInput.value = "";
+    resetRequestEl();
   }
 
   function leaveRoom() {
@@ -691,6 +709,12 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  function chooseAnotherRoom() {
+    document.documentElement.className = "picking-room";
+    roomTopic = null;
+    resetRequestEl();
+  }
+
   socket.on("join-room", (username, id) => {
     if (!isInRoom()) return;
 
@@ -727,7 +751,7 @@ window.addEventListener("DOMContentLoaded", () => {
   socket.on("blocked", (idReported, usernameReported) => {
     if (usernameReported === myUsername) {
       leaveRoom();
-      showRoomAlertPopup(
+      showBodyAlertPopup(
         `You have been blocked from room ${roomTopic} for ${gotBlockedFrom(
           roomTopic
         )} min for streaming inappropriate content.`,
@@ -751,7 +775,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!myUsername) return;
 
     leaveRoom();
-    showRoomAlertPopup(`Connection lost.`, false);
+    showBodyAlertPopup(`Connection lost.`, false);
     roomTopic = null;
   });
 
@@ -759,7 +783,7 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!myUsername) return;
 
     socket.emit("join", myUsername);
-    showRoomAlertPopup(`Reconnected to server.`);
+    showBodyAlertPopup(`Reconnected to server.`);
   });
 
   socket.on("rooms", (rooms) => {
@@ -783,8 +807,9 @@ window.addEventListener("DOMContentLoaded", () => {
       updateRoomCount();
     }
 
-    if (roomTopic === room && isRequesting()) {
-      deletedRooms.add(room);
+    if (roomTopic === room && isRequesting() && isRequestSent) {
+      joinRoom();
+      showMainAlertPopup(`You have joined room ${roomTopic}.`);
     }
   });
 
@@ -856,7 +881,7 @@ window.addEventListener("DOMContentLoaded", () => {
   setupForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const name = e.target.username.value;
+    const name = e.currentTarget.username.value;
     if (name) {
       myUsername = `${name}^${randomNumber(3)}`;
       usernameEl.textContent = myUsername;
@@ -873,16 +898,18 @@ window.addEventListener("DOMContentLoaded", () => {
   newRoomForm.addEventListener("submit", (e) => {
     e.preventDefault();
 
-    const topic = normalizeTopic(e.target.topic.value);
+    const topic = normalizeTopic(e.currentTarget.topic.value);
     roomTopic = topic;
 
     if (getRoomBtn(topic, false)) {
-      roomConfirmChildren[0].textContent = `Room ${topic} already exists.`;
-      roomPopupArea.classList.remove("alerting");
-      roomPopupArea.classList.remove("danger-confirming");
-      roomPopupArea.classList.add("confirming");
+      bodyConfirmChildren[0].textContent = `Room ${topic} already exists.`;
+      bodyPopupArea.children[0].appendChild(bodyConfirmChildren[0].parentNode);
+      bodyPopupArea.classList.remove("alerting");
+      bodyPopupArea.classList.remove("danger-confirming");
+      bodyPopupArea.classList.add("confirming");
     } else {
       joinRoom();
+      showMainAlertPopup(`You have started room ${roomTopic}.`);
     }
   });
 
@@ -933,32 +960,66 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   leaveRoomBtn.addEventListener("click", () => {
+    mainPopupArea.children[0].appendChild(
+      mainDangerConfirmChildren[0].parentNode
+    );
     mainPopupArea.classList.remove("alerting");
     mainPopupArea.classList.remove("confirming");
     mainPopupArea.classList.add("danger-confirming");
   });
 
-  roomAlertChildren[1].addEventListener("click", () => {
-    roomPopupArea.classList.remove("alerting");
+  bodyAlertChildren[1].addEventListener("click", () => {
+    bodyPopupArea.classList.remove("alerting");
   });
 
-  roomConfirmChildren[1].addEventListener("click", () => {
+  bodyConfirmChildren[1].addEventListener("click", () => {
     startRequestToJoin();
-    roomPopupArea.classList.remove("confirming");
+    bodyPopupArea.classList.remove("confirming");
     roomNameInput.value = "";
   });
 
-  roomConfirmChildren[2].addEventListener("click", () => {
-    roomPopupArea.classList.remove("confirming");
+  bodyConfirmChildren[2].addEventListener("click", () => {
+    bodyPopupArea.classList.remove("confirming");
+  });
+
+  bodyDangerConfirmChildren[1].addEventListener("click", () => {
+    // socket.emit("cancel-request", roomTopic);
+    chooseAnotherRoom();
+    bodyPopupArea.classList.remove("danger-confirming");
+  });
+
+  bodyDangerConfirmChildren[2].addEventListener("click", () => {
+    bodyPopupArea.classList.remove("danger-confirming");
   });
 
   addClickOrKeyListener(chooseAnotherRoomEl, () => {
-    document.documentElement.className = "picking-room";
-    roomTopic = null;
+    if (isRequestSent) {
+      bodyPopupArea.children[0].appendChild(
+        bodyDangerConfirmChildren[0].parentNode
+      );
+      bodyPopupArea.classList.remove("alerting");
+      bodyPopupArea.classList.remove("confirming");
+      bodyPopupArea.classList.add("danger-confirming");
+      return;
+    }
+
+    chooseAnotherRoom();
   });
 
   requestForm.addEventListener("submit", (e) => {
     e.preventDefault();
+
+    if (!getRoomBtn(roomTopic)) {
+      joinRoom();
+      showMainAlertPopup(`You have joined room ${roomTopic}.`);
+      return;
+    }
+
+    socket.emit("request", roomTopic, e.currentTarget.message.value);
+    isRequestSent = true;
+    requestFormInput.forEach((e) => {
+      e.disabled = true;
+    });
   });
 
   mainAlertChildren[1].addEventListener("click", () => {
@@ -993,7 +1054,7 @@ window.addEventListener("DOMContentLoaded", () => {
   mainDangerConfirmChildren[1].addEventListener("click", () => {
     mainPopupArea.classList.remove("danger-confirming");
     leaveRoom();
-    showRoomAlertPopup(`You have left room ${roomTopic}.`);
+    showBodyAlertPopup(`You have left room ${roomTopic}.`);
     roomTopic = null;
   });
 
@@ -1023,6 +1084,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     if (streamDiv === captureDiv) {
       mainPopupArea.classList.remove("confirming");
+      mainPopupArea.classList.remove("danger-confirming");
 
       if (streamReady) {
         stopCapture(true);
@@ -1048,6 +1110,8 @@ window.addEventListener("DOMContentLoaded", () => {
     usernameToReport = username;
 
     if (streamDiv.classList.contains("reported") || !streamReady) {
+      mainPopupArea.classList.remove("confirming");
+      mainPopupArea.classList.remove("danger-confirming");
       showMainAlertPopup(
         streamReady
           ? `You have already reported ${username}.`
@@ -1057,6 +1121,7 @@ window.addEventListener("DOMContentLoaded", () => {
       mainConfirmChildren[0].value = `Report and Hide ${username}`;
       mainPopupArea.classList.remove("alerting");
       mainPopupArea.classList.remove("danger-confirming");
+      mainPopupArea.children[0].appendChild(mainConfirmChildren[0].parentNode);
       mainPopupArea.classList.add("confirming");
     }
   });
