@@ -105,6 +105,18 @@
           <span tabindex="0" id="choose-another">Choose Another Room</span>
         </p>
       </div>
+
+      <div id="request-review-area">
+        <h2>Request to join the room:</h2>
+        <p>
+          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Nihil
+          dolorem vitae, labore ullam nobis doloribus similique quidem saepe non
+          laudantium maxime reprehenderit cum vero facere suscipit, ab
+          perferendis quisquam neque?
+        </p>
+        <input type="button" value="Admit" class="safe" />
+        <input type="button" value="Block" class="dangerous" />
+      </div>
     </div>
 
     <div id="chatting-area">
@@ -126,8 +138,12 @@
             </div>
           </div>
         </div>
-        <div class="pop-up-area" id="main-pop-up-area">
+        <div class="pop-up-area reviewing" id="main-pop-up-area">
           <div class="pop-ups">
+            <div class="pop-up review-dialog" id="main-review-dialog">
+              <span>Someone has requested to join the room.</span>
+              <input type="button" value="Review Request" />
+            </div>
             <div class="pop-up alert-dialog" id="main-alert-dialog">
               <span></span>
               <input type="button" value="OK" class="subtle" />

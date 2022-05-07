@@ -130,7 +130,7 @@ form {
       transition: background-color 0.3s, height 0.3s, box-shadow 0.3s;
       border-radius: 10px;
       padding: 6px;
-      margin: 3px 10px;
+      margin: 5px 10px;
       box-shadow: #bbb 0 0 7px;
 
       & > * {
@@ -147,6 +147,12 @@ form {
         padding: 4px 9px;
         font-weight: 400;
       }
+    }
+  }
+
+  &:not(.reviewing) {
+    .review-dialog {
+      display: none;
     }
   }
 
@@ -168,8 +174,24 @@ form {
     }
   }
 
-  &:not(.confirming):not(.alerting):not(.danger-confirming) {
+  &:not(.reviewing):not(.confirming):not(.alerting):not(.danger-confirming) {
     display: none;
+  }
+}
+
+#request-review-area {
+  background: var(--bg1);
+  padding: 12px;
+  margin: 20px;
+  border-radius: 10px;
+  display: none;
+  transition: background-color 0.3s;
+
+  select,
+  input[type="submit"],
+  input[type="button"] {
+    margin: 2px;
+    padding: 6px 15px;
   }
 }
 
@@ -532,6 +554,10 @@ button {
   }
 }
 
+input[type="button"].safe {
+  background-color: #3c5;
+}
+
 input[type="button"].dangerous {
   background-color: #f32;
 }
@@ -611,6 +637,15 @@ html.blocked {
   }
 }
 
+body.reviewing-request #body-container {
+  background: #333e;
+  z-index: 30;
+
+  #request-review-area {
+    display: block;
+  }
+}
+
 @media (prefers-color-scheme: dark) {
   :root {
     --bg1-half: #1c1c1ecc;
@@ -635,7 +670,7 @@ html.blocked {
 
   .pop-up-area {
     .pop-ups > .pop-up {
-      box-shadow: #000 0 0 7px;
+      box-shadow: #555 0 0 7px;
     }
   }
 }

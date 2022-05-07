@@ -136,6 +136,8 @@ window.addEventListener("DOMContentLoaded", () => {
     "main-danger-confirm-dialog"
   ).children;
 
+  const reviewChildren = document.getElementById("main-review-dialog").children;
+
   const baseWidth = 200;
   const baseHeight = 150;
 
@@ -997,6 +999,11 @@ window.addEventListener("DOMContentLoaded", () => {
 
   mainDangerConfirmChildren[2].addEventListener("click", () => {
     mainPopupArea.classList.remove("danger-confirming");
+  });
+
+  reviewChildren[1].addEventListener("click", () => {
+    mainPopupArea.classList.remove("reviewing");
+    document.body.classList.add("reviewing-request");
   });
 
   addDoubleClickOrKeyListener(streamsDiv, (e) => {
