@@ -13,6 +13,31 @@
   </head>
   <body>
     <div id="body-container">
+      <div class="pop-up-area" id="body-pop-up-area">
+        <div class="pop-ups">
+          <div class="pop-up alert-dialog" id="body-alert-dialog">
+            <span></span>
+            <input type="button" value="OK" class="subtle" />
+          </div>
+          <div class="pop-up confirm-dialog" id="body-confirm-dialog">
+            <span></span>
+            <input type="button" value="Request to Join" />
+            <input type="button" value="Cancel" class="subtle" />
+          </div>
+          <div
+            class="pop-up danger-confirm-dialog"
+            id="body-danger-confirm-dialog"
+          >
+            <span
+              >Your current request will be canceled if you go back to choose
+              another room.</span
+            >
+            <input type="button" value="Go Back Anyway" class="dangerous" />
+            <input type="button" value="Stay" class="subtle" />
+          </div>
+        </div>
+      </div>
+
       <div id="intro-area">
         <h1>Hello and Welcome!</h1>
         <p>
@@ -50,20 +75,6 @@
       </div>
 
       <div id="room-area">
-        <div class="pop-up-area" id="room-pop-up-area">
-          <div class="pop-ups">
-            <div class="pop-up alert-dialog" id="room-alert-dialog">
-              <span></span>
-              <input type="button" value="OK" class="subtle" />
-            </div>
-            <div class="pop-up confirm-dialog" id="room-confirm-dialog">
-              <span></span>
-              <input type="button" value="Request to Join" />
-              <input type="button" value="Cancel" class="subtle" />
-            </div>
-          </div>
-        </div>
-
         <div>
           <h2>Please pick a topic to start a new room:</h2>
           <form id="new-room-form">
@@ -114,7 +125,7 @@
           laudantium maxime reprehenderit cum vero facere suscipit, ab
           perferendis quisquam neque?
         </p>
-        <input type="button" value="Admit" class="safe" />
+        <input type="button" value="Accept" class="safe" />
         <input type="button" value="Block" class="dangerous" />
       </div>
     </div>
@@ -140,10 +151,6 @@
         </div>
         <div class="pop-up-area reviewing" id="main-pop-up-area">
           <div class="pop-ups">
-            <div class="pop-up review-dialog" id="main-review-dialog">
-              <span>Someone has requested to join the room.</span>
-              <input type="button" value="Review Request" />
-            </div>
             <div class="pop-up alert-dialog" id="main-alert-dialog">
               <span></span>
               <input type="button" value="OK" class="subtle" />
@@ -162,6 +169,10 @@
               >
               <input type="button" value="Leave" class="dangerous" />
               <input type="button" value="Cancel" class="subtle" />
+            </div>
+            <div class="pop-up review-dialog" id="main-review-dialog">
+              <span>Someone has requested to join the room.</span>
+              <input type="button" value="Review Request" />
             </div>
           </div>
         </div>

@@ -71,7 +71,7 @@ form {
   box-sizing: border-box;
 
   textarea {
-    width: 100%;
+    width: calc(100% - 8px);
     max-width: max(600px, 60%);
   }
 }
@@ -123,7 +123,7 @@ form {
     justify-content: center;
     align-items: center;
     align-content: center;
-    flex-direction: column;
+    flex-direction: column-reverse;
 
     & > .pop-up {
       background: var(--bg1);
@@ -186,12 +186,18 @@ form {
   border-radius: 10px;
   display: none;
   transition: background-color 0.3s;
+  max-width: max(600px, 60vw);
 
   select,
   input[type="submit"],
   input[type="button"] {
     margin: 2px;
     padding: 6px 15px;
+  }
+
+  p {
+    word-break: break-word;
+    white-space: break-spaces;
   }
 }
 
@@ -554,6 +560,11 @@ button {
   }
 }
 
+textarea:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
 input[type="button"].safe {
   background-color: #3c5;
 }
@@ -640,6 +651,10 @@ html.blocked {
 body.reviewing-request #body-container {
   background: #333e;
   z-index: 30;
+
+  #body-pop-up-area {
+    display: none;
+  }
 
   #request-review-area {
     display: block;
