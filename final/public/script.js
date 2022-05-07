@@ -942,6 +942,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   roomConfirmChildren[1].addEventListener("click", () => {
     startRequestToJoin();
+    roomPopupArea.classList.remove("confirming");
+    roomNameInput.value = "";
   });
 
   roomConfirmChildren[2].addEventListener("click", () => {
