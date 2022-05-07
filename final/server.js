@@ -26,8 +26,8 @@ httpServer.listen(port);
  and relays signal messages back and forth.
  */
 const peers = new Map();
-
-const rooms = new Set();
+const requests = new Map();
+const rooms = new Map();
 
 // WebSocket Portion
 // WebSockets work with the HTTP server
@@ -50,6 +50,65 @@ io.of("/").adapter.on("delete-room", (room) => {
   }
 });
 
+function checkRequest(id, action = 0, force = false) {
+  const request = requests.get(id);
+  if (!request) return;
+
+  if (action === 1) {
+    request.approval += 1;
+  } else if (action === -1) {
+    request.denial += 1;
+  }
+
+  const { roomToJoin, approval, denial } = request;
+
+  if (!rooms.has(roomToJoin)) {
+    io.to(id).emit("approved");
+    io.to(roomToJoin).emit("cancel-request", id);
+    requests.delete(id);
+    return;
+  }
+
+  if (force) {
+    io.to(roomToJoin).emit("cancel-request", id);
+    if (approval >= denial) {
+      io.to(id).emit("approved");
+    } else {
+      io.to(id).emit("denied");
+    }
+    return;
+  }
+
+  if (approval > getPeersInRoom(roomToJoin).size * 0.5) {
+    io.to(roomToJoin).emit("cancel-request", id);
+    io.to(id).emit("approved");
+    return;
+  }
+
+  if (denial > getPeersInRoom(roomToJoin).size * 0.5) {
+    io.to(roomToJoin).emit("cancel-request", id);
+    io.to(id).emit("denied");
+    return;
+  }
+}
+
+function removeRequest(id) {
+  const request = requests.get(id);
+
+  if (request) {
+    io.to(request.roomToJoin).emit("cancel-request", id);
+
+    clearTimeout(request.timeoutId);
+    requests.delete(id);
+
+    const roomRequests = rooms.get(request.roomToJoin);
+
+    if (roomRequests) {
+      roomRequests.delete(id);
+    }
+  }
+}
+
 // Register a callback function to run when we have an individual connection
 // This is run for each individual user that connects
 io.sockets.on(
@@ -61,7 +120,45 @@ io.sockets.on(
 
     console.log(`Peer ${socket.id} joined`);
 
-    socket.emit("rooms", [...rooms]);
+    socket.emit("rooms", [...rooms.keys()]);
+
+    socket.on("request", (roomToJoin, msg) => {
+      const timeoutId = setTimeout(() => {
+        checkRequest(socket.id, 0, true);
+        requests.delete(socket.id);
+      }, 30 * 1000);
+
+      requests.set(socket.id, {
+        roomToJoin,
+        approval: 0,
+        denial: 0,
+        timeoutId,
+      });
+
+      const roomRequests = rooms.get(roomToJoin);
+
+      if (roomRequests) {
+        roomRequests.add(socket.id);
+      }
+
+      socket.broadcast
+        .to(roomToJoin)
+        .emit("request", socket.id, (peers.get(socket.id) || {}).username, msg);
+    });
+
+    socket.on("cancel-request", (roomToJoin) => {
+      removeRequest(socket.id);
+
+      socket.broadcast.to(roomToJoin).emit("cancel-request", socket.id);
+    });
+
+    socket.on("approve-request", (id) => {
+      checkRequest(id, 1);
+    });
+
+    socket.on("deny-request", (id) => {
+      checkRequest(id, -1);
+    });
 
     socket.on("join", (username) => {
       if (peers.has(socket.id)) return;
@@ -69,6 +166,8 @@ io.sockets.on(
     });
 
     socket.on("join-room", (roomName) => {
+      removeRequest(socket.id);
+
       socket.emit(
         "user-list",
         [...getPeersInRoom(roomName)].map((id) => [
@@ -78,7 +177,7 @@ io.sockets.on(
       );
 
       if (!rooms.has(roomName)) {
-        rooms.add(roomName);
+        rooms.set(roomName, new Set());
         io.emit("new-room", roomName);
       }
 
@@ -94,6 +193,15 @@ io.sockets.on(
 
       socket.broadcast.to(room).emit("peer_disconnect", socket.id);
       socket.leave(room);
+
+      const roomRequests = rooms.get(room);
+
+      if (roomRequests) {
+        roomRequests.forEach((id) => {
+          checkRequest(id);
+        });
+      }
+
       room = null;
     });
 
@@ -142,6 +250,16 @@ io.sockets.on(
       if (room) {
         io.to(room).emit("peer_disconnect", socket.id);
         socket.leave(room);
+
+        const roomRequests = rooms.get(room);
+
+        if (roomRequests) {
+          roomRequests.forEach((id) => {
+            checkRequest(id);
+          });
+        }
+
+        removeRequest(socket.id);
       }
 
       peers.delete(socket.id);
