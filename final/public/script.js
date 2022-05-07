@@ -76,6 +76,8 @@ window.addEventListener("DOMContentLoaded", () => {
   let roomTopic;
   let isRequestSent = false;
 
+  const requests = [];
+
   const isInRoom = () =>
     document.documentElement.classList.contains("chatting");
 
@@ -143,6 +145,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const reviewChildren = document.getElementById("main-review-dialog").children;
   const requestReviewArea = document.getElementById("request-review-area");
   const requestReviewText = requestReviewArea.querySelector("h2");
+  const requestReviewMsg = requestReviewArea.querySelector("p");
   const requestReviewBtns = requestReviewArea.querySelectorAll("input");
 
   const baseWidth = 200;
@@ -813,6 +816,44 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  socket.on("request", (id, username, msg) => {
+    mainPopupArea.classList.add("reviewing");
+    requests.push({ id, username, msg });
+  });
+
+  socket.on("cancel-request", (id) => {
+    const index = requests.findIndex((e) => e.id === id);
+
+    if (index >= 0) {
+      if (index === 0) {
+        document.body.classList.remove("reviewing-request");
+      }
+      requests.splice(index, 1);
+    }
+
+    if (!requests.length) {
+      mainPopupArea.classList.remove("reviewing");
+    }
+  });
+
+  socket.on("approved", () => {
+    if (roomTopic && isRequesting() && isRequestSent) {
+      showMainAlertPopup(
+        `Your request to join room ${roomTopic} has been approved.`
+      );
+      joinRoom();
+    }
+  });
+
+  socket.on("denied", () => {
+    if (roomTopic && isRequesting() && isRequestSent) {
+      showBodyAlertPopup(
+        `Your request to join room ${roomTopic} has been denied.`
+      );
+      chooseAnotherRoom();
+    }
+  });
+
   document.addEventListener("click", () => {
     if (
       mainAlertChildren[0].textContent === autoPlayText &&
@@ -968,6 +1009,24 @@ window.addEventListener("DOMContentLoaded", () => {
     mainPopupArea.classList.add("danger-confirming");
   });
 
+  requestReviewBtns[0].addEventListener("click", () => {
+    socket.emit("approve-request", requests[0].id);
+    requests.splice(0, 1);
+    if (requests.length) {
+      mainPopupArea.classList.add("reviewing");
+    }
+    document.body.classList.remove("reviewing-request");
+  });
+
+  requestReviewBtns[1].addEventListener("click", () => {
+    socket.emit("deny-request", requests[0].id);
+    requests.splice(0, 1);
+    if (requests.length) {
+      mainPopupArea.classList.add("reviewing");
+    }
+    document.body.classList.remove("reviewing-request");
+  });
+
   bodyAlertChildren[1].addEventListener("click", () => {
     bodyPopupArea.classList.remove("alerting");
   });
@@ -983,7 +1042,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   bodyDangerConfirmChildren[1].addEventListener("click", () => {
-    // socket.emit("cancel-request", roomTopic);
+    socket.emit("cancel-request", roomTopic);
     chooseAnotherRoom();
     bodyPopupArea.classList.remove("danger-confirming");
   });
@@ -1020,6 +1079,9 @@ window.addEventListener("DOMContentLoaded", () => {
     requestFormInput.forEach((e) => {
       e.disabled = true;
     });
+    showBodyAlertPopup(
+      `Your request to join room ${roomTopic} has been submitted.`
+    );
   });
 
   mainAlertChildren[1].addEventListener("click", () => {
@@ -1043,6 +1105,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
     idToReport = null;
     usernameToReport = null;
+    mainPopupArea.classList.remove("confirming");
   });
 
   mainConfirmChildren[1].addEventListener("click", () => {
@@ -1063,7 +1126,14 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   reviewChildren[1].addEventListener("click", () => {
+    if (requests.length < 1) {
+      mainPopupArea.classList.remove("reviewing");
+      return;
+    }
+
     mainPopupArea.classList.remove("reviewing");
+    requestReviewText.textContent = `Request from ${requests[0].username}:`;
+    requestReviewMsg.textContent = requests[0].msg;
     document.body.classList.add("reviewing-request");
   });
 

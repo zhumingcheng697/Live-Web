@@ -191,8 +191,9 @@ form {
   select,
   input[type="submit"],
   input[type="button"] {
-    margin: 2px;
-    padding: 6px 15px;
+    margin: 3px;
+    padding: 5px 12px;
+    min-width: 7em;
   }
 
   p {
