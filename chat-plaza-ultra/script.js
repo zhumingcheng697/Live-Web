@@ -718,24 +718,13 @@ window.addEventListener("DOMContentLoaded", () => {
     if (videoReady && audioReady) {
       sibling = streamsDiv.firstChild;
     } else if (videoReady) {
-      sibling =
-        streamsDiv.querySelector(
-          `.stream.video-ready:not(.audio-ready):not(#${peerCaptureDiv.id})`
-        ) ||
-        streamsDiv.querySelector(
-          `.stream:not(.video-ready).audio-ready:not(#${peerCaptureDiv.id})`
-        ) ||
-        streamsDiv.querySelector(
-          `.stream:not(.video-ready):not(.audio-ready):not(#${peerCaptureDiv.id})`
-        );
+      sibling = streamsDiv.querySelector(
+        `.stream:not(.video-ready.audio-ready):not(#${peerCaptureDiv.id})`
+      );
     } else if (audioReady) {
-      sibling =
-        streamsDiv.querySelector(
-          `.stream:not(.video-ready).audio-ready:not(#${peerCaptureDiv.id})`
-        ) ||
-        streamsDiv.querySelector(
-          `.stream:not(.video-ready):not(.audio-ready):not(#${peerCaptureDiv.id})`
-        );
+      sibling = streamsDiv.querySelector(
+        `.stream:not(.video-ready):not(#${peerCaptureDiv.id})`
+      );
     } else {
       sibling = streamsDiv.querySelector(
         `.stream:not(.video-ready):not(.audio-ready):not(#${peerCaptureDiv.id})`
