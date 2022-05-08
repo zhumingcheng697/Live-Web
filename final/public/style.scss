@@ -129,12 +129,12 @@ form {
       background: var(--bg1);
       transition: background-color 0.3s, height 0.3s, box-shadow 0.3s;
       border-radius: 10px;
-      padding: 6px;
+      padding: 4px 5px;
       margin: 5px 10px;
       box-shadow: #bbb 0 0 7px;
 
       & > * {
-        margin: 1px;
+        margin: 2px 1px;
       }
 
       span {
@@ -661,7 +661,7 @@ html.blocked {
 }
 
 body.reviewing-request #body-container {
-  background: #333e;
+  background: #4448;
   z-index: 30;
 
   #body-pop-up-area {

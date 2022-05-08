@@ -505,9 +505,10 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function startRequestToJoin() {
+    bodyPopupArea.classList.remove("confirming");
+    if (!checkBlock()) return;
     requestAreaText.textContent = `Request to join room ${roomTopic}:`;
     document.documentElement.className = "requesting";
-    bodyPopupArea.classList.remove("confirming");
   }
 
   function resetRequestEl() {
@@ -518,7 +519,7 @@ window.addEventListener("DOMContentLoaded", () => {
     requestForm.message.value = "";
   }
 
-  function joinRoom() {
+  function checkBlock() {
     if (!roomTopic) return;
 
     const roomRecord = blockRecord.get(roomTopic);
@@ -535,10 +536,19 @@ window.addEventListener("DOMContentLoaded", () => {
               timeLeft / 60 / 1000
             )} min to request to join again.`
           );
+
           return;
         }
       }
     }
+
+    return true;
+  }
+
+  function joinRoom() {
+    if (!roomTopic) return;
+
+    if (!checkBlock()) return;
 
     bodyPopupArea.classList.remove("alerting");
     bodyPopupArea.classList.remove("confirming");
@@ -817,6 +827,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   socket.on("request", (id, username, msg) => {
+    mainPopupArea.children[0].appendChild(reviewChildren[0].parentNode);
     mainPopupArea.classList.add("reviewing");
     requests.push({ id, username, msg });
   });
@@ -1013,6 +1024,7 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.emit("approve-request", requests[0].id);
     requests.splice(0, 1);
     if (requests.length) {
+      mainPopupArea.children[0].appendChild(reviewChildren[0].parentNode);
       mainPopupArea.classList.add("reviewing");
     }
     document.body.classList.remove("reviewing-request");
@@ -1022,6 +1034,7 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.emit("deny-request", requests[0].id);
     requests.splice(0, 1);
     if (requests.length) {
+      mainPopupArea.children[0].appendChild(reviewChildren[0].parentNode);
       mainPopupArea.classList.add("reviewing");
     }
     document.body.classList.remove("reviewing-request");
