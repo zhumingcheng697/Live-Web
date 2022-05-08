@@ -391,30 +391,40 @@ form {
     white-space: break-spaces;
   }
 
-  & > div {
-    flex-grow: 100;
+  div {
     display: inline-flex;
-    justify-content: space-evenly;
+    justify-content: center;
     align-content: center;
     align-items: center;
     flex-wrap: wrap;
-    margin: 0 4px;
+  }
 
-    &.end {
-      margin: 4px;
-      flex-grow: 1;
+  .end {
+    margin: 4px;
+    flex-grow: 1;
+  }
+
+  .wide {
+    flex-grow: 100;
+    justify-content: space-between;
+
+    .end {
+      input {
+        margin: 0;
+      }
     }
 
-    & > div {
-      display: inline-flex;
-      justify-content: center;
-      align-content: center;
-      align-items: center;
-      flex-wrap: wrap;
-      margin: 4px;
+    #media-select {
+      justify-content: space-evenly;
+      flex-grow: 100;
+      margin: 0 15px;
 
-      & > * {
-        margin: 2px 4px;
+      & > div {
+        margin: 4px 15px;
+
+        & > * {
+          margin: 2px 4px;
+        }
       }
     }
   }
