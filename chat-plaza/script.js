@@ -464,8 +464,8 @@ window.addEventListener("DOMContentLoaded", () => {
                 (e) => e.kind === deviceKind && e.label === preferredDeviceLabel
               )
             ) {
-              stopVideoCapture();
-              startVideoCapture(startVideo, false);
+              stopCapture(startVideo);
+              startCapture(startVideo, false);
               return;
             }
 
