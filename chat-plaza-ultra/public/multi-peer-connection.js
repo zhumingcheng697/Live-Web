@@ -1,7 +1,3 @@
-// if (process.env.DEBUG) {
-//   const SimplePeer = require("simple-peer");
-// }
-
 class MultiPeerConnection {
   constructor({
     socket,
