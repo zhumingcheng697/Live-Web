@@ -188,6 +188,16 @@ form {
   transition: background-color 0.3s;
   max-width: max(600px, 60vw);
 
+  #msg-container {
+    display: flex;
+    justify-content: center;
+    text-align: start;
+  }
+
+  h2 {
+    margin-bottom: 0;
+  }
+
   select,
   input[type="submit"],
   input[type="button"] {
@@ -197,6 +207,7 @@ form {
   }
 
   p {
+    margin: 1.2em 0;
     word-break: break-word;
     white-space: break-spaces;
   }
