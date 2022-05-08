@@ -79,7 +79,7 @@ function checkRequest(id, action = 0, force = false) {
     return;
   }
 
-  if (approval > getPeersInRoom(roomToJoin).size * 0.5) {
+  if (approval >= getPeersInRoom(roomToJoin).size * 0.5) {
     io.to(roomToJoin).emit("cancel-request", id);
     io.to(id).emit("approved");
     return;
