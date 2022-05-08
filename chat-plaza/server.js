@@ -120,8 +120,6 @@ io.sockets.on(
 
     console.log(`Peer ${socket.id} joined`);
 
-    socket.emit("rooms", [...rooms.keys()]);
-
     socket.on("request", (roomToJoin, msg) => {
       const timeoutId = setTimeout(() => {
         checkRequest(socket.id, 0, true);
@@ -161,6 +159,8 @@ io.sockets.on(
     });
 
     socket.on("join", (username) => {
+      socket.emit("rooms", [...rooms.keys()]);
+
       if (peers.has(socket.id)) return;
       peers.set(socket.id, { username, report_count: 0 });
     });
