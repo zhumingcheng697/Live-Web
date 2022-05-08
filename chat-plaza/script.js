@@ -623,6 +623,10 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function leaveRoom() {
+    mainPopupArea.classList.remove("reviewing");
+    mainPopupArea.classList.remove("alerting");
+    mainPopupArea.classList.remove("confirming");
+    mainPopupArea.classList.remove("danger-confirming");
     socket.emit("leave-room");
     connection.close();
     document.documentElement.className = "picking-room";
@@ -1207,7 +1211,6 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   mainDangerConfirmChildren[1].addEventListener("click", () => {
-    mainPopupArea.classList.remove("danger-confirming");
     leaveRoom();
     showBodyAlertPopup(`You have left room ${roomTopic}.`);
     roomTopic = null;
