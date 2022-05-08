@@ -475,14 +475,13 @@ body.upside-down {
       left: auto;
       right: 0;
       flex-direction: column;
-      justify-content: space-between;
       flex-wrap: nowrap;
       width: var(--tools-width);
       box-sizing: content-box;
       padding: calc(7px + var(--inset-top)) calc(7px + var(--inset-right))
         calc(7px + var(--inset-bottom)) 7px;
 
-      & > div {
+      div {
         flex-direction: column;
       }
 
