@@ -81,7 +81,7 @@ const addDoubleClickOrKeyListener = (
 };
 
 window.addEventListener("DOMContentLoaded", () => {
-  const socket = io.connect("https://mccoy-zhu-chat-plaza.glitch.me/");
+  const socket = io.connect("https://mccoy-zhu-chat-plaza-ultra.glitch.me/");
   const mediaToPlay = new Set();
 
   const blockRecord = new Map();
@@ -615,7 +615,7 @@ window.addEventListener("DOMContentLoaded", () => {
     bodyPopupArea.classList.remove("danger-confirming");
     roomNameEl.textContent = `Room ${roomTopic}`;
     document.documentElement.className = "chatting";
-    document.title = `Room ${roomTopic} – McCoy’s Chat Plaza`;
+    document.title = `Room ${roomTopic} – McCoy’s Chat Plaza Ultra`;
     socket.emit("join-room", roomTopic);
     roomNameInput.value = "";
     resetRequestEl();
@@ -630,7 +630,7 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.emit("leave-room");
     connection.close();
     document.documentElement.className = "picking-room";
-    document.title = "McCoy’s Chat Plaza";
+    document.title = "McCoy’s Chat Plaza Ultra";
     streamsDiv.querySelectorAll(".stream:not(#capture-div)").forEach((e) => {
       e.remove();
     });
