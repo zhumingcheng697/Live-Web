@@ -258,6 +258,10 @@ form {
           border: solid 4px #fc0;
         }
 
+        &.speaking {
+          border: solid 4px #3c5;
+        }
+
         & > .username {
           display: flex;
           align-items: center;

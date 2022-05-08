@@ -4,6 +4,29 @@ function randomNumber(n, base = 10) {
     .join("");
 }
 
+function useAudioMeter(stream) {
+  try {
+    const audioContext = new (AudioContext || webkitAudioContext)();
+    const audioSource = audioContext.createMediaStreamSource(stream);
+    const analyser = audioContext.createAnalyser();
+    analyser.fftSize = 1024;
+    analyser.minDecibels = -127;
+    analyser.maxDecibels = 0;
+    analyser.smoothingTimeConstant = 0.4;
+    audioSource.connect(analyser);
+    const volumes = new Uint8Array(analyser.frequencyBinCount);
+    return () => {
+      analyser.getByteFrequencyData(volumes);
+      let volumeSum = 0;
+      for (const volume of volumes) volumeSum += volume;
+      return volumeSum / volumes.length;
+    };
+  } catch (e) {
+    console.error(e);
+    return () => NaN;
+  }
+}
+
 const addClickOrKeyListener = (target, listener) => {
   target.addEventListener("click", listener);
   target.addEventListener("keydown", (e) => {
@@ -76,6 +99,9 @@ window.addEventListener("DOMContentLoaded", () => {
   let roomTopic;
   let isRequestSent = false;
 
+  let audioMeter = null;
+
+  const volumes = new Map();
   const requests = [];
 
   const isInRoom = () =>
@@ -157,11 +183,37 @@ window.addEventListener("DOMContentLoaded", () => {
   const connection = new MultiPeerConnection({
     socket,
     onStream: receivedStream,
+    onData,
     onPeerConnect: peerConnected,
     onPeerDisconnect: peerDisconnected,
     videoBitrate,
     audioBitrate,
   });
+
+  function checkVolume() {
+    let maxId = null;
+    let maxVolume = 0;
+
+    for (let id of volumes.keys()) {
+      const volume = volumes.get(id);
+      if (volume > maxVolume) {
+        maxVolume = volume;
+        maxId = id;
+      }
+    }
+
+    streamsDiv.querySelectorAll(".stream").forEach((e) => {
+      e.classList.remove("speaking");
+    });
+
+    if (maxId && maxId !== socket.id && maxVolume > 30) {
+      const peerDiv = getPeerCaptureDiv(maxId);
+
+      if (peerDiv) {
+        peerDiv.classList.add("speaking");
+      }
+    }
+  }
 
   function gotBlockedFrom(room) {
     let roomRecord = blockRecord.get(room);
@@ -387,6 +439,10 @@ window.addEventListener("DOMContentLoaded", () => {
           const el = startVideo ? videoEl : audioEl;
           const readyClass = startVideo ? "video-ready" : "audio-ready";
 
+          if (!startVideo) {
+            audioMeter = useAudioMeter(stream);
+          }
+
           el.srcObject = stream;
           el.onloadedmetadata = () => {
             el.play();
@@ -487,6 +543,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
       socket.emit("remove-stream", stopVideo);
       connection.removeStream(stream);
+    }
+
+    if (!stopVideo) {
+      audioMeter = null;
     }
 
     captureDiv.classList.remove(stopVideo ? "video-ready" : "audio-ready");
@@ -720,6 +780,11 @@ window.addEventListener("DOMContentLoaded", () => {
       element.remove();
       updateLayout();
     }
+  }
+
+  function onData(data, simplePeerWrapper) {
+    volumes.set(simplePeerWrapper.socket_id, data);
+    checkVolume();
   }
 
   function chooseAnotherRoom() {
@@ -1208,6 +1273,18 @@ window.addEventListener("DOMContentLoaded", () => {
       mainPopupArea.classList.add("confirming");
     }
   });
+
+  setInterval(() => {
+    if (audioMeter) {
+      const meterValue = audioMeter();
+      connection.sendData(`${meterValue}`);
+      volumes.set(socket.id, meterValue);
+    } else {
+      connection.sendData("NaN");
+      volumes.set(socket.id, NaN);
+    }
+    checkVolume();
+  }, 100);
 
   updateOrientation(window.orientation);
   screen && screen.orientation && updateOrientation(screen.orientation.angle);
