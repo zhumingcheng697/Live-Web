@@ -833,6 +833,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
   enableSocket && socket.on("reconnect", reconnectMyself);
+  enableSocket && socket.on("connect", reconnectMyself);
 
   enableSocket && socket.on("disconnect", quitMyself);
 

@@ -654,7 +654,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function updateRoomCount() {
     const roomCount = roomsDiv.childElementCount;
-    chooseRoomText.textContent = `Choose from ${roomCount} open room${
+    chooseRoomText.textContent = `Choose from ${roomCount} existing room${
       roomCount === 1 ? "" : "s"
     }:`;
 
@@ -868,7 +868,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   socket.on("disconnect", disconnected);
 
-  socket.on("reconnect", reconnect);
+  socket.on("connect", reconnect);
 
   socket.on("rooms", (rooms) => {
     if (rooms.length) {
