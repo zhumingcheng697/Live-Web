@@ -795,6 +795,21 @@ window.addEventListener("DOMContentLoaded", () => {
     resetRequestEl();
   }
 
+  function disconnected() {
+    if (!myUsername) return;
+
+    leaveRoom();
+    showBodyAlertPopup(`Connection lost.`, false);
+    roomTopic = null;
+  }
+
+  function reconnect() {
+    if (!myUsername) return;
+
+    socket.emit("join", myUsername);
+    showBodyAlertPopup(`Reconnected to server.`);
+  }
+
   socket.on("join-room", (username, id) => {
     if (!isInRoom()) return;
 
@@ -851,20 +866,9 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  socket.on("disconnect", () => {
-    if (!myUsername) return;
+  socket.on("disconnect", disconnected);
 
-    leaveRoom();
-    showBodyAlertPopup(`Connection lost.`, false);
-    roomTopic = null;
-  });
-
-  socket.on("reconnect", () => {
-    if (!myUsername) return;
-
-    socket.emit("join", myUsername);
-    showBodyAlertPopup(`Reconnected to server.`);
-  });
+  socket.on("reconnect", reconnect);
 
   socket.on("rooms", (rooms) => {
     if (rooms.length) {
@@ -948,6 +952,10 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     }
   });
+
+  window.addEventListener("offline", disconnected);
+
+  window.addEventListener("online", reconnect);
 
   window.addEventListener("resize", () => {
     updateLayout();
