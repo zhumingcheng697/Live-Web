@@ -619,6 +619,7 @@ window.addEventListener("DOMContentLoaded", () => {
     socket.emit("join-room", roomTopic);
     roomNameInput.value = "";
     resetRequestEl();
+    updateLayout();
   }
 
   function leaveRoom() {
