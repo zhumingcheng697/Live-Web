@@ -871,12 +871,16 @@ window.addEventListener("DOMContentLoaded", () => {
   socket.on("connect", reconnect);
 
   socket.on("rooms", (rooms) => {
+    while (roomsDiv.firstChild) {
+      roomsDiv.firstChild.remove();
+    }
+
     if (rooms.length) {
       for (let room of rooms) {
         roomsDiv.appendChild(getRoomBtn(room, true));
       }
-      updateRoomCount();
     }
+    updateRoomCount();
   });
 
   socket.on("new-room", (newRoom) => {
