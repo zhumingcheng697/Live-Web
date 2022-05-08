@@ -81,7 +81,7 @@ const addDoubleClickOrKeyListener = (
 };
 
 window.addEventListener("DOMContentLoaded", () => {
-  const socket = io.connect("http://127.0.0.1:8080");
+  const socket = io.connect("https://mccoy-zhu-chat-plaza.glitch.me/");
   const mediaToPlay = new Set();
 
   const blockRecord = new Map();
@@ -206,7 +206,7 @@ window.addEventListener("DOMContentLoaded", () => {
       e.classList.remove("speaking");
     });
 
-    if (maxId && maxId !== socket.id && maxVolume > 30) {
+    if (maxId && maxId !== socket.id && maxVolume > 35) {
       const peerDiv = getPeerCaptureDiv(maxId);
 
       if (peerDiv) {
@@ -775,8 +775,9 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   // Whenever a peer disconnected
-  function peerDisconnected(data) {
-    const element = getPeerCaptureDiv(data);
+  function peerDisconnected(id) {
+    const element = getPeerCaptureDiv(id);
+    volumes.delete(id);
     if (element) {
       element.remove();
       updateLayout();
@@ -784,7 +785,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function onData(data, simplePeerWrapper) {
-    volumes.set(simplePeerWrapper.socket_id, data);
+    volumes.set(simplePeerWrapper.socket_id, +data);
     checkVolume();
   }
 
