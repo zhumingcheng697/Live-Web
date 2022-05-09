@@ -104,7 +104,7 @@ window.addEventListener("DOMContentLoaded", () => {
   let audioMeter = null;
 
   const volumes = new Map();
-  const requests = [];
+  const requests = new Map();
 
   const isInRoom = () =>
     document.documentElement.classList.contains("chatting");
@@ -906,20 +906,19 @@ window.addEventListener("DOMContentLoaded", () => {
   socket.on("request", (id, username, msg) => {
     mainPopupArea.children[0].appendChild(reviewChildren[0].parentNode);
     mainPopupArea.classList.add("reviewing");
-    requests.push({ id, username, msg });
+    requests.set(id, { username, msg });
   });
 
   socket.on("cancel-request", (id) => {
-    const index = requests.findIndex((e) => e.id === id);
+    const firstId = requests.keys().next().value;
 
-    if (index >= 0) {
-      if (index === 0) {
-        document.body.classList.remove("reviewing-request");
-      }
-      requests.splice(index, 1);
+    if (id === firstId) {
+      document.body.classList.remove("reviewing-request");
     }
 
-    if (!requests.length) {
+    requests.delete(id);
+
+    if (!requests.size) {
       mainPopupArea.classList.remove("reviewing");
     }
   });
@@ -1102,9 +1101,11 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   requestReviewBtns[0].addEventListener("click", () => {
-    socket.emit("approve-request", requests[0].id);
-    requests.splice(0, 1);
-    if (requests.length) {
+    const approvedId = requests.keys().next().value;
+    socket.emit("approve-request", approvedId);
+    requests.delete(approvedId);
+
+    if (requests.size) {
       mainPopupArea.children[0].appendChild(reviewChildren[0].parentNode);
       mainPopupArea.classList.add("reviewing");
     }
@@ -1112,9 +1113,11 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   requestReviewBtns[1].addEventListener("click", () => {
-    socket.emit("deny-request", requests[0].id);
-    requests.splice(0, 1);
-    if (requests.length) {
+    const deniedId = requests.keys().next().value;
+    socket.emit("deny-request", deniedId);
+    requests.delete(deniedId);
+
+    if (requests.size) {
       mainPopupArea.children[0].appendChild(reviewChildren[0].parentNode);
       mainPopupArea.classList.add("reviewing");
     }
@@ -1219,14 +1222,16 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   reviewChildren[1].addEventListener("click", () => {
-    if (requests.length < 1) {
+    if (!requests.size) {
       mainPopupArea.classList.remove("reviewing");
       return;
     }
 
+    const { username, msg } = requests.values().next().value || {};
+
     mainPopupArea.classList.remove("reviewing");
-    requestReviewText.textContent = `Request from ${requests[0].username}:`;
-    requestReviewMsg.textContent = requests[0].msg;
+    requestReviewText.textContent = `Request from ${username}:`;
+    requestReviewMsg.textContent = msg;
     document.body.classList.add("reviewing-request");
   });
 
