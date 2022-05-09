@@ -2,6 +2,8 @@
 
 **Live Web Final Project**
 
+[![Chat Plaza Ultra Video Thumbnail](https://i1.ytimg.com/vi/NvT8CnNyJ8s/maxresdefault.jpg)](https://www.youtube.com/watch?v=NvT8CnNyJ8s)
+
 Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-plaza-ultra) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-plaza-ultra)
 
 Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-plaza-ultra) & [Glitch](https://mccoy-zhu-chat-plaza-ultra.glitch.me/)
