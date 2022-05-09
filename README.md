@@ -8,6 +8,10 @@
 
   Midterm Project
 
+- ### [Chat Plaza Ultra](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-plaza-ultra)
+
+  Final Project
+
 ## Assignments
 
 - ### [Self Portrait](https://github.com/zhumingcheng697/Live-Web/tree/main/self-portrait)

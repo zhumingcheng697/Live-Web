@@ -2,9 +2,9 @@
 
 **Live Web Final Project**
 
-Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-plaza) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-plaza)
+Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/chat-plaza-ultra) & [Glitch](https://glitch.com/edit/#!/mccoy-zhu-chat-plaza-ultra)
 
-Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-plaza) & [Glitch](https://mccoy-zhu-chat-plaza.glitch.me/)
+Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/chat-plaza-ultra) & [Glitch](https://mccoy-zhu-chat-plaza-ultra.glitch.me/)
 
 Like I envisioned in my final proposal, I built an alternative version of my midterm project using WebRTC and audio/video streaming.
 
@@ -15,7 +15,7 @@ I was able to achieve about all the features I wanted to add, including:
 - reporting and blocking users (intended to prevent inappropriate content)
 - allowing users to create rooms or requst to join existing rooms and switch between rooms
 - having users already inside a room vote whether to approve or deny new users’ requests to join
-- highlighting the user with the loadest voice
+- highlighting the speaking user with the loadest voice
 
 Following professor’s advice, I also added a text box where new users can write a short message when requesting to join a room.
 
@@ -462,4 +462,4 @@ Several details worth mentioning:
 
 I did not have the time to implement an SFU server for now since the whole subscriber-publisher model is quite a bit different from what we have been doing with `simple-peer` so far, but implementing an SFU server would be one of the first things I’ll do when I get the time to do so.
 
-Besides having an SFU server that relays the video streams, I had also been thinking if I could do more with the server, for example, taking snapshot of each users’ stream every minute, composing snapshots from users in each room to a single image on the server side, perhaps using something like [`node-canvas`](https://github.com/Automattic/node-canvas), and sending the composed snapshot back to the clients as a low-res preview image for the room. I’ll have to see if `media-soup` supports taking snapshot of the streams, though. If that is not supported, I could just have the clients each take their own snapshot using HTML5 canvas like we did in the first half of the semester and only let the server to the composition work.
+Besides having an SFU server that relays the video streams, I had also been thinking if I could do more with the server, for example, taking snapshot of each users’ stream every minute, composing snapshots from users in each room to a single image on the server side, perhaps using something like [`node-canvas`](https://github.com/Automattic/node-canvas), and sending the composed snapshot back to the clients as a low-res preview image for the room. I’ll have to see if `mediasoup` supports taking snapshot of the streams, though. If that is not supported, I could just have the clients each take their own snapshot using HTML5 canvas like we did in the first half of the semester and only let the server do the composition work.
