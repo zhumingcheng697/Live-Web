@@ -90,6 +90,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const micOffText = "- Mic Off -";
   const autoPlayText = "Unable to auto-play audio. Click anywhere to play.";
 
+  let isDisconnected = false;
+
   let myUsername = "";
   let preferredAudioLabel;
   let preferredVideoLabel;
@@ -789,6 +791,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   function disconnected() {
+    isDisconnected = true;
+
     if (!myUsername) return;
 
     leaveRoom();
@@ -800,7 +804,6 @@ window.addEventListener("DOMContentLoaded", () => {
     if (!myUsername) return;
 
     socket.emit("join", myUsername);
-    showBodyAlertPopup(`Reconnected to server.`);
   }
 
   socket.on("join-room", (username, id) => {
@@ -864,6 +867,12 @@ window.addEventListener("DOMContentLoaded", () => {
   socket.on("connect", reconnect);
 
   socket.on("rooms", (rooms) => {
+    if (isDisconnected) {
+      showBodyAlertPopup(`Connected to server.`);
+    }
+
+    isDisconnected = false;
+
     while (roomsDiv.firstChild) {
       roomsDiv.firstChild.remove();
     }
