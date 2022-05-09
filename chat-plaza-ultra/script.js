@@ -4,7 +4,7 @@ function randomNumber(n, base = 10) {
     .join("");
 }
 
-function useAudioMeter(stream) {
+function createAudioMeter(stream) {
   try {
     const audioContext = new (AudioContext || webkitAudioContext)();
     const audioSource = audioContext.createMediaStreamSource(stream);
@@ -440,7 +440,7 @@ window.addEventListener("DOMContentLoaded", () => {
           const readyClass = startVideo ? "video-ready" : "audio-ready";
 
           if (!startVideo) {
-            audioMeter = useAudioMeter(stream);
+            audioMeter = createAudioMeter(stream);
           }
 
           el.srcObject = stream;
