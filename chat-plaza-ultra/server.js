@@ -131,6 +131,7 @@ io.sockets.on(
         approval: 0,
         denial: 0,
         timeoutId,
+        msg,
       });
 
       const roomRequests = rooms.get(roomToJoin);
@@ -176,9 +177,20 @@ io.sockets.on(
         ])
       );
 
-      if (!rooms.has(roomName)) {
+      const roomRequests = rooms.get(roomName);
+
+      if (!roomRequests) {
         rooms.set(roomName, new Set());
         io.emit("new-room", roomName);
+      } else {
+        roomRequests.forEach((id) => {
+          socket.emit(
+            "request",
+            id,
+            (peers.get(id) || {}).username,
+            (requests.get(id) || {}).msg
+          );
+        });
       }
 
       socket.join(roomName);
