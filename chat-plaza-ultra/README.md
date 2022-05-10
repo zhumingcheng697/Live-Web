@@ -356,6 +356,22 @@ Several details worth mentioning:
 
 - A new user will be allowed in a room when simple majority has been reached so the new user might already be in the room as you are still reviewing their join request. Similarly, users can cancel their request to join a room so their request might already be invalidated as you are reviewing it. Special attention has been paid to take care of such edge cases. My implementation is to immediately hide such request as soon as the request has become invalidated.
 
+- Imagine the following chain of events:
+
+  1. User A created room R and is the only user in room R.
+  2. User B, C, and D requested to join room R.
+  3. User A _and user A only_ received the requests from user B, C, and D.
+  4. User A approved request from user B.
+  5. Since there was only one user (user A) in room R, user B gained 100% approval and was admitted to the room immediately.
+  6. User A approved request from user C.
+  7. Since there were only two users (user A and B) in room R, user C gained 50% approval and was also admitted to the room immediately.
+     > Note that because user C requested to join room R before user B joined the room, user B would not have received the request from user C and would not have been able to decide whether to let user C in, but user B was still being counted as “users already in the room.”
+  8. User A approved request from user D.
+  9. Since there were three users (user A, B, and C) in room R, user D only gained 33.33% approval and will not be admitted to the room immediately.
+     > Similarly, note that because user D requested to join room R before user B or C joined the room, user B or C would not have received the request from user D and would not have been able to decide whether to let user D in, but user B and C were still being counted as “users already in the room.”
+
+  Above is just a simplied example but the core issue is the same if there were more existing users in the room and/or more new requests are received. What I did was caching all active requests in each room and retroactively resending the requests to new users after they joined the room to make sure that each user in the room actually has a say-so and new users don’t have to wait any longer than necessary to either get admitted into or rejected from a room.
+
 ## Highlighting Speaking User
 
 1. I found [this code from StackOverflow](https://stackoverflow.com/a/64650826) that can measure audio volume using the built-in `AudioContext` API and no additional libraries.
