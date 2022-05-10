@@ -949,12 +949,10 @@ window.addEventListener("DOMContentLoaded", () => {
       mainPopupArea.classList.remove("alerting");
     }
 
-    if (mediaToPlay.size) {
-      for (let media of mediaToPlay) {
-        media.play().then(() => {
-          mediaToPlay.delete(media);
-        });
-      }
+    for (let media of mediaToPlay) {
+      media.play().then(() => {
+        mediaToPlay.delete(media);
+      });
     }
   });
 

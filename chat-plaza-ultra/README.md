@@ -13,6 +13,7 @@ Like I envisioned in my final proposal, I built an alternative version of my mid
 I was able to achieve about all the features I wanted to add, including:
 
 - toggling audio and video on and off and switching between cameras and microphones
+- recover from failed autoplay attempts of media elements
 - reordering users’ frames depending on whether their camera and/or microphone is on
 - reporting and blocking users (intended to prevent inappropriate content)
 - allowing users to create rooms or requst to join existing rooms and switch between rooms
@@ -113,6 +114,40 @@ To fix this, I will always emit a `remove-stream` event with _WebSockets_ when r
 This two-step approach to removing streams with work done using both `simple-peer` and WebSocket is necessary because the `simple-peer` aspect makes sure that no additional video or audio stream data is being transmitted but cannot tell the other peers to update the UI (unless using the unreliable data channel), and the WebSocket aspect makes sure that the UI is being updated correctly but cannot stop the peers from transmitting video or audio data by itself.
 
 > I have been handling the video and audio streams completely separately by having a pair of `video` and `audio` HTML elements for each peer, calling `navigator.mediaDevices.getUserMedia` to get video and audio streams separately, and adding and removing video and audio streams separately as well. I might be able to create an empty `MediaStream` and add and remove the `MediaStreamTrack` from the video and audio streams to it but that just seems more complicated and I was worried that it might lead to tons of unexpected behavior for example with calling the `SimplePeer.removeTrack` method and the `MediaStream.removeTrack` method in different orders.
+
+## Failed Media Autoplay Recovery
+
+We have been calling the `play` method in the `onloadedmetadata` event listener of video and audio elements to autoplay them. However, if the video or audio is not muted, autoplay may fail in some browsers.
+
+To be able to recover from failed autoplay attempts, I had a `Set` storing all media elements that had failed to autoplay.
+
+```js
+const mediaToPlay = new Set();
+```
+
+Whenever a media element fails to autoplay, I add that media element to the set.
+
+```js
+media.play().catch(() => {
+  mediaToPlay.add(media);
+
+  // Show UI prompt saying autoplay failed and asking user to click anywhere to start playback
+});
+```
+
+I also had a global `click` event listener that attempts to re-autoplay all media elements that had previously failed to autoplay whenever and whereever the user click.
+
+```js
+document.addEventListener("click", () => {
+  // Hide prompt asking user to click anywhere
+
+  for (let media of mediaToPlay) {
+    media.play().then(() => {
+      mediaToPlay.delete(media);
+    });
+  }
+});
+```
 
 ## Reordering Frames
 
