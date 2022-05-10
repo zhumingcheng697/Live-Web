@@ -54,6 +54,10 @@ form {
   align-items: center;
 }
 
+#intro-form > * {
+  margin: 4px;
+}
+
 #setup-form,
 #new-room-form,
 #request-form {
