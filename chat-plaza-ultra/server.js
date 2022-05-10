@@ -145,10 +145,8 @@ io.sockets.on(
         .emit("request", socket.id, (peers.get(socket.id) || {}).username, msg);
     });
 
-    socket.on("cancel-request", (roomToJoin) => {
+    socket.on("cancel-request", () => {
       removeRequest(socket.id);
-
-      socket.broadcast.to(roomToJoin).emit("cancel-request", socket.id);
     });
 
     socket.on("approve-request", (id) => {
@@ -258,6 +256,7 @@ io.sockets.on(
 
     socket.on("disconnect", () => {
       console.log(`Peer ${socket.id} left`);
+      removeRequest(socket.id);
 
       if (room) {
         io.to(room).emit("peer_disconnect", socket.id);
@@ -270,8 +269,6 @@ io.sockets.on(
             checkRequest(id);
           });
         }
-
-        removeRequest(socket.id);
       }
 
       peers.delete(socket.id);

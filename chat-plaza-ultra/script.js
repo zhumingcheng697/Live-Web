@@ -1139,7 +1139,7 @@ window.addEventListener("DOMContentLoaded", () => {
   });
 
   bodyDangerConfirmChildren[1].addEventListener("click", () => {
-    socket.emit("cancel-request", roomTopic);
+    socket.emit("cancel-request");
     chooseAnotherRoom();
     bodyPopupArea.classList.remove("danger-confirming");
   });
