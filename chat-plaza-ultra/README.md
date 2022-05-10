@@ -17,7 +17,7 @@ I was able to achieve about all the features I wanted to add, including:
 - reporting and blocking users (intended to prevent inappropriate content)
 - allowing users to create rooms or requst to join existing rooms and switch between rooms
 - having users already inside a room vote whether to approve or deny new users’ requests to join
-- highlighting the speaking user with the loadest voice
+- highlighting the speaking user with the loudest voice
 
 Following professor’s advice, I also added a text box where new users can write a short message when requesting to join a room.
 
@@ -442,7 +442,7 @@ Several details worth mentioning:
    }, 100);
    ```
 
-5. Whenever I get an updated volume data, I add it to the `Map` and determine which peer has the loadest volume.
+5. Whenever I get an updated volume data, I add it to the `Map` and determine which peer has the loudest volume.
 
    ```js
    function onData(data, simplePeerWrapper) {
