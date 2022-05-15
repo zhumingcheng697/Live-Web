@@ -4,11 +4,11 @@ window.addEventListener("DOMContentLoaded", () => {
   const renderedArea = document.getElementById("rendered-area");
   const inputs = tools.getElementsByTagName("input");
   const spans = tools.getElementsByTagName("span");
-  const controlDivs = tools.querySelectorAll("div:not(:last-child)");
 
   const defaults = [18, 6, 20, 6, 12, 4, 18, 4];
 
   let selected = null;
+  let shouldIgnoreDrop = false;
 
   function checkToolsHeight() {
     document.documentElement.style.setProperty(
@@ -19,9 +19,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   function hideTools() {
     selected = null;
-    for (let div of controlDivs) {
-      div.classList.add("hidden");
-    }
+    tools.classList.remove("selected");
 
     for (let image of renderedArea.getElementsByTagName("img")) {
       image.classList.remove("selected");
@@ -117,9 +115,7 @@ window.addEventListener("DOMContentLoaded", () => {
       }
       renderedImage.classList.add("selected");
 
-      for (let div of controlDivs) {
-        div.classList.remove("hidden");
-      }
+      tools.classList.add("selected");
 
       inputs[0].value = threshold;
       inputs[1].value = margin;
@@ -210,18 +206,32 @@ window.addEventListener("DOMContentLoaded", () => {
   document.body.addEventListener("dragover", (e) => {
     e.stopPropagation();
     e.preventDefault();
-    e.dataTransfer.dropEffect = "copy";
+
+    if (!shouldIgnoreDrop) e.dataTransfer.dropEffect = "copy";
+  });
+
+  document.body.addEventListener("dragstart", (e) => {
+    e.dataTransfer.effectAllowed = "none";
+    shouldIgnoreDrop = true;
+  });
+
+  document.body.addEventListener("dragend", () => {
+    shouldIgnoreDrop = false;
   });
 
   document.body.addEventListener("drop", (e) => {
     e.preventDefault();
-    handleFiles(e.dataTransfer.files);
+    if (!shouldIgnoreDrop) handleFiles(e.dataTransfer.files);
   });
 
   checkToolsHeight();
 
   document.body.addEventListener("click", (e) => {
-    if (e.target === document.body || e.target.id === "main-area") {
+    if (
+      e.target === document.body ||
+      e.target.id === "main-area" ||
+      e.target.id === "rendered-area"
+    ) {
       hideTools();
     }
   });

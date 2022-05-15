@@ -4,12 +4,12 @@
       name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover"
     />
-    <title>86 Simple Edge Detector Demo</title>
+    <title>Simple Edge Detector</title>
     <link rel="stylesheet" type="text/css" href="./style.css" />
     <script type="text/javascript" src="./simple-edge-detector.js"></script>
     <script type="text/javascript" src="./script.js"></script>
   </head>
-  <body class="eighty-six no-canvas-selected">
+  <body>
     <div id="hidden">
       <img crossorigin="anonymous" src="./eighty-six/eighty-six-1.jpeg" />
       <img crossorigin="anonymous" src="./eighty-six/eighty-six-2.jpeg" />
@@ -18,19 +18,19 @@
     </div>
     <div id="main-area"><div id="rendered-area"></div></div>
     <div id="tools">
-      <div class="shrink hidden">
+      <div class="shrink">
         <input type="range" min="1" max="128" value="12" />
         <span>Threshold</span>
       </div>
-      <div class="shrink hidden">
+      <div class="shrink">
         <input type="range" min="1" max="25" value="8" />
         <span>Sampling Area</span>
       </div>
-      <div class="hidden">
+      <div>
         <input type="reset" value="&#8635;" />
         <span>Reset</span>
       </div>
-      <div class="hidden">
+      <div>
         <input type="button" value="-" />
         <span>Remove</span>
       </div>
