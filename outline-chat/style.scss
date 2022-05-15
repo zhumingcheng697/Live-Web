@@ -18,11 +18,8 @@ body {
 }
 
 body {
-  &:not(.eighty-six) {
-    height: 100%;
-    overflow: hidden;
-  }
-
+  height: 100%;
+  overflow: hidden;
   font-size: 14px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
@@ -189,40 +186,6 @@ body {
       cursor: not-allowed;
       opacity: 0.5;
     }
-  }
-}
-
-body.eighty-six {
-  #hidden {
-    display: none;
-  }
-
-  img.rendered {
-    object-fit: contain;
-    width: 50%;
-    cursor: pointer;
-    padding: 5px;
-    box-sizing: border-box;
-
-    &.selected {
-      background-color: #fc0;
-    }
-  }
-
-  &.no-canvas-selected {
-    #main-area {
-      bottom: var(--inset-bottom);
-    }
-
-    #tools {
-      transform: translate(0, 100%);
-    }
-  }
-}
-
-@media (max-width: 800px) {
-  body.eighty-six img.rendered {
-    width: 100%;
   }
 }
 
