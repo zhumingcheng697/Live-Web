@@ -18,11 +18,6 @@ body {
 }
 
 body {
-  &:not(.eighty-six) {
-    height: 100%;
-    overflow: hidden;
-  }
-
   font-size: 14px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
     Arial, sans-serif;
@@ -40,36 +35,6 @@ body {
   padding-top: var(--inset-top);
   overflow: auto;
   transition: bottom 0.3s;
-
-  #videos {
-    width: 100%;
-    min-height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    align-content: center;
-    flex-wrap: wrap;
-
-    canvas {
-      border: solid 5px #3e7;
-
-      &.recording {
-        border: solid 5px #f00;
-      }
-    }
-
-    video.recorded {
-      border: solid 5px #fc0;
-    }
-
-    & > * {
-      width: var(--each-width);
-      height: var(--each-height);
-      object-fit: cover;
-      box-sizing: border-box;
-      margin: 2.5px;
-    }
-  }
 }
 
 #tools {
@@ -90,6 +55,12 @@ body {
   background-color: #e5e5ea;
   transition: background-color 0.3s, transform 0.3s;
 
+  &:not(.selected) {
+    & > div:not(:last-child) {
+      display: none;
+    }
+  }
+
   & > div {
     margin: 2px 6px;
     flex-shrink: 1;
@@ -97,28 +68,6 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-  }
-
-  #record-el {
-    line-height: 14px;
-    transition: color 0.3s;
-
-    &.recording {
-      @keyframes blink {
-        0% {
-          color: inherit;
-        }
-        50% {
-          color: #f00;
-        }
-      }
-
-      animation: blink 2s steps(1) 0s infinite normal both;
-    }
-
-    &:not(.recording) {
-      color: #f00;
-    }
   }
 
   .shrink {
@@ -183,33 +132,31 @@ body {
   display: none !important;
 }
 
-body.eighty-six {
-  #hidden {
-    display: none;
-  }
+#hidden {
+  display: none;
+}
 
-  #rendered-area {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    align-content: center;
-  }
+#rendered-area {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  align-content: center;
+}
 
-  img.rendered {
-    object-fit: contain;
-    width: 50%;
-    cursor: pointer;
-    padding: 5px;
-    box-sizing: border-box;
+img.rendered {
+  object-fit: contain;
+  width: 50%;
+  cursor: pointer;
+  padding: 5px;
+  box-sizing: border-box;
 
-    &.selected {
-      background-color: #fc0;
-    }
+  &.selected {
+    background-color: #fc0;
   }
 }
 
 @media (max-width: 800px) {
-  body.eighty-six img.rendered {
+  img.rendered {
     width: 100%;
   }
 }
