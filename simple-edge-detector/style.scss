@@ -29,9 +29,9 @@ body {
 #main-area {
   position: fixed;
   top: 0;
-  left: var(--inset-left);
+  left: 0;
   bottom: var(--tools-height);
-  right: var(--inset-right);
+  right: 0;
   padding-top: var(--inset-top);
   overflow: auto;
   transition: bottom 0.3s;
@@ -141,6 +141,8 @@ body {
   flex-wrap: wrap;
   align-items: center;
   align-content: center;
+  padding-left: var(--inset-left);
+  padding-right: var(--inset-right);
 }
 
 img.rendered {
