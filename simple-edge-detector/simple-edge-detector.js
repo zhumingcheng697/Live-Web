@@ -65,7 +65,9 @@ function detectEdge({ threshold, margin, buffer, width, height, mode }) {
   return newData.buffer;
 }
 
-self.onmessage = (e) => {
-  const newBuffer = detectEdge(e.data);
-  self.postMessage(newBuffer, [newBuffer]);
-};
+self.addEventListener("message", ({ data }) => {
+  if (data.buffer) {
+    const newBuffer = detectEdge(data);
+    self.postMessage(newBuffer, [newBuffer]);
+  }
+});
