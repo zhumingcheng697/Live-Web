@@ -6,8 +6,8 @@ window.addEventListener("DOMContentLoaded", () => {
   const spans = tools.getElementsByTagName("span");
   const previewSize = 360;
 
-  const useEdgeDetector = () =>
-    window.Worker && new Worker("./simple-edge-detector.js");
+  const useOutlineFiler = () =>
+    window.Worker && new Worker("./outline-filter.js");
 
   const addDoubleClickOrKeyListener = (
     target,
@@ -81,10 +81,10 @@ window.addEventListener("DOMContentLoaded", () => {
     defaultMargin,
     appendDirectly = false
   ) {
-    let previewEdgeDetector = useEdgeDetector();
+    let previewFilter = useOutlineFiler();
 
-    if (previewEdgeDetector)
-      previewEdgeDetector.onmessage = ({ data }) => {
+    if (previewFilter)
+      previewFilter.onmessage = ({ data }) => {
         repaint(
           previewContext.createImageData(previewWidth, previewHeight),
           data,
@@ -92,20 +92,20 @@ window.addEventListener("DOMContentLoaded", () => {
         );
       };
 
-    let finalEdgeDetector = useEdgeDetector();
+    let finalFilter = useOutlineFiler();
 
-    if (finalEdgeDetector)
-      finalEdgeDetector.onmessage = ({ data }) => {
+    if (finalFilter)
+      finalFilter.onmessage = ({ data }) => {
         repaint(finalContext.createImageData(width, height), data, false);
       };
 
-    function resetFinalEdgeDetector() {
-      if (finalEdgeDetector && isRenderingFinal) {
-        finalEdgeDetector.terminate();
+    function resetFinalFilter() {
+      if (finalFilter && isRenderingFinal) {
+        finalFilter.terminate();
         isRenderingFinal = false;
 
-        finalEdgeDetector = useEdgeDetector();
-        finalEdgeDetector.onmessage = ({ data }) => {
+        finalFilter = useOutlineFiler();
+        finalFilter.onmessage = ({ data }) => {
           repaint(finalContext.createImageData(width, height), data, false);
         };
       }
@@ -189,7 +189,7 @@ window.addEventListener("DOMContentLoaded", () => {
       }
 
       if (frameOutOfDate || finalOutOfDate) {
-        resetFinalEdgeDetector();
+        resetFinalFilter();
       }
 
       if (!isRenderingFinal && finalOutOfDate) {
@@ -237,12 +237,12 @@ window.addEventListener("DOMContentLoaded", () => {
         data: { previewing },
       };
 
-      const detector = previewing ? previewEdgeDetector : finalEdgeDetector;
+      const detector = previewing ? previewFilter : finalFilter;
 
       if (detector) {
         detector.postMessage(payload, [imageData.data.buffer]);
       } else {
-        repaint(imageData, detectEdge(payload), previewing);
+        repaint(imageData, outlineFilter(payload), previewing);
       }
     }
 

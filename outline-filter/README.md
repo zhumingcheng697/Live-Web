@@ -1,4 +1,4 @@
-# Outline Chat
+# Simple Edge Detector
 
 **Live Web Week 8 Session 2 / Week 9 Session 1 Assignment**
 
