@@ -1,5 +1,5 @@
 window.addEventListener("DOMContentLoaded", () => {
-  const edgeDetector = window.Worker && new Worker("./simple-edge-detector.js");
+  const outlineWorker = window.Worker && new Worker("./outline-filter.js");
 
   const mainArea = document.getElementById("main-area");
   const videosDiv = document.getElementById("videos");
@@ -171,15 +171,15 @@ window.addEventListener("DOMContentLoaded", () => {
             mode,
           };
 
-          if (edgeDetector) {
-            edgeDetector.postMessage(payload, [imageData.data.buffer]);
+          if (outlineWorker) {
+            outlineWorker.postMessage(payload, [imageData.data.buffer]);
           } else {
-            repaint(imageData, detectEdge(payload));
+            repaint(imageData, outlineFilter(payload));
           }
         }
 
-        if (edgeDetector) {
-          edgeDetector.onmessage = (e) => {
+        if (outlineWorker) {
+          outlineWorker.onmessage = (e) => {
             repaint(context.createImageData(width, height), e.data);
           };
         }

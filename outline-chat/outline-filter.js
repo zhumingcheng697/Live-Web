@@ -1,4 +1,4 @@
-function detectEdge({ threshold, margin, buffer, width, height, mode }) {
+function outlineFilter({ threshold, margin, buffer, width, height, mode }) {
   const mode1 = mode ? !!(mode & 1) : true;
   const mode2 = !!(mode & 2);
 
@@ -65,7 +65,9 @@ function detectEdge({ threshold, margin, buffer, width, height, mode }) {
   return newData.buffer;
 }
 
-self.onmessage = (e) => {
-  const newBuffer = detectEdge(e.data);
-  self.postMessage(newBuffer, [newBuffer]);
-};
+self.addEventListener("message", ({ data }) => {
+  if (data.buffer) {
+    const newBuffer = outlineFilter(data);
+    self.postMessage(newBuffer, [newBuffer]);
+  }
+});

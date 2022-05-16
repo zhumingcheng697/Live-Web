@@ -6,7 +6,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const spans = tools.getElementsByTagName("span");
   const previewSize = 360;
 
-  const useOutlineFiler = () =>
+  const useOutlineWorker = () =>
     window.Worker && new Worker("./outline-filter.js");
 
   const addDoubleClickOrKeyListener = (
@@ -81,10 +81,10 @@ window.addEventListener("DOMContentLoaded", () => {
     defaultMargin,
     appendDirectly = false
   ) {
-    let previewFilter = useOutlineFiler();
+    let previewWorker = useOutlineWorker();
 
-    if (previewFilter)
-      previewFilter.onmessage = ({ data }) => {
+    if (previewWorker)
+      previewWorker.onmessage = ({ data }) => {
         repaint(
           previewContext.createImageData(previewWidth, previewHeight),
           data,
@@ -92,20 +92,20 @@ window.addEventListener("DOMContentLoaded", () => {
         );
       };
 
-    let finalFilter = useOutlineFiler();
+    let finalWorker = useOutlineWorker();
 
-    if (finalFilter)
-      finalFilter.onmessage = ({ data }) => {
+    if (finalWorker)
+      finalWorker.onmessage = ({ data }) => {
         repaint(finalContext.createImageData(width, height), data, false);
       };
 
     function resetFinalFilter() {
-      if (finalFilter && isRenderingFinal) {
-        finalFilter.terminate();
+      if (finalWorker && isRenderingFinal) {
+        finalWorker.terminate();
         isRenderingFinal = false;
 
-        finalFilter = useOutlineFiler();
-        finalFilter.onmessage = ({ data }) => {
+        finalWorker = useOutlineWorker();
+        finalWorker.onmessage = ({ data }) => {
           repaint(finalContext.createImageData(width, height), data, false);
         };
       }
@@ -237,7 +237,7 @@ window.addEventListener("DOMContentLoaded", () => {
         data: { previewing },
       };
 
-      const detector = previewing ? previewFilter : finalFilter;
+      const detector = previewing ? previewWorker : finalWorker;
 
       if (detector) {
         detector.postMessage(payload, [imageData.data.buffer]);
