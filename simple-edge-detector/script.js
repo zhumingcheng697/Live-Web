@@ -71,6 +71,8 @@ window.addEventListener("DOMContentLoaded", () => {
     for (let image of renderedArea.getElementsByTagName("img")) {
       image.classList.remove("selected");
     }
+
+    checkToolsHeight();
   }
 
   function handleImage(
@@ -261,6 +263,8 @@ window.addEventListener("DOMContentLoaded", () => {
       for (let span of spans) {
         span.classList.remove("disabled");
       }
+
+      checkToolsHeight();
     }
 
     function removeMyself() {
