@@ -17,16 +17,11 @@ window.addEventListener("DOMContentLoaded", () => {
   ) => {
     let lastMouseTime = null;
     let lastMouseTarget = null;
-    let lastMouseTimeoutId;
     target.addEventListener("click", (e) => {
-      clearTimeout(lastMouseTimeoutId);
-
       if (lastMouseTarget == e.target && Date.now() - lastMouseTime < timeout) {
         doubleListner(e);
       } else {
-        lastMouseTimeoutId = setTimeout(() => {
-          singleListener(e);
-        }, timeout);
+        singleListener(e);
       }
 
       lastMouseTime = Date.now();
@@ -35,16 +30,12 @@ window.addEventListener("DOMContentLoaded", () => {
 
     let lastKeyTime = null;
     let lastKeyTarget = null;
-    let lastKeyTimeoutId;
     target.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
-        clearTimeout(lastKeyTimeoutId);
         if (lastKeyTarget == e.target && Date.now() - lastKeyTime < timeout) {
           doubleListner(e);
         } else {
-          lastKeyTimeoutId = setTimeout(() => {
-            singleListener(e);
-          }, timeout);
+          singleListener(e);
         }
       }
       lastKeyTime = Date.now();
