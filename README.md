@@ -48,6 +48,6 @@
 
   A More Efficient and User-Friendly [`multipeer-simple-peer-server`](https://github.com/vanevery/multipeer-simple-peer-server)
 
-- ### [Outlinify](https://zhumingcheng697.github.io/Live-Web/outlinify)
+- ### [Outlinify](https://github.com/zhumingcheng697/Live-Web/tree/main/outlinify)
 
   An Interactive Image Manipulation Tool
