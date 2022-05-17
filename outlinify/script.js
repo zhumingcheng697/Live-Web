@@ -18,7 +18,7 @@ window.addEventListener("DOMContentLoaded", () => {
     let lastMouseTime = null;
     let lastMouseTarget = null;
     let lastMouseTimeoutId;
-    target.addEventListener("mousedown", (e) => {
+    target.addEventListener("click", (e) => {
       clearTimeout(lastMouseTimeoutId);
 
       if (lastMouseTarget == e.target && Date.now() - lastMouseTime < timeout) {
@@ -234,7 +234,6 @@ window.addEventListener("DOMContentLoaded", () => {
         width: previewing ? previewWidth : width,
         height: previewing ? previewHeight : height,
         mode: 1,
-        data: { previewing },
       };
 
       const detector = previewing ? previewWorker : finalWorker;
