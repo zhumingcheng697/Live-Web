@@ -10,7 +10,7 @@ I first came up with a really simple [edge detection algorithm](https://github.c
 
 I first hard-coded the parameters but added the knobs later for greater usability.
 
-Ideally I would like to allow users to upload, style, and download their own images and add support for drag and drop, but since this is not the focus of our assignment this week, I did not have the time to do that.
+~~Ideally I would like to allow users to upload, style, and download their own images and add support for drag and drop, but since this is not the focus of our assignment this week, I did not have the time to do that.~~ After the semester was over, I was able to add uploading and drag-and-drop support to the site. Furthermore, I added a “preview” view and a “final” view (just like I did for the drawing board), so that the user can have a preview of what the final result might be like ahead of time instead of having to wait for the full-res result to be computed.
 
 I then applied this edge detection algorithm to video chat and laid out all the video feeds nicely on the screen.
 
