@@ -12,6 +12,16 @@
 
   Final Project
 
+## Playground
+
+- ### [MultiPeerConnection](https://github.com/zhumingcheng697/MultiPeerConnection)
+
+  A More Efficient and User-Friendly [`multipeer-simple-peer-server`](https://github.com/vanevery/multipeer-simple-peer-server)
+
+- ### [Outlinify](https://github.com/zhumingcheng697/Live-Web/tree/main/outlinify)
+
+  An Interactive Image Manipulation Tool
+
 ## Assignments
 
 - ### [Self Portrait](https://github.com/zhumingcheng697/Live-Web/tree/main/self-portrait)
@@ -41,13 +51,3 @@
 - ### [Outline Chat](https://github.com/zhumingcheng697/Live-Web/tree/main/outline-chat)
 
   Week 8 Session 2 / Week 9 Session 1 Assignment
-
-## More
-
-- ### [MultiPeerConnection](https://github.com/zhumingcheng697/MultiPeerConnection)
-
-  A More Efficient and User-Friendly [`multipeer-simple-peer-server`](https://github.com/vanevery/multipeer-simple-peer-server)
-
-- ### [Outlinify](https://github.com/zhumingcheng697/Live-Web/tree/main/outlinify)
-
-  An Interactive Image Manipulation Tool
