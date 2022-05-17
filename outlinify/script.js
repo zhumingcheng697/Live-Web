@@ -357,11 +357,10 @@ window.addEventListener("DOMContentLoaded", () => {
     e.stopPropagation();
     e.preventDefault();
 
-    if (!shouldIgnoreDrop) e.dataTransfer.dropEffect = "copy";
+    e.dataTransfer.dropEffect = !shouldIgnoreDrop ? "copy" : "none";
   });
 
-  document.body.addEventListener("dragstart", (e) => {
-    e.dataTransfer.effectAllowed = "none";
+  document.body.addEventListener("dragstart", () => {
     shouldIgnoreDrop = true;
   });
 
