@@ -48,6 +48,6 @@
 
   A More Efficient and User-Friendly [`multipeer-simple-peer-server`](https://github.com/vanevery/multipeer-simple-peer-server)
 
-- ### [86 Simple Edge Detector Demo](https://zhumingcheng697.github.io/Live-Web/outline-chat/86.html)
+- ### [Outlinify](https://zhumingcheng697.github.io/Live-Web/outlinify)
 
-  An Image Manipulation Demo with [`simple-edge-detector.js`](https://github.com/zhumingcheng697/Live-Web/blob/main/outline-chat/simple-edge-detector.js)
+  An Interactive Image Manipulation Tool

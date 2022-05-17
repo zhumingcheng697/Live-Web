@@ -6,7 +6,7 @@ Source Code: [GitHub](https://github.com/zhumingcheng697/Live-Web/tree/main/outl
 
 Deployment: [GitHub Pages](https://zhumingcheng697.github.io/Live-Web/outline-chat) & [Glitch](https://mccoy-zhu-outline-chat.glitch.me/)
 
-I first came up with a really simple [edge detection algorithm](https://github.com/zhumingcheng697/Live-Web/blob/main/outline-chat/simple-edge-detector.js) that works extremely well especially with [images with a more uniform distribution of color like anime](https://zhumingcheng697.github.io/Live-Web/outline-chat/86.html).
+I first came up with a really simple [edge detection algorithm](https://github.com/zhumingcheng697/Live-Web/blob/main/outline-chat/outline-filter.js) that works extremely well especially with [images with a more uniform distribution of color like anime](https://zhumingcheng697.github.io/Live-Web/outlinify).
 
 I first hard-coded the parameters but added the knobs later for greater usability.
 
