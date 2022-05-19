@@ -3,7 +3,6 @@ window.addEventListener("DOMContentLoaded", () => {
   const hiddenArea = document.getElementById("hidden");
   const renderedArea = document.getElementById("rendered-area");
   const inputs = tools.getElementsByTagName("input");
-  const spans = tools.getElementsByTagName("span");
   const previewSize = 360;
 
   const useOutlineWorker = () =>
@@ -43,7 +42,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const defaults = [18, 6, 20, 6, 12, 4, 18, 4];
+  const defaults = [18, 18, 20, 18, 12, 12, 18, 12];
 
   let selected = null;
   let shouldIgnoreDrop = false;
@@ -211,16 +210,9 @@ window.addEventListener("DOMContentLoaded", () => {
         )
       );
 
-      const marginRatio = Math.max(width, height) / 960;
-
       const payload = {
         threshold,
-        margin: Math.max(
-          1,
-          previewing
-            ? Math.floor(ratio * margin * marginRatio)
-            : Math.round(margin * marginRatio)
-        ),
+        margin: Math.max(1, Math.floor((previewing ? ratio : 1) * margin)),
         buffer: imageData.data.buffer,
         width: previewing ? previewWidth : width,
         height: previewing ? previewHeight : height,
@@ -248,11 +240,8 @@ window.addEventListener("DOMContentLoaded", () => {
       tools.classList.add("selected");
 
       inputs[0].value = threshold;
+      inputs[1].max = Math.max(width, height) / 40;
       inputs[1].value = margin;
-
-      for (let span of spans) {
-        span.classList.remove("disabled");
-      }
 
       checkToolsHeight();
     }
