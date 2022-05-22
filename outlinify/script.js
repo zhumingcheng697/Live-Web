@@ -240,7 +240,7 @@ window.addEventListener("DOMContentLoaded", () => {
       tools.classList.add("selected");
 
       inputs[0].value = threshold;
-      inputs[1].max = Math.max(width, height) / 40;
+      inputs[1].max = Math.ceil(Math.max(width, height) / 40);
       inputs[1].value = margin;
 
       checkToolsHeight();
