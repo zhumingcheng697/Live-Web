@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "assemblyscript": "^0.20.6"
+  },
+  "type": "module",
+  "scripts": {
+    "asbuild": "asc index.ts --target release --importMemory",
+    "start": "npx serve ."
+  }
+}
