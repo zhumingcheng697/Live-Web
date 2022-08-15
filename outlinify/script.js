@@ -1,13 +1,16 @@
 window.addEventListener("DOMContentLoaded", () => {
+  const searchParam = window.location.search;
   const tools = document.getElementById("tools");
   const hiddenArea = document.getElementById("hidden");
   const renderedArea = document.getElementById("rendered-area");
   const inputs = tools.getElementsByTagName("input");
-  const isWasmSupported = !!window.WebAssembly;
+  const isWasmSupported =
+    !!window.WebAssembly && !/[?&]disable.?wasm/i.test(searchParam);
   const previewSize = isWasmSupported ? 480 : 360;
 
   const useOutlineWorker = () =>
     window.Worker &&
+    !/[?&]disable.?worker/i.test(searchParam) &&
     (isWasmSupported
       ? new Worker("./wasm-outline-filter.js")
       : new Worker("./outline-filter.js"));
