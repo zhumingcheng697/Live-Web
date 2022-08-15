@@ -3,10 +3,14 @@ window.addEventListener("DOMContentLoaded", () => {
   const hiddenArea = document.getElementById("hidden");
   const renderedArea = document.getElementById("rendered-area");
   const inputs = tools.getElementsByTagName("input");
-  const previewSize = 360;
+  const isWasmSupported = !!window.WebAssembly;
+  const previewSize = isWasmSupported ? 480 : 360;
 
   const useOutlineWorker = () =>
-    window.Worker && new Worker("./outline-filter.js");
+    window.Worker &&
+    (isWasmSupported
+      ? new Worker("./wasm-outline-filter.js")
+      : new Worker("./outline-filter.js"));
 
   const addDoubleClickOrKeyListener = (
     target,
@@ -95,9 +99,29 @@ window.addEventListener("DOMContentLoaded", () => {
         isRenderingFinal = false;
 
         finalWorker = useOutlineWorker();
-        finalWorker.onmessage = ({ data }) => {
-          repaint(finalContext.createImageData(width, height), data, false);
-        };
+
+        if (finalWorker) {
+          if (isWasmSupported) {
+            const imageData = finalContext.createImageData(width, height);
+
+            imageData.data.set(
+              new Uint8ClampedArray(finalImageData.data.buffer)
+            );
+
+            finalWorker.postMessage(
+              {
+                type: "init",
+                buffer: imageData.data.buffer,
+                size: imageData.data.length,
+              },
+              [imageData.data.buffer]
+            );
+          }
+
+          finalWorker.onmessage = ({ data }) => {
+            repaint(finalContext.createImageData(width, height), data, false);
+          };
+        }
       }
     }
 
@@ -147,6 +171,41 @@ window.addEventListener("DOMContentLoaded", () => {
     let threshold = defaultThreshold;
     let margin = defaultMargin;
 
+    if (isWasmSupported) {
+      if (previewWorker) {
+        const imageData = previewContext.createImageData(
+          previewWidth,
+          previewHeight
+        );
+
+        imageData.data.set(new Uint8ClampedArray(previewImageData.data.buffer));
+
+        previewWorker.postMessage(
+          {
+            type: "init",
+            buffer: imageData.data.buffer,
+            size: imageData.data.length,
+          },
+          [imageData.data.buffer]
+        );
+      }
+
+      if (finalWorker) {
+        const imageData = finalContext.createImageData(width, height);
+
+        imageData.data.set(new Uint8ClampedArray(finalImageData.data.buffer));
+
+        finalWorker.postMessage(
+          {
+            type: "init",
+            buffer: imageData.data.buffer,
+            size: imageData.data.length,
+          },
+          [imageData.data.buffer]
+        );
+      }
+    }
+
     function repaint(imageData, buffer, previewing) {
       imageData.data.set(new Uint8ClampedArray(buffer));
 
@@ -189,19 +248,36 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     function draw(previewing = true) {
+      if (previewing) {
+        isIdle = false;
+      } else {
+        isRenderingFinal = true;
+      }
+
+      const payload = {
+        threshold,
+        margin: Math.max(1, Math.floor((previewing ? ratio : 1) * margin)),
+        width: previewing ? previewWidth : width,
+        height: previewing ? previewHeight : height,
+        mode: 1,
+      };
+
+      if (isWasmSupported) {
+        const worker = previewing ? previewWorker : finalWorker;
+
+        if (worker) {
+          payload.type = "filter";
+          worker.postMessage(payload);
+          return;
+        }
+      }
+
       let imageData;
 
       if (previewing) {
-        isIdle = false;
-        imageData = previewContext.getImageData(
-          0,
-          0,
-          previewWidth,
-          previewHeight
-        );
+        imageData = previewContext.createImageData(previewWidth, previewHeight);
       } else {
-        isRenderingFinal = true;
-        imageData = finalContext.getImageData(0, 0, width, height);
+        imageData = finalContext.createImageData(width, height);
       }
 
       imageData.data.set(
@@ -210,19 +286,12 @@ window.addEventListener("DOMContentLoaded", () => {
         )
       );
 
-      const payload = {
-        threshold,
-        margin: Math.max(1, Math.floor((previewing ? ratio : 1) * margin)),
-        buffer: imageData.data.buffer,
-        width: previewing ? previewWidth : width,
-        height: previewing ? previewHeight : height,
-        mode: 1,
-      };
+      payload.buffer = imageData.data.buffer;
 
-      const detector = previewing ? previewWorker : finalWorker;
+      const worker = previewing ? previewWorker : finalWorker;
 
-      if (detector) {
-        detector.postMessage(payload, [imageData.data.buffer]);
+      if (worker) {
+        worker.postMessage(payload, [imageData.data.buffer]);
       } else {
         repaint(imageData, outlineFilter(payload), previewing);
       }
@@ -315,7 +384,6 @@ window.addEventListener("DOMContentLoaded", () => {
       const img = document.createElement("img");
       img.src = e.target.result;
       img.crossorigin = "anonymous";
-      hiddenArea.append(img);
       img.addEventListener("load", () => {
         handleImage(img, 10, 3);
       });
@@ -382,5 +450,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
       handleImage(image, defaultThreshold, defaultMargin, true);
     }
+
+    hiddenArea.remove();
   });
 });
