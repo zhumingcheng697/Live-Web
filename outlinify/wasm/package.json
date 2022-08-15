@@ -4,7 +4,6 @@
   },
   "type": "module",
   "scripts": {
-    "asbuild": "asc index.ts --target release --importMemory",
-    "start": "npx serve ."
+    "build": "asc outline-filter.ts --target release --importMemory"
   }
 }
