@@ -5,12 +5,12 @@ window.addEventListener("DOMContentLoaded", () => {
   const renderedArea = document.getElementById("rendered-area");
   const inputs = tools.getElementsByTagName("input");
   const isWasmSupported =
-    !!window.WebAssembly && !/[?&]disable.?wasm/i.test(searchParam);
+    !!window.WebAssembly && !/[?&]disable[-_]?wasm/i.test(searchParam);
   const previewSize = isWasmSupported ? 480 : 360;
 
   const useOutlineWorker = () =>
     window.Worker &&
-    !/[?&]disable.?worker/i.test(searchParam) &&
+    !/[?&]disable[-_]?worker/i.test(searchParam) &&
     (isWasmSupported
       ? new Worker("./wasm-outline-filter.js")
       : new Worker("./outline-filter.js"));
@@ -78,56 +78,6 @@ window.addEventListener("DOMContentLoaded", () => {
     defaultMargin,
     appendDirectly = false
   ) {
-    let previewWorker = useOutlineWorker();
-
-    if (previewWorker)
-      previewWorker.onmessage = ({ data }) => {
-        repaint(
-          previewContext.createImageData(previewWidth, previewHeight),
-          data,
-          true
-        );
-      };
-
-    let finalWorker = useOutlineWorker();
-
-    if (finalWorker)
-      finalWorker.onmessage = ({ data }) => {
-        repaint(finalContext.createImageData(width, height), data, false);
-      };
-
-    function resetFinalFilter() {
-      if (finalWorker && isRenderingFinal) {
-        finalWorker.terminate();
-        isRenderingFinal = false;
-
-        finalWorker = useOutlineWorker();
-
-        if (finalWorker) {
-          if (isWasmSupported) {
-            const imageData = finalContext.createImageData(width, height);
-
-            imageData.data.set(
-              new Uint8ClampedArray(finalImageData.data.buffer)
-            );
-
-            finalWorker.postMessage(
-              {
-                type: "init",
-                buffer: imageData.data.buffer,
-                size: imageData.data.length,
-              },
-              [imageData.data.buffer]
-            );
-          }
-
-          finalWorker.onmessage = ({ data }) => {
-            repaint(finalContext.createImageData(width, height), data, false);
-          };
-        }
-      }
-    }
-
     let isIdle = true;
     let isRenderingFinal = false;
     let frameOutOfDate = false;
@@ -165,6 +115,62 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const finalImageData = finalContext.getImageData(0, 0, width, height);
 
+    let previewWorker, finalWorker;
+
+    function initWorker(initPreview) {
+      const worker = useOutlineWorker();
+
+      if (worker) {
+        let initImageData, createImageData;
+
+        if (initPreview) {
+          createImageData = () =>
+            previewContext.createImageData(previewWidth, previewHeight);
+          initImageData = previewImageData;
+        } else {
+          createImageData = () => finalContext.createImageData(width, height);
+          initImageData = finalImageData;
+        }
+
+        if (isWasmSupported) {
+          const imageData = createImageData();
+
+          imageData.data.set(new Uint8ClampedArray(initImageData.data.buffer));
+
+          worker.postMessage(
+            {
+              type: "init",
+              buffer: imageData.data.buffer,
+              size: imageData.data.length,
+            },
+            [imageData.data.buffer]
+          );
+        }
+
+        worker.onmessage = ({ data }) => {
+          repaint(createImageData(), data, initPreview);
+        };
+      }
+
+      if (initPreview) {
+        previewWorker = worker;
+      } else {
+        finalWorker = worker;
+      }
+    }
+
+    initWorker(true);
+    initWorker(false);
+
+    function resetFinalFilter() {
+      if (finalWorker && isRenderingFinal) {
+        finalWorker.terminate();
+        isRenderingFinal = false;
+
+        initWorker(false);
+      }
+    }
+
     const renderedImage = document.createElement("img");
     renderedImage.className = "rendered";
     renderedImage.tabIndex = 0;
@@ -173,41 +179,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     let threshold = defaultThreshold;
     let margin = defaultMargin;
-
-    if (isWasmSupported) {
-      if (previewWorker) {
-        const imageData = previewContext.createImageData(
-          previewWidth,
-          previewHeight
-        );
-
-        imageData.data.set(new Uint8ClampedArray(previewImageData.data.buffer));
-
-        previewWorker.postMessage(
-          {
-            type: "init",
-            buffer: imageData.data.buffer,
-            size: imageData.data.length,
-          },
-          [imageData.data.buffer]
-        );
-      }
-
-      if (finalWorker) {
-        const imageData = finalContext.createImageData(width, height);
-
-        imageData.data.set(new Uint8ClampedArray(finalImageData.data.buffer));
-
-        finalWorker.postMessage(
-          {
-            type: "init",
-            buffer: imageData.data.buffer,
-            size: imageData.data.length,
-          },
-          [imageData.data.buffer]
-        );
-      }
-    }
 
     function repaint(imageData, buffer, previewing) {
       imageData.data.set(new Uint8ClampedArray(buffer));
@@ -257,6 +228,8 @@ window.addEventListener("DOMContentLoaded", () => {
         isRenderingFinal = true;
       }
 
+      const worker = previewing ? previewWorker : finalWorker;
+
       const payload = {
         threshold,
         margin: Math.max(1, Math.floor((previewing ? ratio : 1) * margin)),
@@ -265,14 +238,10 @@ window.addEventListener("DOMContentLoaded", () => {
         mode: 1,
       };
 
-      if (isWasmSupported) {
-        const worker = previewing ? previewWorker : finalWorker;
-
-        if (worker) {
-          payload.type = "filter";
-          worker.postMessage(payload);
-          return;
-        }
+      if (isWasmSupported && worker) {
+        payload.type = "filter";
+        worker.postMessage(payload);
+        return;
       }
 
       let imageData;
@@ -290,8 +259,6 @@ window.addEventListener("DOMContentLoaded", () => {
       );
 
       payload.buffer = imageData.data.buffer;
-
-      const worker = previewing ? previewWorker : finalWorker;
 
       if (worker) {
         worker.postMessage(payload, [imageData.data.buffer]);
