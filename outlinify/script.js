@@ -115,27 +115,29 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const finalImageData = finalContext.getImageData(0, 0, width, height);
 
+    function newImageData(forPreview, copy = true) {
+      const imageData = forPreview
+        ? previewContext.createImageData(previewWidth, previewHeight)
+        : finalContext.createImageData(width, height);
+
+      if (copy)
+        imageData.data.set(
+          new Uint8ClampedArray(
+            (forPreview ? previewImageData : finalImageData).data.buffer
+          )
+        );
+
+      return imageData;
+    }
+
     let previewWorker, finalWorker;
 
-    function initWorker(initPreview) {
+    function initWorker(forPreview) {
       const worker = useOutlineWorker();
 
       if (worker) {
-        let initImageData, createImageData;
-
-        if (initPreview) {
-          createImageData = () =>
-            previewContext.createImageData(previewWidth, previewHeight);
-          initImageData = previewImageData;
-        } else {
-          createImageData = () => finalContext.createImageData(width, height);
-          initImageData = finalImageData;
-        }
-
         if (isWasmSupported) {
-          const imageData = createImageData();
-
-          imageData.data.set(new Uint8ClampedArray(initImageData.data.buffer));
+          const imageData = newImageData(forPreview);
 
           worker.postMessage(
             {
@@ -148,11 +150,11 @@ window.addEventListener("DOMContentLoaded", () => {
         }
 
         worker.onmessage = ({ data }) => {
-          repaint(createImageData(), data, initPreview);
+          repaint(newImageData(forPreview, false), data, forPreview);
         };
       }
 
-      if (initPreview) {
+      if (forPreview) {
         previewWorker = worker;
       } else {
         finalWorker = worker;
@@ -181,6 +183,17 @@ window.addEventListener("DOMContentLoaded", () => {
     let margin = defaultMargin;
 
     function repaint(imageData, buffer, previewing) {
+      if (!appended) {
+        function scrollIntoView() {
+          renderedArea.scrollIntoView(false);
+          renderedImage.removeEventListener("load", scrollIntoView);
+        }
+
+        renderedImage.addEventListener("load", scrollIntoView);
+        renderedArea.appendChild(renderedImage);
+        appended = true;
+      }
+
       imageData.data.set(new Uint8ClampedArray(buffer));
 
       if (previewing) {
@@ -189,14 +202,6 @@ window.addEventListener("DOMContentLoaded", () => {
       } else if (!frameOutOfDate && !finalOutOfDate) {
         finalContext.putImageData(imageData, 0, 0);
         renderedImage.src = finalCanvas.toDataURL();
-      }
-
-      if (!appended) {
-        renderedArea.appendChild(renderedImage);
-        setTimeout(() => {
-          renderedArea.scrollIntoView(false);
-        }, 10);
-        appended = true;
       }
 
       if (previewing) {
@@ -244,19 +249,7 @@ window.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      let imageData;
-
-      if (previewing) {
-        imageData = previewContext.createImageData(previewWidth, previewHeight);
-      } else {
-        imageData = finalContext.createImageData(width, height);
-      }
-
-      imageData.data.set(
-        new Uint8ClampedArray(
-          (previewing ? previewImageData : finalImageData).data.buffer
-        )
-      );
+      const imageData = newImageData(previewing);
 
       payload.buffer = imageData.data.buffer;
 
