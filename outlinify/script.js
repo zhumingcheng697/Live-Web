@@ -7,6 +7,10 @@ window.addEventListener("DOMContentLoaded", () => {
   const isWasmSupported =
     !!window.WebAssembly && !/[?&]disable[-_]?wasm/i.test(searchParam);
   const previewSize = isWasmSupported ? 480 : 360;
+  const defaults = [18, 18, 20, 18, 12, 12, 18, 12];
+
+  let selected = null;
+  let shouldIgnoreDrop = false;
 
   const useOutlineWorker = () =>
     window.Worker &&
@@ -49,17 +53,14 @@ window.addEventListener("DOMContentLoaded", () => {
     });
   };
 
-  const defaults = [18, 18, 20, 18, 12, 12, 18, 12];
-
-  let selected = null;
-  let shouldIgnoreDrop = false;
-
   function checkToolsHeight() {
     document.documentElement.style.setProperty(
       "--tools-height",
       tools.clientHeight + "px"
     );
   }
+
+  checkToolsHeight();
 
   function hideTools() {
     selected = null;
@@ -78,11 +79,14 @@ window.addEventListener("DOMContentLoaded", () => {
     defaultMargin,
     appendDirectly = false
   ) {
+    const id = {};
     let isIdle = true;
     let isRenderingFinal = false;
     let frameOutOfDate = false;
     let finalOutOfDate = false;
     let appended = appendDirectly;
+    let threshold = defaultThreshold;
+    let margin = defaultMargin;
 
     const width = image.naturalWidth;
     const height = image.naturalHeight;
@@ -114,6 +118,12 @@ window.addEventListener("DOMContentLoaded", () => {
     finalContext.drawImage(image, 0, 0);
 
     const finalImageData = finalContext.getImageData(0, 0, width, height);
+
+    const renderedImage = document.createElement("img");
+    renderedImage.className = "rendered";
+    renderedImage.tabIndex = 0;
+
+    if (appendDirectly) renderedArea.appendChild(renderedImage);
 
     function newImageData(forPreview, copy = true) {
       const imageData = forPreview
@@ -172,15 +182,6 @@ window.addEventListener("DOMContentLoaded", () => {
         initWorker(false);
       }
     }
-
-    const renderedImage = document.createElement("img");
-    renderedImage.className = "rendered";
-    renderedImage.tabIndex = 0;
-
-    if (appendDirectly) renderedArea.appendChild(renderedImage);
-
-    let threshold = defaultThreshold;
-    let margin = defaultMargin;
 
     function repaint(imageData, buffer, previewing) {
       if (!appended) {
@@ -263,7 +264,7 @@ window.addEventListener("DOMContentLoaded", () => {
     draw();
 
     function showTools() {
-      selected = image.src;
+      selected = id;
       for (let img of renderedArea.getElementsByTagName("img")) {
         img.classList.remove("selected");
       }
@@ -285,7 +286,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
     inputs[0].addEventListener("input", () => {
-      if (selected === image.src) {
+      if (selected === id) {
         threshold = +inputs[0].value;
         if (isIdle) {
           draw();
@@ -296,7 +297,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     inputs[1].addEventListener("input", () => {
-      if (selected === image.src) {
+      if (selected === id) {
         margin = +inputs[1].value;
         if (isIdle) {
           draw();
@@ -307,7 +308,7 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     inputs[2].addEventListener("click", () => {
-      if (selected === image.src) {
+      if (selected === id) {
         threshold = defaultThreshold;
         margin = defaultMargin;
 
@@ -322,13 +323,13 @@ window.addEventListener("DOMContentLoaded", () => {
     });
 
     inputs[3].addEventListener("click", () => {
-      if (selected === image.src) {
+      if (selected === id) {
         removeMyself();
       }
     });
 
     addDoubleClickOrKeyListener(renderedImage, removeMyself, () => {
-      if (selected === image.src) {
+      if (selected === id) {
         hideTools();
       } else {
         showTools();
@@ -383,8 +384,6 @@ window.addEventListener("DOMContentLoaded", () => {
     e.preventDefault();
     if (!shouldIgnoreDrop) handleFiles(e.dataTransfer.files);
   });
-
-  checkToolsHeight();
 
   document.body.addEventListener("click", (e) => {
     if (
