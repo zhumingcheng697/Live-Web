@@ -221,10 +221,12 @@ window.addEventListener("DOMContentLoaded", () => {
         resetFinalFilter();
       }
 
-      if (!isRenderingFinal && finalOutOfDate) {
-        finalOutOfDate = false;
-        draw(false);
-      }
+      setTimeout(() => {
+        if (!isRenderingFinal && finalOutOfDate) {
+          finalOutOfDate = false;
+          draw(false);
+        }
+      });
     }
 
     function draw(previewing = true) {
@@ -342,9 +344,6 @@ window.addEventListener("DOMContentLoaded", () => {
 
     const fileReader = new FileReader();
     fileReader.onload = (e) => {
-      const el = document.querySelector(`img[src="${e.target.result}"]`);
-      if (el) return;
-
       const img = document.createElement("img");
       img.src = e.target.result;
       img.crossorigin = "anonymous";
