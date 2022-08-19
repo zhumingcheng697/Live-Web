@@ -1,7 +1,4 @@
 function outlineFilter({ threshold, margin, buffer, width, height, mode }) {
-  const mode1 = mode ? !!(mode & 1) : true;
-  const mode2 = !!(mode & 2);
-
   const imageData = new Uint8ClampedArray(buffer);
   const newData = new Uint8ClampedArray(imageData.length);
 
@@ -38,25 +35,35 @@ function outlineFilter({ threshold, margin, buffer, width, height, mode }) {
         const dg = imageData[dbegin + 1];
         const db = imageData[dbegin + 2];
 
-        if (dr - r > threshold && mode1) {
-          newData[begin] -= 32;
-        } else if (r - dr > threshold && mode2) {
-          newData[begin + 1] -= 16;
-          newData[begin + 2] -= 16;
+        if (!mode || mode & 1) {
+          if (dr - r > threshold) {
+            newData[begin] -= 32;
+          }
+
+          if (dg - g > threshold) {
+            newData[begin + 1] -= 32;
+          }
+
+          if (db - b > threshold) {
+            newData[begin + 2] -= 32;
+          }
         }
 
-        if (dg - g > threshold && mode1) {
-          newData[begin + 1] -= 32;
-        } else if (g - dg > threshold && mode2) {
-          newData[begin] -= 16;
-          newData[begin + 2] -= 16;
-        }
+        if (mode & 2) {
+          if (r - dr > threshold) {
+            newData[begin + 1] -= 16;
+            newData[begin + 2] -= 16;
+          }
 
-        if (db - b > threshold && mode1) {
-          newData[begin + 2] -= 32;
-        } else if (b - db > threshold && mode2) {
-          newData[begin] -= 16;
-          newData[begin + 1] -= 16;
+          if (g - dg > threshold) {
+            newData[begin] -= 16;
+            newData[begin + 2] -= 16;
+          }
+
+          if (b - db > threshold) {
+            newData[begin] -= 16;
+            newData[begin + 1] -= 16;
+          }
         }
       }
     }

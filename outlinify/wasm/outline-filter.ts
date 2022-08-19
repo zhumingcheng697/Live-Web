@@ -12,8 +12,6 @@ export function outlineFilter(
   height: u32,
   mode: u32
 ): void {
-  const mode1 = mode ? !!(mode & 1) : true;
-  const mode2 = !!(mode & 2);
   const size = width * height * 4;
 
   for (let i: usize = 0; i < size; ++i) {
@@ -59,7 +57,7 @@ export function outlineFilter(
           let _g = load<u8>(dst + 1);
           let _b = load<u8>(dst + 2);
 
-          if (mode1) {
+          if (!mode || mode & 1) {
             if (dr > r && dr - r > threshold) {
               _r -= min(_r, _32);
             }
@@ -73,7 +71,7 @@ export function outlineFilter(
             }
           }
 
-          if (mode2) {
+          if (mode & 2) {
             if (r > dr && r - dr > threshold) {
               _g -= min(_g, _16);
               _b -= min(_b, _16);
