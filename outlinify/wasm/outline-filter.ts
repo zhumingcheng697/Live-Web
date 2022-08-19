@@ -1,70 +1,8 @@
-function min<T>(a: T, b: T): T {
-  return a < b ? a : b;
-}
-
 const _16: u8 = 16;
 const _32: u8 = 32;
 
-function calculateColor(
-  dx: u32,
-  dy: u32,
-  width: u32,
-  height: u32,
-  mode: u8,
-  begin: usize,
-  threshold: u8
-): void {
-  const mode1 = mode ? !!(mode & 1) : true;
-  const mode2 = !!(mode & 2);
-
-  const r = load<u8>(begin);
-  const g = load<u8>(begin + 1);
-  const b = load<u8>(begin + 2);
-
-  const dbegin: usize = (dy * width + dx) * 4;
-  const dr = load<u8>(dbegin);
-  const dg = load<u8>(dbegin + 1);
-  const db = load<u8>(dbegin + 2);
-
-  const dst: usize = begin + width * height * 4;
-  let _r = load<u8>(dst);
-  let _g = load<u8>(dst + 1);
-  let _b = load<u8>(dst + 2);
-
-  if (mode1) {
-    if (dr > r && dr - r > threshold) {
-      _r -= min(_r, _32);
-    }
-
-    if (dg > g && dg - g > threshold) {
-      _g -= min(_g, _32);
-    }
-
-    if (db > b && db - b > threshold) {
-      _b -= min(_b, _32);
-    }
-  }
-
-  if (mode2) {
-    if (r > dr && r - dr > threshold) {
-      _g -= min(_g, _16);
-      _b -= min(_b, _16);
-    }
-
-    if (g > dg && g - dg > threshold) {
-      _r -= min(_r, _16);
-      _b -= min(_b, _16);
-    }
-
-    if (b > db && b - db > threshold) {
-      _r -= min(_r, _16);
-      _g -= min(_g, _16);
-    }
-  }
-
-  store<u8>(dst, _r);
-  store<u8>(dst + 1, _g);
-  store<u8>(dst + 2, _b);
+function min<T>(a: T, b: T): T {
+  return a < b ? a : b;
 }
 
 export function outlineFilter(
@@ -74,13 +12,22 @@ export function outlineFilter(
   height: u32,
   mode: u8
 ): void {
-  for (let i: usize = 0; i < width * height * 4; ++i) {
-    store<u8>(i + width * height * 4, 255);
+  const mode1 = mode ? !!(mode & 1) : true;
+  const mode2 = !!(mode & 2);
+  const size = width * height * 4;
+
+  for (let i: usize = 0; i < size; ++i) {
+    store<u8>(i + size, 255);
   }
 
   for (let x: u32 = 0; x < width; x++) {
     for (let y: u32 = 0; y < height; y++) {
       const begin: usize = (y * width + x) * 4;
+      const dst: usize = begin + size;
+
+      const r = load<u8>(begin);
+      const g = load<u8>(begin + 1);
+      const b = load<u8>(begin + 2);
 
       const left: u32 = x > margin ? x - margin : 0;
       const right: u32 = min(x + margin, width - 1);
@@ -88,16 +35,66 @@ export function outlineFilter(
       const top: u32 = y > margin ? y - margin : 0;
       const bottom: u32 = min(y + margin, height - 1);
 
-      calculateColor(left, top, width, height, mode, begin, threshold);
-      calculateColor(x, top, width, height, mode, begin, threshold);
-      calculateColor(right, top, width, height, mode, begin, threshold);
+      for (let i: i8 = -1; i <= 1; ++i) {
+        let dx: u32;
 
-      calculateColor(left, y, width, height, mode, begin, threshold);
-      calculateColor(right, y, width, height, mode, begin, threshold);
+        if (i == -1) dx = left;
+        else if (i == 1) dx = right;
+        else dx = x;
 
-      calculateColor(left, bottom, width, height, mode, begin, threshold);
-      calculateColor(x, bottom, width, height, mode, begin, threshold);
-      calculateColor(right, bottom, width, height, mode, begin, threshold);
+        for (let j: i8 = -1; j <= 1; ++j) {
+          let dy: u32;
+
+          if (j == -1) dy = top;
+          else if (j == 1) dy = bottom;
+          else if (dx == x) continue;
+          else dy = y;
+
+          const dbegin: usize = (dy * width + dx) * 4;
+          const dr = load<u8>(dbegin);
+          const dg = load<u8>(dbegin + 1);
+          const db = load<u8>(dbegin + 2);
+
+          let _r = load<u8>(dst);
+          let _g = load<u8>(dst + 1);
+          let _b = load<u8>(dst + 2);
+
+          if (mode1) {
+            if (dr > r && dr - r > threshold) {
+              _r -= min(_r, _32);
+            }
+
+            if (dg > g && dg - g > threshold) {
+              _g -= min(_g, _32);
+            }
+
+            if (db > b && db - b > threshold) {
+              _b -= min(_b, _32);
+            }
+          }
+
+          if (mode2) {
+            if (r > dr && r - dr > threshold) {
+              _g -= min(_g, _16);
+              _b -= min(_b, _16);
+            }
+
+            if (g > dg && g - dg > threshold) {
+              _r -= min(_r, _16);
+              _b -= min(_b, _16);
+            }
+
+            if (b > db && b - db > threshold) {
+              _r -= min(_r, _16);
+              _g -= min(_g, _16);
+            }
+          }
+
+          store<u8>(dst, _r);
+          store<u8>(dst + 1, _g);
+          store<u8>(dst + 2, _b);
+        }
+      }
     }
   }
 }
