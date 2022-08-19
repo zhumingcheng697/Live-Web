@@ -31,8 +31,6 @@
   i32.and
   i32.const 1
   local.get $4
-  i32.const 255
-  i32.and
   select
   local.set $21
   local.get $4
@@ -91,13 +89,13 @@
       local.set $9
       local.get $4
       i32.load8_u
-      local.set $11
-      local.get $4
-      i32.load8_u offset=1
       local.set $12
       local.get $4
-      i32.load8_u offset=2
+      i32.load8_u offset=1
       local.set $13
+      local.get $4
+      i32.load8_u offset=2
+      local.set $14
       local.get $7
       local.get $1
       i32.sub
@@ -142,50 +140,35 @@
       i32.lt_u
       select
       local.set $26
-      i32.const -1
-      local.set $14
-      loop $for-loop|6
-       local.get $14
-       i32.extend8_s
-       i32.const 1
-       i32.le_s
+      i32.const 0
+      local.set $10
+      loop $for-loop|3
+       local.get $10
+       i32.const 3
+       i32.lt_u
        if
-        local.get $23
         local.get $24
         local.get $7
-        local.get $14
-        i32.const 255
-        i32.and
-        local.tee $4
-        i32.const 1
+        local.get $10
+        i32.const 2
         i32.eq
         select
-        local.get $4
-        i32.const 255
-        i32.eq
+        local.get $23
+        local.get $10
         select
         local.set $19
-        i32.const -1
-        local.set $10
-        loop $for-loop|8
-         local.get $10
-         i32.extend8_s
-         i32.const 1
-         i32.le_s
+        i32.const 0
+        local.set $11
+        loop $for-loop|4
+         local.get $11
+         i32.const 3
+         i32.lt_u
          if
-          block $for-continue|8
-           local.get $10
-           i32.const 255
-           i32.and
-           i32.const 255
-           i32.eq
+          block $for-continue|4
+           local.get $11
            if (result i32)
-            local.get $25
-           else
-            local.get $10
-            i32.const 255
-            i32.and
-            i32.const 1
+            local.get $11
+            i32.const 2
             i32.eq
             if (result i32)
              local.get $26
@@ -193,9 +176,11 @@
              local.get $7
              local.get $19
              i32.eq
-             br_if $for-continue|8
+             br_if $for-continue|4
              local.get $8
             end
+           else
+            local.get $25
            end
            local.get $2
            i32.mul
@@ -234,7 +219,7 @@
             select
             i32.sub
             local.get $4
-            local.get $11
+            local.get $12
             local.get $15
             i32.lt_u
             local.get $0
@@ -242,7 +227,7 @@
             i32.and
             local.tee $20
             local.get $15
-            local.get $11
+            local.get $12
             i32.sub
             i32.const 255
             i32.and
@@ -261,11 +246,11 @@
             select
             i32.sub
             local.get $6
-            local.get $13
+            local.get $14
             local.get $17
             i32.lt_u
             local.get $17
-            local.get $13
+            local.get $14
             i32.sub
             i32.const 255
             i32.and
@@ -285,11 +270,11 @@
             select
             i32.sub
             local.get $5
-            local.get $12
+            local.get $13
             local.get $16
             i32.lt_u
             local.get $16
-            local.get $12
+            local.get $13
             i32.sub
             i32.const 255
             i32.and
@@ -302,10 +287,10 @@
            local.get $9
            local.get $22
            if (result i32)
-            local.get $11
+            local.get $12
             local.get $15
             i32.gt_u
-            local.get $11
+            local.get $12
             local.get $15
             i32.sub
             i32.const 255
@@ -339,7 +324,7 @@
              i32.sub
              local.set $5
             end
-            local.get $12
+            local.get $13
             local.get $16
             i32.sub
             i32.const 255
@@ -348,7 +333,7 @@
             i32.const 255
             i32.and
             i32.gt_u
-            local.get $12
+            local.get $13
             local.get $16
             i32.gt_u
             i32.and
@@ -376,7 +361,7 @@
              i32.sub
              local.set $4
             end
-            local.get $13
+            local.get $14
             local.get $17
             i32.sub
             i32.const 255
@@ -385,7 +370,7 @@
             i32.const 255
             i32.and
             i32.gt_u
-            local.get $13
+            local.get $14
             local.get $17
             i32.gt_u
             i32.and
@@ -425,18 +410,18 @@
            local.get $6
            i32.store8 offset=2
           end
-          local.get $10
+          local.get $11
           i32.const 1
           i32.add
-          local.set $10
-          br $for-loop|8
+          local.set $11
+          br $for-loop|4
          end
         end
-        local.get $14
+        local.get $10
         i32.const 1
         i32.add
-        local.set $14
-        br $for-loop|6
+        local.set $10
+        br $for-loop|3
        end
       end
       local.get $8

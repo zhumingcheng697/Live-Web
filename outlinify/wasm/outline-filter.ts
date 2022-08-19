@@ -10,7 +10,7 @@ export function outlineFilter(
   margin: u32,
   width: u32,
   height: u32,
-  mode: u8
+  mode: u32
 ): void {
   const mode1 = mode ? !!(mode & 1) : true;
   const mode2 = !!(mode & 2);
@@ -35,18 +35,18 @@ export function outlineFilter(
       const top: u32 = y > margin ? y - margin : 0;
       const bottom: u32 = min(y + margin, height - 1);
 
-      for (let i: i8 = -1; i <= 1; ++i) {
+      for (let i: u32 = 0; i < 3; ++i) {
         let dx: u32;
 
-        if (i == -1) dx = left;
-        else if (i == 1) dx = right;
+        if (i == 0) dx = left;
+        else if (i == 2) dx = right;
         else dx = x;
 
-        for (let j: i8 = -1; j <= 1; ++j) {
+        for (let j: u32 = 0; j < 3; ++j) {
           let dy: u32;
 
-          if (j == -1) dy = top;
-          else if (j == 1) dy = bottom;
+          if (j == 0) dy = top;
+          else if (j == 2) dy = bottom;
           else if (dx == x) continue;
           else dy = y;
 
