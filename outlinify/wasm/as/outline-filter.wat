@@ -62,6 +62,7 @@
      local.get $9
      i32.gt_u
      if
+      local.get $19
       local.get $2
       local.get $9
       i32.mul
@@ -70,7 +71,6 @@
       i32.const 2
       i32.shl
       local.tee $5
-      local.get $19
       i32.add
       local.set $10
       local.get $5

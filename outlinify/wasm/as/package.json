@@ -1,6 +1,6 @@
 {
   "devDependencies": {
-    "assemblyscript": "^0.20.6"
+    "assemblyscript": "^0.20.19"
   },
   "type": "module",
   "scripts": {
