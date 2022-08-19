@@ -10,7 +10,13 @@ window.addEventListener("DOMContentLoaded", () => {
     isWorkerSupported &&
     !!window.WebAssembly &&
     !/[?&]disable[-_]?wasm(?:&|=|$)/i.test(searchParam);
-  const previewSize = isWasmSupported ? 480 : isWorkerSupported ? 360 : 240;
+  const wasmVersion =
+    /[?&]wasm(?:[-_]?ver(?:sion)?)?=(?:as|assemblyscript)(?:&|$)/i.test(
+      searchParam
+    )
+      ? "as"
+      : "emscripten";
+  const previewSize = isWasmSupported ? 480 : isWorkerSupported ? 480 : 240;
   const defaults = [18, 18, 20, 18, 12, 12, 18, 12];
 
   let selected = null;
@@ -157,6 +163,7 @@ window.addEventListener("DOMContentLoaded", () => {
               type: "init",
               buffer: imageData.data.buffer,
               size: imageData.data.length,
+              wasmVersion,
             },
             [imageData.data.buffer]
           );

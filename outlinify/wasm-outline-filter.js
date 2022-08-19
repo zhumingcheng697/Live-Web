@@ -12,17 +12,20 @@ let wasmReady = new Promise((resolve) => {
   wasmResolve = resolve;
 });
 
-function wasmInit({ size, buffer }) {
+function wasmInit({ size, buffer, wasmVersion = "emscripten" }) {
   const nPages = ((((size * 2) >>> 0) + 0xffff) & ~0xffff) >>> 16;
   const memory = new WebAssembly.Memory({ initial: nPages });
 
-  WebAssembly.instantiateStreaming(fetch("./wasm/as/outline-filter.wasm"), {
-    env: {
-      memory,
-      abort: (msg, file, line, column) =>
-        console.error(`Error at ${line}:${column} in ${file}\n${msg}`),
-    },
-  }).then((instantiatedModule) => {
+  WebAssembly.instantiateStreaming(
+    fetch(`./wasm/${wasmVersion}/outline-filter.wasm`),
+    {
+      env: {
+        memory,
+        abort: (msg, file, line, column) =>
+          console.error(`Error at ${line}:${column} in ${file}\n${msg}`),
+      },
+    }
+  ).then((instantiatedModule) => {
     const wasmExports = instantiatedModule.instance.exports;
 
     wasmData = new Uint8ClampedArray(memory.buffer);
