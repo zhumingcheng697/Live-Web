@@ -31,25 +31,35 @@ function calculateColor(
   let _g = load<u8>(dst + 1);
   let _b = load<u8>(dst + 2);
 
-  if (dr > r && dr - r > threshold && mode1) {
-    _r -= min(_r, _32);
-  } else if (r > dr && r - dr > threshold && mode2) {
-    _g -= min(_g, _16);
-    _b -= min(_b, _16);
+  if (mode1) {
+    if (dr > r && dr - r > threshold) {
+      _r -= min(_r, _32);
+    }
+
+    if (dg > g && dg - g > threshold) {
+      _g -= min(_g, _32);
+    }
+
+    if (db > b && db - b > threshold) {
+      _b -= min(_b, _32);
+    }
   }
 
-  if (dg > g && dg - g > threshold && mode1) {
-    _g -= min(_g, _32);
-  } else if (g > dg && g - dg > threshold && mode2) {
-    _r -= min(_r, _16);
-    _b -= min(_b, _16);
-  }
+  if (mode2) {
+    if (r > dr && r - dr > threshold) {
+      _g -= min(_g, _16);
+      _b -= min(_b, _16);
+    }
 
-  if (db > b && db - b > threshold && mode1) {
-    _b -= min(_b, _32);
-  } else if (b > db && b - db > threshold && mode2) {
-    _r -= min(_r, _16);
-    _g -= min(_g, _16);
+    if (g > dg && g - dg > threshold) {
+      _r -= min(_r, _16);
+      _b -= min(_b, _16);
+    }
+
+    if (b > db && b - db > threshold) {
+      _r -= min(_r, _16);
+      _g -= min(_g, _16);
+    }
   }
 
   store<u8>(dst, _r);
