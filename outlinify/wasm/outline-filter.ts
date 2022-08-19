@@ -37,15 +37,15 @@ export function outlineFilter(
         let dx: u32;
 
         if (i == 0) dx = left;
-        else if (i == 2) dx = right;
+        else if (i == 1) dx = right;
         else dx = x;
 
         for (let j: u32 = 0; j < 3; ++j) {
           let dy: u32;
 
           if (j == 0) dy = top;
-          else if (j == 2) dy = bottom;
-          else if (dx == x) continue;
+          else if (j == 1) dy = bottom;
+          else if (dx == x) break;
           else dy = y;
 
           const dbegin: usize = (dy * width + dx) * 4;

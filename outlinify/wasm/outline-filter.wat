@@ -136,7 +136,7 @@
         local.get $23
         local.get $8
         local.get $11
-        i32.const 2
+        i32.const 1
         i32.eq
         select
         local.get $22
@@ -150,11 +150,11 @@
          i32.const 3
          i32.lt_u
          if
-          block $for-continue|4
+          block $for-break4
            local.get $12
            if (result i32)
             local.get $12
-            i32.const 2
+            i32.const 1
             i32.eq
             if (result i32)
              local.get $25
@@ -162,7 +162,7 @@
              local.get $8
              local.get $20
              i32.eq
-             br_if $for-continue|4
+             br_if $for-break4
              local.get $9
             end
            else
@@ -402,12 +402,12 @@
            local.get $10
            local.get $7
            i32.store8 offset=2
+           local.get $12
+           i32.const 1
+           i32.add
+           local.set $12
+           br $for-loop|4
           end
-          local.get $12
-          i32.const 1
-          i32.add
-          local.set $12
-          br $for-loop|4
          end
         end
         local.get $11

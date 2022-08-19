@@ -20,49 +20,44 @@ function outlineFilter({ threshold, margin, buffer, width, height, mode }) {
       const top = Math.max(y - margin, 0);
       const bottom = Math.min(y + margin, height - 1);
 
-      for (let [dx, dy] of [
-        [left, top],
-        [x, top],
-        [right, top],
-        [left, y],
-        [right, y],
-        [left, bottom],
-        [x, bottom],
-        [right, bottom],
-      ]) {
-        const dbegin = (dy * width + dx) * 4;
-        const dr = imageData[dbegin];
-        const dg = imageData[dbegin + 1];
-        const db = imageData[dbegin + 2];
+      calculateColor: for (let dx of [left, right, x]) {
+        for (let dy of [top, bottom, y]) {
+          if (dx === x && dy === y) break calculateColor;
 
-        if (!mode || mode & 1) {
-          if (dr - r > threshold) {
-            newData[begin] -= 32;
+          const dbegin = (dy * width + dx) * 4;
+          const dr = imageData[dbegin];
+          const dg = imageData[dbegin + 1];
+          const db = imageData[dbegin + 2];
+
+          if (!mode || mode & 1) {
+            if (dr - r > threshold) {
+              newData[begin] -= 32;
+            }
+
+            if (dg - g > threshold) {
+              newData[begin + 1] -= 32;
+            }
+
+            if (db - b > threshold) {
+              newData[begin + 2] -= 32;
+            }
           }
 
-          if (dg - g > threshold) {
-            newData[begin + 1] -= 32;
-          }
+          if (mode & 2) {
+            if (r - dr > threshold) {
+              newData[begin + 1] -= 16;
+              newData[begin + 2] -= 16;
+            }
 
-          if (db - b > threshold) {
-            newData[begin + 2] -= 32;
-          }
-        }
+            if (g - dg > threshold) {
+              newData[begin] -= 16;
+              newData[begin + 2] -= 16;
+            }
 
-        if (mode & 2) {
-          if (r - dr > threshold) {
-            newData[begin + 1] -= 16;
-            newData[begin + 2] -= 16;
-          }
-
-          if (g - dg > threshold) {
-            newData[begin] -= 16;
-            newData[begin + 2] -= 16;
-          }
-
-          if (b - db > threshold) {
-            newData[begin] -= 16;
-            newData[begin + 1] -= 16;
+            if (b - db > threshold) {
+              newData[begin] -= 16;
+              newData[begin + 1] -= 16;
+            }
           }
         }
       }
